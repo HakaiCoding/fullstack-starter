@@ -34,16 +34,8 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    // Keep the starter deterministic and fast by default.
+    // Re-enable Firefox/WebKit when cross-browser coverage becomes necessary.
 
     // Uncomment for mobile browsers support
     /* {
