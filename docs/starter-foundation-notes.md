@@ -28,6 +28,10 @@
 - api_versioning: `/api/v1`
 - database: `PostgreSQL`
 - data_modeling: `standard relational modeling`
+- module_boundaries:
+  - `type:app` can depend on: `type:contracts`, `type:util`
+  - `type:contracts` can depend on: `type:contracts`
+  - `type:util` can depend on: `type:util`
 
 ## 4. Authentication
 
@@ -76,6 +80,9 @@
 
 ## 9. Testing Baseline
 - scope: `bare minimum for starter`
+- e2e_projects:
+  - `apps/web-e2e`: `keep`
+  - `apps/api-e2e`: `keep`
 - required_tests:
   - `API auth flow`: login, refresh, protected route
   - `Web auth interceptor`: single refresh + request retry
