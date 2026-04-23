@@ -2,10 +2,7 @@
   "name": "@fullstack-starter/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {
-    "e2e:web:setup": "playwright install chromium",
-    "e2e:web": "nx e2e web-e2e"
-  },
+  "scripts": {},
   "private": true,
   "devDependencies": {
     "@angular-devkit/core": "~21.2.0",

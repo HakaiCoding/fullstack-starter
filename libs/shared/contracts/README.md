@@ -1,11 +1,27 @@
-# contracts
+# Shared Contracts (`libs/shared/contracts`)
 
-This library was generated with [Nx](https://nx.dev).
+Shared cross-app contracts and types.
 
-## Building
+## Public Import Path
 
-Run `nx build contracts` to build the library.
+```ts
+import { contracts } from '@fullstack-starter/contracts';
+```
 
-## Running unit tests
+## Responsibility
 
-Run `nx test contracts` to execute the unit tests via [Jest](https://jestjs.io).
+- Hold DTO-like shapes and API contract primitives shared by web and api.
+- Avoid business logic and runtime side effects.
+
+## Nx Targets
+
+```sh
+npx nx build contracts
+npx nx test contracts
+npx nx lint contracts
+```
+
+## Boundaries
+
+- Project tags: `type:contracts`, `scope:shared`
+- Allowed dependency direction: `type:contracts` -> `type:contracts`

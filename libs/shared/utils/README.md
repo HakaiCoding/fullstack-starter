@@ -1,11 +1,27 @@
-# utils
+# Shared Utils (`libs/shared/utils`)
 
-This library was generated with [Nx](https://nx.dev).
+Shared pure utility functions used across apps and libraries.
 
-## Building
+## Public Import Path
 
-Run `nx build utils` to build the library.
+```ts
+import { utils } from '@fullstack-starter/utils';
+```
 
-## Running unit tests
+## Responsibility
 
-Run `nx test utils` to execute the unit tests via [Jest](https://jestjs.io).
+- Hold small, reusable, framework-agnostic helpers.
+- Keep functions deterministic and easy to unit test.
+
+## Nx Targets
+
+```sh
+npx nx build utils
+npx nx test utils
+npx nx lint utils
+```
+
+## Boundaries
+
+- Project tags: `type:util`, `scope:shared`
+- Allowed dependency direction: `type:util` -> `type:util`
