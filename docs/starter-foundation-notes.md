@@ -1,66 +1,108 @@
-# Full-stack starter notes
+# Full-Stack Starter Foundation Notes
 
-## Goal
-A clean, practical, and maintainable full-stack starter for side projects and small/medium projects.
+## 1. Purpose
+- goal: Build a clean, practical, maintainable full-stack starter for side projects and small/medium projects.
+- principle: Prioritize a solid foundation without overengineering.
 
-## Stack
-- Node.js 24.15.0
-- npm 11.12.1
-- Nx 22.6.5
-- Angular 21.2.7 (+ Angular Material)
-- NestJS 11.1.19
-- TypeORM 0.3.28
-- PostgreSQL 18
-- Transloco 8.3.0
-- Docker Compose (database only)
+## 2. Stack (Pinned Versions)
+- runtime.node: `24.15.0`
+- package_manager.npm: `11.12.1`
+- monorepo.nx: `22.6.5`
+- frontend.angular: `21.2.7`
+- frontend.angular_material: `21.2.7`
+- backend.nestjs: `11.1.19`
+- orm.typeorm: `0.3.28`
+- database.postgresql: `18`
+- i18n.transloco: `8.3.0`
+- local_infra: `docker compose (database only)`
 
-## Base architecture
-- Nx monorepo
-- `apps/web` (Angular), `apps/api` (NestJS)
-- `libs/shared/contracts`, `libs/shared/utils`
-- REST API with versioning: `/api/v1`
-- PostgreSQL as main database
-- Standard relational modeling
+## 3. Base Architecture
+- monorepo: `Nx`
+- apps:
+  - `apps/web` (Angular)
+  - `apps/api` (NestJS)
+- shared_libs:
+  - `libs/shared/contracts`
+  - `libs/shared/utils`
+- api_style: `REST`
+- api_versioning: `/api/v1`
+- database: `PostgreSQL`
+- data_modeling: `standard relational modeling`
 
-## Auth
-### Frontend
-- Access token in memory
-- Refresh token in HttpOnly cookie
-- JWT interceptor attaches access token
-- On access token expiration: one refresh attempt, then retry original request once
+## 4. Authentication
 
-### Backend
-- Short-lived access token
-- Rotating refresh token
-- Refresh token hash stored in DB
-- Dedicated refresh endpoint
-- Single-session-only auth (new login invalidates previous session)
+### 4.1 Frontend
+- access_token_storage: `memory only`
+- refresh_token_storage: `HttpOnly cookie`
+- request_auth: `JWT interceptor attaches access token`
+- expired_access_token_flow: `one refresh attempt, then one retry of original request`
 
-## Authorization
-- Basic RBAC
-- Roles: `admin`, `user`
-- Default rule: user can access own resources; admin can access all
+### 4.2 Backend
+- access_token_lifetime: `short-lived`
+- refresh_token_strategy: `rotating refresh tokens`
+- refresh_token_storage: `hashed in database`
+- refresh_endpoint: `dedicated endpoint`
+- session_policy: `single-session-only (new login invalidates previous session)`
 
-## i18n
-- Transloco
-- Languages: `en`, `es`
-- Fallback: `en`
-- Scope: UI translations only
+## 5. Authorization
+- model: `basic RBAC`
+- roles:
+  - `admin`
+  - `user`
+- default_rule: `user accesses own resources, admin can access all`
 
-## Data conventions
-- UUID IDs
-- TypeORM migrations only (no auto schema sync)
+## 6. Internationalization (i18n)
+- library: `Transloco`
+- supported_languages:
+  - `en`
+  - `es`
+- fallback_language: `en`
+- scope: `UI translations only`
 
-## Cookie/CORS baseline
-- Refresh cookie: `HttpOnly=true`
-- `Secure=true` in production, `false` in local dev
-- `SameSite=Lax` by default
-- CORS allowlist for web origin + `credentials=true`
+## 7. Data Conventions
+- id_strategy: `UUID`
+- schema_change_strategy: `TypeORM migrations only`
+- schema_sync: `disabled (no auto schema sync)`
 
-## Testing baseline
-- Bare minimum:
-  - API auth flow test (login/refresh/protected route)
-  - Web auth interceptor test (single refresh + retry)
+## 8. Cookie and CORS Baseline
+- refresh_cookie.http_only: `true`
+- refresh_cookie.secure:
+  - `true` in production
+  - `false` in local development
+- refresh_cookie.same_site: `Lax`
+- cors:
+  - `origin`: allowlist web origin
+  - `credentials`: `true`
 
-## Main goal
-Provide a solid foundation without overengineering.
+## 9. Testing Baseline
+- scope: `bare minimum for starter`
+- required_tests:
+  - `API auth flow`: login, refresh, protected route
+  - `Web auth interceptor`: single refresh + request retry
+
+## 10. Initial Scaffolding CLI Defaults
+
+### 10.1 Angular app (`web`)
+- generator: `@nx/angular:application`
+- generation_target: `apps/web` (recommended Nx monorepo layout)
+- flags:
+  - `--name=web`
+  - `--tags=type:app,scope:web`
+  - `--style=scss`
+
+### 10.2 NestJS app (`api`)
+- generator: `@nx/nest:application`
+- generation_target: `apps/api` (recommended Nx monorepo layout)
+- flags:
+  - `--name=api`
+  - `--tags=type:app,scope:api`
+  - `--linter=eslint`
+  - `--strict=true`
+  - `--unitTestRunner=jest`
+  - `--frontendProject=web`
+
+### 10.3 Commands (recommended layout)
+- angular:
+  - `npx nx g @nx/angular:application apps/web --name=web --tags=type:app,scope:web --style=scss`
+- nest:
+  - `npx nx g @nx/nest:application apps/api --name=api --tags=type:app,scope:api --linter=eslint --strict=true --unitTestRunner=jest --frontendProject=web`
