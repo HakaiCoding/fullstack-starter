@@ -13,6 +13,10 @@
   - `--name=web`
   - `--tags=type:app,scope:web`
   - `--style=scss`
+- workspace_generator_defaults (from `nx.json`):
+  - `linter`: `eslint`
+  - `unitTestRunner`: `vitest-angular`
+  - `e2eTestRunner`: `playwright`
 - component_generation_default:
   - `changeDetection`: `OnPush`
 

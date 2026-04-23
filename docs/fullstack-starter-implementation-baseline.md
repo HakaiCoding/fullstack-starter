@@ -7,6 +7,7 @@
   - `i18n`: not implemented yet
   - `typeorm/postgresql`: not implemented yet
   - `e2e projects`: scaffolded and runnable with local prerequisites
+  - `web-e2e prerequisite`: run `npx playwright install chromium` once before first `npx nx e2e web-e2e`
 
 ## 1. Internationalization (i18n)
 - library: `Transloco`
