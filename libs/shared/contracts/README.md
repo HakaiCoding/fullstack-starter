@@ -25,3 +25,4 @@ npx nx lint contracts
 
 - Project tags: `type:contracts`, `scope:shared`
 - Allowed dependency direction: `type:contracts` -> `type:contracts`
+- Allowed scope direction: `scope:shared` -> `scope:shared`

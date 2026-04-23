@@ -1,5 +1,9 @@
 # Full-Stack Starter Auth and Security Baseline
 
+## 0. Status
+- `state`: `planned baseline`
+- `implemented_in_code`: `no` (as of `2026-04-24`)
+
 ## 1. Authentication
 
 ### 1.1 Frontend

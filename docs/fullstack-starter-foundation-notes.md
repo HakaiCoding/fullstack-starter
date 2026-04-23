@@ -36,10 +36,15 @@
 - api_versioning: `/api/v1`
 - database: `PostgreSQL`
 - data_modeling: `standard relational modeling`
+- boundary_enforcement: `@nx/enforce-module-boundaries (ESLint)`
 - module_boundaries:
   - `type:app` can depend on: `type:contracts`, `type:util`
+  - `type:e2e` can depend on: `type:contracts`, `type:util`
   - `type:contracts` can depend on: `type:contracts`
   - `type:util` can depend on: `type:util`
+  - `scope:web` can depend on: `scope:web`, `scope:shared`
+  - `scope:api` can depend on: `scope:api`, `scope:shared`
+  - `scope:shared` can depend on: `scope:shared`
 
 ## 4. Detailed Baselines (Moved)
 - auth and security baseline:

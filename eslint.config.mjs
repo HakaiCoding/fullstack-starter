@@ -21,12 +21,28 @@ export default [
               onlyDependOnLibsWithTags: ['type:contracts', 'type:util'],
             },
             {
+              sourceTag: 'type:e2e',
+              onlyDependOnLibsWithTags: ['type:contracts', 'type:util'],
+            },
+            {
               sourceTag: 'type:contracts',
               onlyDependOnLibsWithTags: ['type:contracts'],
             },
             {
               sourceTag: 'type:util',
               onlyDependOnLibsWithTags: ['type:util'],
+            },
+            {
+              sourceTag: 'scope:web',
+              onlyDependOnLibsWithTags: ['scope:web', 'scope:shared'],
+            },
+            {
+              sourceTag: 'scope:api',
+              onlyDependOnLibsWithTags: ['scope:api', 'scope:shared'],
+            },
+            {
+              sourceTag: 'scope:shared',
+              onlyDependOnLibsWithTags: ['scope:shared'],
             },
           ],
         },

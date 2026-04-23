@@ -62,5 +62,9 @@ npx nx e2e web-e2e
 Module boundaries are enforced with Nx ESLint rules:
 
 - `type:app` -> can depend on `type:contracts`, `type:util`
+- `type:e2e` -> can depend on `type:contracts`, `type:util`
 - `type:contracts` -> can depend on `type:contracts`
 - `type:util` -> can depend on `type:util`
+- `scope:web` -> can depend on `scope:web`, `scope:shared`
+- `scope:api` -> can depend on `scope:api`, `scope:shared`
+- `scope:shared` -> can depend on `scope:shared`

@@ -6,8 +6,8 @@ Deployable applications and their end-to-end test projects.
 
 - [`api`](./api/README.md) - NestJS backend (`type:app`, `scope:api`)
 - [`web`](./web/README.md) - Angular frontend (`type:app`, `scope:web`)
-- [`api-e2e`](./api-e2e/README.md) - e2e tests for API
-- [`web-e2e`](./web-e2e/README.md) - e2e tests for Web
+- [`api-e2e`](./api-e2e/README.md) - e2e tests for API (`type:e2e`, `scope:api`)
+- [`web-e2e`](./web-e2e/README.md) - e2e tests for Web (`type:e2e`, `scope:web`)
 
 ## Useful Commands
 
@@ -19,5 +19,5 @@ npx nx run api:serve
 npx nx run web:serve
 
 # Run all app-level e2e tests
-npx nx run-many -t e2e -p api-e2e web-e2e
+npx nx run-many -t e2e -p api-e2e,web-e2e
 ```

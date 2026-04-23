@@ -1,5 +1,9 @@
 # Full-Stack Starter Scaffolding Reference
 
+## 0. Scope
+- purpose: `reference defaults/commands for generating new projects`
+- note: `this file documents scaffolding intent, not current runtime implementation status`
+
 ## 1. Initial Scaffolding CLI Defaults
 
 ### 1.1 Angular app (`web`)

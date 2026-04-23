@@ -25,3 +25,4 @@ npx nx lint utils
 
 - Project tags: `type:util`, `scope:shared`
 - Allowed dependency direction: `type:util` -> `type:util`
+- Allowed scope direction: `scope:shared` -> `scope:shared`
