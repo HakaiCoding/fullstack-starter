@@ -89,6 +89,8 @@
   - `--name=web`
   - `--tags=type:app,scope:web`
   - `--style=scss`
+- component_generation_default:
+  - `changeDetection`: `OnPush`
 
 ### 10.2 NestJS app (`api`)
 - generator: `@nx/nest:application`
