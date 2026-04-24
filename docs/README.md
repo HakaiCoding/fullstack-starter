@@ -4,15 +4,15 @@ Architecture and baseline references for the monorepo.
 
 ## Files
 
-- [`fullstack-starter-foundation-notes.md`](./fullstack-starter-foundation-notes.md) - high-level foundation summary and source-of-truth policy
-- [`fullstack-starter-auth-security-baseline.md`](./fullstack-starter-auth-security-baseline.md) - auth, authorization, cookie, and CORS baseline
-- [`fullstack-starter-implementation-baseline.md`](./fullstack-starter-implementation-baseline.md) - i18n, data conventions, and testing baseline
-- [`fullstack-starter-scaffolding-reference.md`](./fullstack-starter-scaffolding-reference.md) - generation defaults and scaffold commands
+- [`foundation.md`](./foundation.md) - foundation contract, source-of-truth policy, stack snapshot, and boundary model
+- [`auth-security-baseline.md`](./auth-security-baseline.md) - auth, authorization, cookie, and CORS baseline
+- [`implementation-baseline.md`](./implementation-baseline.md) - i18n, data conventions, and testing baseline
+- [`scaffolding-reference.md`](./scaffolding-reference.md) - generation defaults and scaffold commands
 
 ## Boundary Model
 
 - Boundary constraints are summarized in:
-  - [`fullstack-starter-foundation-notes.md`](./fullstack-starter-foundation-notes.md)
+  - [`foundation.md`](./foundation.md)
 - Runtime enforcement is defined in:
   - [`../eslint.config.mjs`](../eslint.config.mjs)
 

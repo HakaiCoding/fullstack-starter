@@ -1,4 +1,4 @@
-# Full-Stack Starter Foundation Notes
+# Full-Stack Starter Foundation
 
 ## 1. Purpose
 - goal: Build a clean, practical, maintainable full-stack starter for side projects and small/medium projects.
@@ -45,11 +45,3 @@
   - `scope:web` can depend on: `scope:web`, `scope:shared`
   - `scope:api` can depend on: `scope:api`, `scope:shared`
   - `scope:shared` can depend on: `scope:shared`
-
-## 4. Detailed Baselines (Moved)
-- auth and security baseline:
-  - [`fullstack-starter-auth-security-baseline.md`](./fullstack-starter-auth-security-baseline.md)
-- implementation baseline (i18n, data conventions, testing):
-  - [`fullstack-starter-implementation-baseline.md`](./fullstack-starter-implementation-baseline.md)
-- scaffolding defaults and commands:
-  - [`fullstack-starter-scaffolding-reference.md`](./fullstack-starter-scaffolding-reference.md)

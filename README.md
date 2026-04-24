@@ -90,19 +90,11 @@ If you changed `POSTGRES_VOLUME_NAME` in `.env.docker`, replace `fullstack-start
 
 ## Docs
 
-- Foundation summary: [`docs/fullstack-starter-foundation-notes.md`](./docs/fullstack-starter-foundation-notes.md)
-- Auth/security baseline: [`docs/fullstack-starter-auth-security-baseline.md`](./docs/fullstack-starter-auth-security-baseline.md)
-- Implementation baseline: [`docs/fullstack-starter-implementation-baseline.md`](./docs/fullstack-starter-implementation-baseline.md)
-- Scaffolding reference: [`docs/fullstack-starter-scaffolding-reference.md`](./docs/fullstack-starter-scaffolding-reference.md)
+- Foundation summary: [`docs/foundation.md`](./docs/foundation.md)
+- Auth/security baseline: [`docs/auth-security-baseline.md`](./docs/auth-security-baseline.md)
+- Implementation baseline: [`docs/implementation-baseline.md`](./docs/implementation-baseline.md)
+- Scaffolding reference: [`docs/scaffolding-reference.md`](./docs/scaffolding-reference.md)
 
 ## Module Boundaries
 
-Module boundaries are enforced with Nx ESLint rules:
-
-- `type:app` -> can depend on `type:contracts`, `type:util`
-- `type:e2e` -> can depend on `type:contracts`, `type:util`
-- `type:contracts` -> can depend on `type:contracts`
-- `type:util` -> can depend on `type:util`
-- `scope:web` -> can depend on `scope:web`, `scope:shared`
-- `scope:api` -> can depend on `scope:api`, `scope:shared`
-- `scope:shared` -> can depend on `scope:shared`
+Boundary constraints are documented in [`docs/foundation.md`](./docs/foundation.md) and enforced by [`eslint.config.mjs`](./eslint.config.mjs).
