@@ -122,9 +122,7 @@ function validateNonPlaceholderSecretForRuntime(
 }
 
 export function validateEnvironment(env: Environment): Environment {
-  const nodeEnv = (
-    readOptionalString(env, 'NODE_ENV') ?? 'development'
-  ).toLowerCase();
+  const nodeEnv = readRequiredString(env, 'NODE_ENV').toLowerCase();
   const host = readRequiredString(env, 'POSTGRES_HOST');
   const port = validateIntegerInRange(
     readRequiredString(env, 'POSTGRES_PORT'),
@@ -198,6 +196,7 @@ export function validateEnvironment(env: Environment): Environment {
 
   return {
     ...env,
+    NODE_ENV: nodeEnv,
     POSTGRES_HOST: host,
     POSTGRES_PORT: port,
     POSTGRES_DB: db,

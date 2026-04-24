@@ -46,9 +46,11 @@ npx nx run web:build
 # API e2e (Jest)
 npx nx e2e api-e2e
 
-# Web e2e (Playwright)
-npx playwright install chromium
+# Web e2e (Playwright; auto-installs Chromium via web-e2e:install-chromium)
 npx nx e2e web-e2e
+
+# Optional prewarm step for local images/CI
+npx playwright install chromium
 ```
 
 ## 5. Local PostgreSQL (Docker Compose)

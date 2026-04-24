@@ -8,7 +8,7 @@
   - `auth/security`: partially implemented (`API auth endpoints + JWT guard + refresh-session persistence + web auth interceptor baseline`; access-token issuance currently carries baseline claims with `sub` + `tokenType` only and no persisted role claim; `auth/me` role currently falls back to `user` unless an `admin` claim is present; API CORS allowlist + credentials bootstrap wiring implemented; route-level RBAC enforcement pending)
   - `typeorm/postgresql persistence foundation`: implemented
   - `e2e projects`: scaffolded and runnable with local prerequisites
-  - `web-e2e prerequisite`: run `npx playwright install chromium` once before first `npx nx e2e web-e2e`
+  - `web-e2e prerequisite`: `npx nx e2e web-e2e` auto-runs `web-e2e:install-chromium`; optional prewarm remains `npx playwright install chromium`
 
 ## 1. Internationalization (i18n)
 - library: `Transloco`
@@ -50,6 +50,7 @@
   - `POSTGRES_PASSWORD`
   - `POSTGRES_SSL` (optional; default `false`)
 - api_auth_env_contract:
+  - `NODE_ENV` (required; explicit runtime mode, no implicit default)
   - `AUTH_ACCESS_TOKEN_SECRET`
   - `AUTH_ACCESS_TOKEN_TTL_SECONDS`
   - `AUTH_REFRESH_TOKEN_SECRET`
@@ -58,6 +59,7 @@
   - `AUTH_REFRESH_COOKIE_SECURE`
   - `AUTH_REFRESH_COOKIE_SAME_SITE`
   - runtime_validation_enforcement:
+    - `NODE_ENV` must be explicitly set
     - `NODE_ENV=production` requires `AUTH_REFRESH_COOKIE_SECURE=true`
     - `AUTH_REFRESH_COOKIE_SAME_SITE=none` requires `AUTH_REFRESH_COOKIE_SECURE=true`
     - known placeholder JWT secret patterns are rejected outside local/dev/test

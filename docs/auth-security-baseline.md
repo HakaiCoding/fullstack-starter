@@ -11,7 +11,7 @@
   - access-token issuance currently includes baseline claims with `sub` and `tokenType` only; no persisted role claim is issued (`apps/api/src/app/auth/auth-core.service.ts`, around line 251)
   - `auth/me` role currently uses fallback behavior (`admin` only if access-token role claim is present; otherwise `user`) (`apps/api/src/app/auth/jwt-access.strategy.ts`, around line 45)
   - route-level RBAC enforcement is not implemented yet
-  - env validation now enforces cookie safety (`NODE_ENV=production` requires `AUTH_REFRESH_COOKIE_SECURE=true`; `AUTH_REFRESH_COOKIE_SAME_SITE=none` requires `AUTH_REFRESH_COOKIE_SECURE=true`)
+  - env validation now requires explicit `NODE_ENV` and enforces cookie safety (`NODE_ENV=production` requires `AUTH_REFRESH_COOKIE_SECURE=true`; `AUTH_REFRESH_COOKIE_SAME_SITE=none` requires `AUTH_REFRESH_COOKIE_SECURE=true`)
   - env validation rejects known placeholder JWT secret patterns outside local/dev/test
   - CORS allowlist + credentials wiring is implemented in API bootstrap (`credentials=true`, allowlisted origins only, requests without `Origin` allowed)
 

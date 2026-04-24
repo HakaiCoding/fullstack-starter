@@ -28,6 +28,15 @@ function buildEnv(overrides: Partial<EnvRecord> = {}): EnvRecord {
 }
 
 describe('validateEnvironment', () => {
+  it('fails fast when NODE_ENV is missing', () => {
+    const env = buildEnv();
+    delete env.NODE_ENV;
+
+    expect(() => validateEnvironment(env)).toThrow(
+      'Missing required environment variable: NODE_ENV',
+    );
+  });
+
   it('fails fast when API_CORS_ALLOWED_ORIGINS is missing', () => {
     const env = buildEnv();
     delete env.API_CORS_ALLOWED_ORIGINS;
