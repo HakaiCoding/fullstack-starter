@@ -2,12 +2,15 @@ import { Check, Column, Entity, Index, OneToOne } from 'typeorm';
 import { AuthSessionEntity } from './auth-session.entity';
 import { BaseEntity } from '../base.entity';
 
+export type UserRole = 'admin' | 'user';
+
 @Entity({ name: 'users' })
 @Index('idx_users_created_at', ['createdAt'])
 @Check(
   'CHK_users_password_hash_not_blank',
   `"password_hash" IS NULL OR btrim("password_hash") <> ''`,
 )
+@Check('CHK_users_role_allowed', `"role" IN ('admin', 'user')`)
 export class UserEntity extends BaseEntity {
   @Column({
     type: 'text',
@@ -28,6 +31,12 @@ export class UserEntity extends BaseEntity {
     nullable: true,
   })
   passwordHash!: string | null;
+
+  @Column({
+    type: 'text',
+    default: 'user',
+  })
+  role!: UserRole;
 
   @OneToOne(() => AuthSessionEntity, (authSession) => authSession.user)
   authSession!: AuthSessionEntity | null;
