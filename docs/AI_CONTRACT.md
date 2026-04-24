@@ -31,16 +31,23 @@ This contract uses explicit status labels:
 
 ## 5. Required Workflow (Accepted Policy)
 1. Classify the change:
-- `Accepted policy`: `local` (small isolated change) vs `core` (domain/auth/persistence/cross-module behavior).
+- `Accepted policy`: use lightweight tiers:
+  - `tiny/local`: docs/copy/style or small isolated non-behavioral changes.
+  - `normal implementation`: bounded implementation changes within existing module boundaries.
+  - `core`: domain/auth/persistence/cross-module/security/business-rule changes.
+- `Accepted policy`: `tiny/local` and `normal implementation` changes do not require a spec by default.
+- `Accepted policy`: if the change matches spec-required criteria in [`README.md`](./README.md), treat it as `core`.
 
 2. Read relevant docs before editing:
-- `Accepted policy`: Always read [`ARCHITECTURE.md`](./ARCHITECTURE.md) and [`commands-reference.md`](./commands-reference.md).
+- `Accepted policy`: For `normal implementation` and `core` work, always read [`ARCHITECTURE.md`](./ARCHITECTURE.md) and [`commands-reference.md`](./commands-reference.md).
+- `Accepted policy`: For `tiny/local` work, read the minimal relevant docs needed to avoid boundary/policy violations.
 - `Accepted policy`: Also read domain docs (for example [`auth-security-baseline.md`](./auth-security-baseline.md)) when applicable.
 
 3. For `core` changes, create or update a spec first:
 - `Accepted policy`: Use [`specs/_template.md`](./specs/_template.md).
 
 4. Perform a design/placement pass before implementation:
+- `Accepted policy`: Required for `core` changes.
 - `Accepted policy`: Identify target modules/files and justify why each is the right layer.
 
 5. Implement in small ordered slices:
@@ -52,6 +59,9 @@ This contract uses explicit status labels:
 ## 6. Completion Checklist (Accepted Policy)
 - `Accepted policy`: Explain which files changed.
 - `Accepted policy`: Explain why each changed file was the correct layer.
+- `Accepted policy`: Perform a post-change review against [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), relevant spec (if any), known risks, and forbidden shortcuts.
+- `Accepted policy`: Confirm changed-file placement still matches architecture boundaries.
+- `Accepted policy`: For behavior changes, ensure tests cover the general rule and not only the shown example.
 - `Accepted policy`: Run and report relevant gates from [`commands-reference.md`](./commands-reference.md).
 - `Accepted policy`: Explicitly state any gates not run.
 - `Accepted policy`: State docs/spec/decision updates completed or still required.
@@ -63,6 +73,7 @@ This contract uses explicit status labels:
 - `Accepted policy`: Generic model knowledge must not override relevant local skills.
 - `Accepted policy`: If no relevant local skill exists, explicitly say so.
 - `Accepted policy`: If a relevant local skill is intentionally not used, explicitly explain why.
-- `Accepted policy`: For implementation tasks, report which skills were inspected, which were used, and any conflicts/tensions found.
+- `Accepted policy`: For `normal implementation` and `core` work, report which skills were inspected, which were used, and any conflicts/tensions found.
+- `Accepted policy`: For `tiny/local` work, explicitly state when no relevant skill was needed.
 - `Accepted policy`: If local skill guidance conflicts with project docs/specs/decisions, flag the conflict and follow the safest project-compatible option.
 - `Accepted policy`: Do not copy large skill contents into project docs; summarize only what is needed.

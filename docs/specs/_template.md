@@ -50,16 +50,23 @@
 - unit tests:
 - integration/e2e tests:
 - regression coverage:
+- anti-hack coverage for behavior changes (general rule coverage, not only the shown example):
+  - reject example-specific patches
+  - reject hardcoded special cases when the real rule is broader
+  - reject wrong-layer business-rule placement
 
 ## Required Gates
 Use commands from [`../commands-reference.md`](../commands-reference.md).
-- quick/local gates:
+- tiny/local gates (if applicable):
+- normal implementation gates (if applicable):
 - core gates:
 - additional domain gates (if applicable):
 - manual/proposed checks:
 
 ## Acceptance Checks
 - observable outcomes that must be true before merge
+- behavior tests prove the general rule, not only a single example
+- no example-specific patches, hardcoded special cases, or wrong-layer business-rule placement introduced
 
 ## Documentation Updates Needed
 - docs to update:

@@ -5,7 +5,7 @@ End-to-end tests for the NestJS API using Jest.
 ## Scope
 
 - Verifies runtime behavior through HTTP requests
-- Currently covers `GET /api/v1`
+- Currently covers baseline API health/runtime checks, migration-backed schema checks, CORS behavior, and auth-flow behavior (`login`, `refresh`, `logout`, `auth/me`, session rotation/replacement, and role-change-on-refresh claim behavior)
 
 ## Nx Target
 

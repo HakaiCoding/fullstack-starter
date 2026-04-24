@@ -106,8 +106,21 @@ npx nx reset
 
 ## 8. Gate Profiles
 
-### 8.1 Quick/Local Change Gates
-Use when change is isolated and non-core.
+Use workflow tiers from [`AI_CONTRACT.md`](./AI_CONTRACT.md):
+- `tiny/local` -> use 8.1
+- `normal implementation` -> use 8.2
+- `core` -> use 8.3 plus relevant domain overlays (8.4-8.6)
+
+Notes:
+- no dedicated workspace `typecheck` command is currently documented; `build` targets are the practical proxy.
+- no standalone automated forbidden-pattern command is currently documented; review manually against [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), and relevant spec(s) when applicable.
+
+### 8.1 Tiny/Local Change Gates
+Use when change is docs/copy/style or small isolated non-behavioral work.
+
+- specs are not required by default.
+- for docs-only changes with no runtime impact, gates may be skipped; explicitly report skipped gates.
+- if code is touched, run impacted project gates:
 
 ```sh
 # Prefer impacted project gates
@@ -123,8 +136,31 @@ npx nx run web:build
 npx nx affected -t lint,test,build
 ```
 
-### 8.2 Core Change Gates
-Use for domain/auth/persistence/cross-module behavior changes.
+### 8.2 Normal Implementation Gates
+Use when implementation changes stay within existing module boundaries and do not meet `core` criteria.
+
+- specs are not required by default.
+- run impacted project gates:
+
+```sh
+# Prefer impacted project gates
+npx nx run api:lint
+npx nx run api:test
+npx nx run api:build
+
+npx nx run web:lint
+npx nx run web:test
+npx nx run web:build
+
+# or impacted-only across workspace
+npx nx affected -t lint,test,build
+```
+
+- if auth/security or DB/migration work is touched, also apply 8.4 and/or 8.5.
+- if behavior crosses app boundaries, auth flows, routing, or API contracts, also apply 8.6.
+
+### 8.3 Core Change Gates
+Use for domain/auth/persistence/cross-module/security/business-rule changes.
 
 ```sh
 npx nx run-many -t lint,test,build --all
@@ -138,9 +174,10 @@ npx nx e2e web-e2e
 ```
 
 - manual/proposed: confirm placement/rule compliance against `docs/ARCHITECTURE.md` and `docs/AI_CONTRACT.md`.
+- manual/proposed: confirm relevant spec requirements and risk/forbidden-shortcut checks were reviewed.
 - manual/proposed: explicitly report any gate not run.
 
-### 8.3 Auth/Security Change Gates
+### 8.4 Auth/Security Change Gates
 
 ```sh
 npx nx run api:lint
@@ -160,7 +197,7 @@ npx nx e2e web-e2e
 
 - manual/proposed: review `docs/auth-security-baseline.md` invariants before merge.
 
-### 8.4 Database/Migration Change Gates
+### 8.5 Database/Migration Change Gates
 
 ```sh
 npm run db:migration:create -- apps/api/src/db/migrations/<migration-name>
@@ -180,7 +217,7 @@ npm run db:down
 
 - manual/proposed: verify entity and migration changes stay consistent.
 
-### 8.5 E2E-Relevant Change Gates
+### 8.6 E2E-Relevant Change Gates
 Use when behavior crosses app boundaries, auth flows, routing, or API contracts.
 
 ```sh

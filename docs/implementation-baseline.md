@@ -10,7 +10,7 @@ Authoritative docs for other concerns:
 - commands/gate profiles: [`commands-reference.md`](./commands-reference.md)
 - long-lived policy decisions: [`DECISIONS.md`](./DECISIONS.md)
 
-## 2. Status Snapshot (as of 2026-04-24)
+## 2. Status Snapshot (as of 2026-04-25)
 - state: `active baseline`
 - implemented_in_code: `partial`
 - i18n: not implemented yet

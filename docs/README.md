@@ -19,8 +19,16 @@ Documentation entry point for architecture, AI workflow constraints, decisions, 
 5. For technology/tooling/workflow guidance, inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default (especially for core changes, auth/security work, framework usage, database/migration work, testing, and build/tooling work).
 6. Keep project docs/specs/decisions authoritative for repository-specific architecture, boundaries, and accepted policies.
 
+## Lightweight Workflow Tiers
+- `tiny/local`: docs/copy/style or small isolated non-behavioral changes.
+- `normal implementation`: bounded implementation changes within existing module boundaries.
+- `core`: domain/auth/persistence/cross-module/security/business-rule changes.
+- for `tiny/local` edits, use the minimal relevant doc subset needed to stay inside boundaries.
+- By default, specs are not required for `tiny/local` or `normal implementation`.
+- If a change matches the "When a Spec Is Required" criteria below, treat it as `core`.
+
 ## What Codex Should Read Before Core Changes
-For core changes (domain/auth/persistence/cross-module behavior):
+For core changes (domain/auth/persistence/cross-module/security/business-rule behavior):
 1. Read architecture + AI contract + command gates.
 2. Create or update a spec using [`specs/_template.md`](./specs/_template.md).
 3. Check existing decisions in [`DECISIONS.md`](./DECISIONS.md).
@@ -28,6 +36,7 @@ For core changes (domain/auth/persistence/cross-module behavior):
 ## When a Spec Is Required
 Create/update a spec for:
 - auth/session behavior changes
+- security-sensitive policy/rule changes
 - persistence schema or data rule changes
 - shared contracts changes affecting API and web
 - cross-module business/domain rule changes
@@ -47,6 +56,8 @@ All executable commands and gate profiles are in:
 - Location: `C:\Users\Development\.agents\skills\`
 - Inspect and use relevant local skills by default for technology/tooling/workflow guidance.
 - Local skills are the preferred reference source for current technology/framework/tooling best practices.
+- For `normal implementation` and `core` work, report skills inspected/used and conflicts/tensions found.
+- For `tiny/local` work, explicitly state when no relevant skill was needed.
 - Project docs/specs/decisions remain authoritative for repository-specific architecture, boundaries, and accepted policies.
 - If local skills conflict with project docs/specs/decisions, flag the conflict and choose the safest project-compatible option.
 
@@ -63,5 +74,6 @@ All executable commands and gate profiles are in:
 - Enforced module-boundary rules: [`../eslint.config.mjs`](../eslint.config.mjs).
 - Human-readable commands and gate profiles: [`commands-reference.md`](./commands-reference.md).
 - Architecture boundaries and project map: [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+- No separate `projectmap.md` is currently required; [`ARCHITECTURE.md`](./ARCHITECTURE.md) serves that role in this repository.
 - AI-assisted coding rules: [`AI_CONTRACT.md`](./AI_CONTRACT.md).
 - Long-lived architecture/policy decisions: [`DECISIONS.md`](./DECISIONS.md).
