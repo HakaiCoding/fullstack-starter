@@ -78,6 +78,16 @@ npm run db:health
 npm run db:down
 ```
 
+5. Reset local PostgreSQL data (destructive; removes all DB data in the named volume):
+
+```sh
+npm run db:down
+docker volume rm fullstack-starter-pgdata
+npm run db:up
+```
+
+If you changed `POSTGRES_VOLUME_NAME` in `.env.docker`, replace `fullstack-starter-pgdata` with your configured volume name.
+
 ## Docs
 
 - Foundation summary: [`docs/fullstack-starter-foundation-notes.md`](./docs/fullstack-starter-foundation-notes.md)
