@@ -4,6 +4,13 @@ const TRUE_VALUES = new Set(['1', 'true', 'yes', 'on']);
 const FALSE_VALUES = new Set(['0', 'false', 'no', 'off']);
 const SAME_SITE_VALUES = new Set(['strict', 'lax', 'none']);
 const MIN_JWT_SECRET_LENGTH = 32;
+const LOCAL_LIKE_NODE_ENV_VALUES = new Set([
+  'development',
+  'dev',
+  'local',
+  'test',
+]);
+const KNOWN_PLACEHOLDER_SECRET_PATTERNS = [/^change[_-]?me/i, /^replace[_-]?me/i];
 
 function readRequiredString(env: Environment, key: string) {
   const value = env[key];
@@ -80,7 +87,42 @@ function validateJwtSecret(secret: string, key: string) {
   return secret;
 }
 
+function isLocalLikeNodeEnv(nodeEnv: string) {
+  return LOCAL_LIKE_NODE_ENV_VALUES.has(nodeEnv);
+}
+
+function isTruthyBooleanFlag(value: string) {
+  return TRUE_VALUES.has(value);
+}
+
+function looksLikePlaceholderSecret(secret: string) {
+  return KNOWN_PLACEHOLDER_SECRET_PATTERNS.some((pattern) =>
+    pattern.test(secret),
+  );
+}
+
+function validateNonPlaceholderSecretForRuntime(
+  secret: string,
+  key: string,
+  nodeEnv: string,
+) {
+  if (isLocalLikeNodeEnv(nodeEnv)) {
+    return secret;
+  }
+
+  if (looksLikePlaceholderSecret(secret)) {
+    throw new Error(
+      `${key} looks like a placeholder secret and is not allowed when NODE_ENV="${nodeEnv}".`,
+    );
+  }
+
+  return secret;
+}
+
 export function validateEnvironment(env: Environment): Environment {
+  const nodeEnv = (
+    readOptionalString(env, 'NODE_ENV') ?? 'development'
+  ).toLowerCase();
   const host = readRequiredString(env, 'POSTGRES_HOST');
   const port = validateIntegerInRange(
     readRequiredString(env, 'POSTGRES_PORT'),
@@ -97,9 +139,13 @@ export function validateEnvironment(env: Environment): Environment {
     ? normalizeBooleanFlag(sslFlagRaw, 'POSTGRES_SSL')
     : 'false';
 
-  const accessTokenSecret = validateJwtSecret(
-    readRequiredString(env, 'AUTH_ACCESS_TOKEN_SECRET'),
+  const accessTokenSecret = validateNonPlaceholderSecretForRuntime(
+    validateJwtSecret(
+      readRequiredString(env, 'AUTH_ACCESS_TOKEN_SECRET'),
+      'AUTH_ACCESS_TOKEN_SECRET',
+    ),
     'AUTH_ACCESS_TOKEN_SECRET',
+    nodeEnv,
   );
   const accessTokenTtlSeconds = validateIntegerInRange(
     readRequiredString(env, 'AUTH_ACCESS_TOKEN_TTL_SECONDS'),
@@ -107,9 +153,13 @@ export function validateEnvironment(env: Environment): Environment {
     1,
     Number.MAX_SAFE_INTEGER,
   );
-  const refreshTokenSecret = validateJwtSecret(
-    readRequiredString(env, 'AUTH_REFRESH_TOKEN_SECRET'),
+  const refreshTokenSecret = validateNonPlaceholderSecretForRuntime(
+    validateJwtSecret(
+      readRequiredString(env, 'AUTH_REFRESH_TOKEN_SECRET'),
+      'AUTH_REFRESH_TOKEN_SECRET',
+    ),
     'AUTH_REFRESH_TOKEN_SECRET',
+    nodeEnv,
   );
   const refreshTokenTtlSeconds = validateIntegerInRange(
     readRequiredString(env, 'AUTH_REFRESH_TOKEN_TTL_SECONDS'),
@@ -126,6 +176,19 @@ export function validateEnvironment(env: Environment): Environment {
     readRequiredString(env, 'AUTH_REFRESH_COOKIE_SAME_SITE'),
     'AUTH_REFRESH_COOKIE_SAME_SITE',
   );
+  const isRefreshCookieSecure = isTruthyBooleanFlag(refreshCookieSecure);
+
+  if (nodeEnv === 'production' && !isRefreshCookieSecure) {
+    throw new Error(
+      'AUTH_REFRESH_COOKIE_SECURE must be true when NODE_ENV is production.',
+    );
+  }
+
+  if (refreshCookieSameSite === 'none' && !isRefreshCookieSecure) {
+    throw new Error(
+      'AUTH_REFRESH_COOKIE_SAME_SITE=none requires AUTH_REFRESH_COOKIE_SECURE=true.',
+    );
+  }
 
   return {
     ...env,

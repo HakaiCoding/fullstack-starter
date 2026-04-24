@@ -5,7 +5,7 @@
 - `implemented_in_code`: `partial` (as of `2026-04-24`)
 - notes:
   - `i18n`: not implemented yet
-  - `auth/security`: partially implemented (`API auth endpoints + JWT guard + refresh-session persistence + web auth interceptor baseline`)
+  - `auth/security`: partially implemented (`API auth endpoints + JWT guard + refresh-session persistence + web auth interceptor baseline`; access-token issuance currently carries baseline claims with `sub` + `tokenType` only and no persisted role claim; `auth/me` role currently falls back to `user` unless an `admin` claim is present; route-level RBAC enforcement pending)
   - `typeorm/postgresql persistence foundation`: implemented
   - `e2e projects`: scaffolded and runnable with local prerequisites
   - `web-e2e prerequisite`: run `npx playwright install chromium` once before first `npx nx e2e web-e2e`
@@ -57,6 +57,10 @@
   - `AUTH_REFRESH_COOKIE_NAME`
   - `AUTH_REFRESH_COOKIE_SECURE`
   - `AUTH_REFRESH_COOKIE_SAME_SITE`
+  - runtime_validation_enforcement:
+    - `NODE_ENV=production` requires `AUTH_REFRESH_COOKIE_SECURE=true`
+    - `AUTH_REFRESH_COOKIE_SAME_SITE=none` requires `AUTH_REFRESH_COOKIE_SECURE=true`
+    - known placeholder JWT secret patterns are rejected outside local/dev/test
 
 ## 3. Testing Baseline
 - scope: `bare minimum for starter`
