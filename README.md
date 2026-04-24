@@ -95,7 +95,7 @@ API persistence runtime uses the same PostgreSQL env keys: `POSTGRES_HOST`, `POS
 - Foundation summary: [`docs/foundation.md`](./docs/foundation.md)
 - Auth/security baseline: [`docs/auth-security-baseline.md`](./docs/auth-security-baseline.md)
 - Implementation baseline: [`docs/implementation-baseline.md`](./docs/implementation-baseline.md)
-- Scaffolding reference: [`docs/scaffolding-reference.md`](./docs/scaffolding-reference.md)
+- Commands reference: [`docs/commands-reference.md`](./docs/commands-reference.md)
 
 ## Module Boundaries
 

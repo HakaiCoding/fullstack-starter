@@ -20,12 +20,17 @@
 - frontend.angular_material: `planned (not installed)`
 - backend.nestjs: `11.1.19`
 - backend.nest_config: `declared ^4.0.4 (resolved 4.0.4)`
+- backend.nest_jwt: `declared ^11.0.2 (resolved 11.0.2), implemented`
+- backend.nest_passport: `declared ^11.0.5 (resolved 11.0.5), implemented`
+- backend.passport: `declared ^0.7.0 (resolved 0.7.0), implemented`
+- backend.passport_jwt: `declared ^4.0.1 (resolved 4.0.1), implemented`
 - orm.typeorm: `declared ^0.3.28 (resolved 0.3.28), implemented for runtime + migrations`
 - orm.nest_typeorm: `declared ^11.0.1 (resolved 11.0.1), implemented`
 - database.postgresql_driver: `pg declared ^8.20.0 (resolved 8.20.0), implemented`
 - database.postgresql_local: `implemented (docker-compose PostgreSQL + .env.docker contract)`
 - i18n.transloco: `planned (not installed)`
 - local_infra: `implemented (docker-compose.yml for database-only local PostgreSQL; env/scripts wired in workspace)`
+- auth.security: `partially implemented (JWT access + refresh tokens, hashed refresh-session persistence, single-session policy); CORS allowlist/credentials wiring pending`
 
 ## 3. Base Architecture
 - monorepo: `Nx`
@@ -37,6 +42,7 @@
   - `libs/shared/utils`
 - api_style: `REST`
 - api_versioning: `/api/v1`
+- auth_style: `JWT access tokens + rotating refresh tokens via HttpOnly cookie`
 - database: `PostgreSQL`
 - data_modeling: `standard relational modeling`
 - boundary_enforcement: `@nx/enforce-module-boundaries (ESLint)`

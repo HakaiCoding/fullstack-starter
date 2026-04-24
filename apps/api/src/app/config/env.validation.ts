@@ -1,17 +1,11 @@
 type Environment = Record<string, unknown>;
 
-const REQUIRED_DB_KEYS = [
-  'POSTGRES_HOST',
-  'POSTGRES_PORT',
-  'POSTGRES_DB',
-  'POSTGRES_USER',
-  'POSTGRES_PASSWORD',
-] as const;
-
 const TRUE_VALUES = new Set(['1', 'true', 'yes', 'on']);
 const FALSE_VALUES = new Set(['0', 'false', 'no', 'off']);
+const SAME_SITE_VALUES = new Set(['strict', 'lax', 'none']);
+const MIN_JWT_SECRET_LENGTH = 32;
 
-function readRequiredString(env: Environment, key: (typeof REQUIRED_DB_KEYS)[number]) {
+function readRequiredString(env: Environment, key: string) {
   const value = env[key];
 
   if (typeof value !== 'string' || value.trim() === '') {
@@ -36,43 +30,102 @@ function readOptionalString(env: Environment, key: string) {
   return trimmedValue === '' ? undefined : trimmedValue;
 }
 
-function validatePort(port: string) {
-  const parsedPort = Number(port);
+function validateIntegerInRange(
+  value: string,
+  key: string,
+  min: number,
+  max: number,
+) {
+  const parsed = Number(value);
 
-  if (
-    !Number.isInteger(parsedPort) ||
-    parsedPort < 1 ||
-    parsedPort > 65535
-  ) {
+  if (!Number.isInteger(parsed) || parsed < min || parsed > max) {
     throw new Error(
-      `Invalid POSTGRES_PORT value "${port}". Expected an integer between 1 and 65535.`,
+      `Invalid ${key} value "${value}". Expected an integer between ${String(min)} and ${String(max)}.`,
     );
   }
 
-  return String(parsedPort);
+  return String(parsed);
 }
 
-function normalizeSslFlag(sslFlag: string) {
-  const normalized = sslFlag.toLowerCase();
+function normalizeBooleanFlag(rawValue: string, key: string) {
+  const normalized = rawValue.toLowerCase();
 
   if (TRUE_VALUES.has(normalized) || FALSE_VALUES.has(normalized)) {
     return normalized;
   }
 
   throw new Error(
-    `Invalid POSTGRES_SSL value "${sslFlag}". Use one of: true,false,1,0,yes,no,on,off.`,
+    `Invalid ${key} value "${rawValue}". Use one of: true,false,1,0,yes,no,on,off.`,
   );
+}
+
+function normalizeSameSite(rawValue: string, key: string) {
+  const normalized = rawValue.toLowerCase();
+  if (!SAME_SITE_VALUES.has(normalized)) {
+    throw new Error(
+      `Invalid ${key} value "${rawValue}". Use one of: strict,lax,none.`,
+    );
+  }
+
+  return normalized;
+}
+
+function validateJwtSecret(secret: string, key: string) {
+  if (secret.length < MIN_JWT_SECRET_LENGTH) {
+    throw new Error(
+      `${key} must be at least ${String(MIN_JWT_SECRET_LENGTH)} characters long for HS256 usage.`,
+    );
+  }
+
+  return secret;
 }
 
 export function validateEnvironment(env: Environment): Environment {
   const host = readRequiredString(env, 'POSTGRES_HOST');
-  const port = validatePort(readRequiredString(env, 'POSTGRES_PORT'));
+  const port = validateIntegerInRange(
+    readRequiredString(env, 'POSTGRES_PORT'),
+    'POSTGRES_PORT',
+    1,
+    65535,
+  );
   const db = readRequiredString(env, 'POSTGRES_DB');
   const user = readRequiredString(env, 'POSTGRES_USER');
   const password = readRequiredString(env, 'POSTGRES_PASSWORD');
 
   const sslFlagRaw = readOptionalString(env, 'POSTGRES_SSL');
-  const sslFlag = sslFlagRaw ? normalizeSslFlag(sslFlagRaw) : 'false';
+  const sslFlag = sslFlagRaw
+    ? normalizeBooleanFlag(sslFlagRaw, 'POSTGRES_SSL')
+    : 'false';
+
+  const accessTokenSecret = validateJwtSecret(
+    readRequiredString(env, 'AUTH_ACCESS_TOKEN_SECRET'),
+    'AUTH_ACCESS_TOKEN_SECRET',
+  );
+  const accessTokenTtlSeconds = validateIntegerInRange(
+    readRequiredString(env, 'AUTH_ACCESS_TOKEN_TTL_SECONDS'),
+    'AUTH_ACCESS_TOKEN_TTL_SECONDS',
+    1,
+    Number.MAX_SAFE_INTEGER,
+  );
+  const refreshTokenSecret = validateJwtSecret(
+    readRequiredString(env, 'AUTH_REFRESH_TOKEN_SECRET'),
+    'AUTH_REFRESH_TOKEN_SECRET',
+  );
+  const refreshTokenTtlSeconds = validateIntegerInRange(
+    readRequiredString(env, 'AUTH_REFRESH_TOKEN_TTL_SECONDS'),
+    'AUTH_REFRESH_TOKEN_TTL_SECONDS',
+    1,
+    Number.MAX_SAFE_INTEGER,
+  );
+  const refreshCookieName = readRequiredString(env, 'AUTH_REFRESH_COOKIE_NAME');
+  const refreshCookieSecure = normalizeBooleanFlag(
+    readRequiredString(env, 'AUTH_REFRESH_COOKIE_SECURE'),
+    'AUTH_REFRESH_COOKIE_SECURE',
+  );
+  const refreshCookieSameSite = normalizeSameSite(
+    readRequiredString(env, 'AUTH_REFRESH_COOKIE_SAME_SITE'),
+    'AUTH_REFRESH_COOKIE_SAME_SITE',
+  );
 
   return {
     ...env,
@@ -82,5 +135,12 @@ export function validateEnvironment(env: Environment): Environment {
     POSTGRES_USER: user,
     POSTGRES_PASSWORD: password,
     POSTGRES_SSL: sslFlag,
+    AUTH_ACCESS_TOKEN_SECRET: accessTokenSecret,
+    AUTH_ACCESS_TOKEN_TTL_SECONDS: accessTokenTtlSeconds,
+    AUTH_REFRESH_TOKEN_SECRET: refreshTokenSecret,
+    AUTH_REFRESH_TOKEN_TTL_SECONDS: refreshTokenTtlSeconds,
+    AUTH_REFRESH_COOKIE_NAME: refreshCookieName,
+    AUTH_REFRESH_COOKIE_SECURE: refreshCookieSecure,
+    AUTH_REFRESH_COOKIE_SAME_SITE: refreshCookieSameSite,
   };
 }

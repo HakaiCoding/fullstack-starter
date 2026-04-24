@@ -7,7 +7,7 @@ Architecture and baseline references for the monorepo.
 - [`foundation.md`](./foundation.md) - foundation contract, source-of-truth policy, synced stack snapshot, and boundary model
 - [`auth-security-baseline.md`](./auth-security-baseline.md) - planned auth, authorization, cookie, and CORS baseline
 - [`implementation-baseline.md`](./implementation-baseline.md) - current implementation baseline (implemented vs planned) for i18n, data/persistence, and testing
-- [`scaffolding-reference.md`](./scaffolding-reference.md) - generation defaults and scaffold commands
+- [`commands-reference.md`](./commands-reference.md) - practical daily commands for Nx, npm scripts, Docker, Playwright, and TypeORM
 
 ## Boundary Model
 

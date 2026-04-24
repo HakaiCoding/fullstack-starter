@@ -2,6 +2,7 @@ import { type TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { type DataSourceOptions } from 'typeorm';
 import { type PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 import { type DatabaseConfig } from '../app/config/database.config';
+import { AuthSessionEntity } from './entities/auth-session.entity';
 import { UserEntity } from './entities/user.entity';
 import { snakeNamingStrategy } from './snake-naming.strategy';
 
@@ -11,7 +12,7 @@ const DATA_SOURCE_MIGRATIONS_GLOB = [
   'dist/apps/api/db/migrations/*.js',
 ];
 const RUNTIME_MIGRATIONS_GLOB = ['dist/apps/api/db/migrations/*.js'];
-const ENTITIES = [UserEntity];
+const ENTITIES = [UserEntity, AuthSessionEntity];
 
 interface BuildDataSourceOptionsParams {
   useTsMigrations?: boolean;
