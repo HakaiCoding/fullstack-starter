@@ -22,7 +22,7 @@
 - orm.typeorm: `planned (not installed)`
 - database.postgresql: `planned (not installed)`
 - i18n.transloco: `planned (not installed)`
-- local_infra: `planned (target: docker compose for database only)`
+- local_infra: `implemented (docker-compose.yml for database-only local PostgreSQL; env/scripts wired in workspace)`
 
 ## 3. Base Architecture
 - monorepo: `Nx`

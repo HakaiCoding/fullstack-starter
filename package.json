@@ -2,7 +2,13 @@
   "name": "@fullstack-starter/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "db:up": "docker compose --env-file .env.docker up -d postgres",
+    "db:down": "docker compose --env-file .env.docker down --remove-orphans",
+    "db:logs": "docker compose --env-file .env.docker logs -f postgres",
+    "db:ps": "docker compose --env-file .env.docker ps",
+    "db:health": "docker compose --env-file .env.docker ps postgres"
+  },
   "private": true,
   "devDependencies": {
     "@angular-devkit/core": "~21.2.0",

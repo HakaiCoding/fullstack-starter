@@ -22,6 +22,7 @@ See scoped READMEs:
 
 - Node.js `24.15.0`
 - npm `11.12.1`
+- Docker Engine + Docker Compose
 
 ## Quick Start
 
@@ -48,6 +49,33 @@ npx nx e2e api-e2e
 # Web e2e (Chromium)
 npx playwright install chromium
 npx nx e2e web-e2e
+```
+
+## Local PostgreSQL (Docker)
+
+1. Create local Docker env file:
+
+```sh
+copy .env.docker.example .env.docker
+```
+
+2. Start PostgreSQL:
+
+```sh
+npm run db:up
+```
+
+3. Check status/health:
+
+```sh
+npm run db:ps
+npm run db:health
+```
+
+4. Stop services (keeps the named volume):
+
+```sh
+npm run db:down
 ```
 
 ## Docs
