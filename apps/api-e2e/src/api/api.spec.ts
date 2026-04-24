@@ -96,13 +96,44 @@ describe('API DB foundation', () => {
             AND table_name = 'users'
             AND column_name = ANY($1::text[])
         `,
-        [['id', 'email', 'created_at', 'updated_at']],
+        [['id', 'email', 'display_name', 'created_at', 'updated_at']],
       );
       const actualColumns = requiredColumns.rows
         .map((row) => row.column_name)
         .sort();
 
-      expect(actualColumns).toEqual(['created_at', 'email', 'id', 'updated_at']);
+      expect(actualColumns).toEqual([
+        'created_at',
+        'display_name',
+        'email',
+        'id',
+        'updated_at',
+      ]);
+
+      const usersEmailUniqueConstraint = await client.query<{
+        conname: string;
+      }>(
+        `
+          SELECT conname
+          FROM pg_constraint
+          WHERE connamespace = 'public'::regnamespace
+            AND conrelid = 'users'::regclass
+            AND contype = 'u'
+            AND conname = 'UQ_users_email'
+        `,
+      );
+      expect(usersEmailUniqueConstraint.rowCount).toBe(1);
+
+      const usersCreatedAtIndex = await client.query<{ indexname: string }>(
+        `
+          SELECT indexname
+          FROM pg_indexes
+          WHERE schemaname = 'public'
+            AND tablename = 'users'
+            AND indexname = 'idx_users_created_at'
+        `,
+      );
+      expect(usersCreatedAtIndex.rowCount).toBe(1);
     } finally {
       await client.end();
     }

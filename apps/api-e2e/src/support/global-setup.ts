@@ -1,9 +1,12 @@
 import { waitForPortOpen } from '@nx/node/utils';
+import { spawn } from 'node:child_process';
+import * as path from 'node:path';
 import { loadDockerEnvFile } from './load-docker-env';
+
+const workspaceRoot = path.resolve(__dirname, '../../../../');
 
 declare global {
   // Shared across setup/teardown files.
-  // eslint-disable-next-line no-var
   var __TEARDOWN_MESSAGE__: string | undefined;
 }
 
@@ -16,22 +19,39 @@ async function waitForDatabasePort(): Promise<void> {
   await waitForPortOpen(databasePort, { host: databaseHost });
 }
 
+function runWorkspaceCommand(
+  command: string,
+  args: string[],
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: workspaceRoot,
+      env: process.env,
+    });
+
+    child.once('error', reject);
+    child.once('close', (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(
+        new Error(
+          `Command failed: ${command} ${args.join(' ')} (exit code: ${String(code)})`,
+        ),
+      );
+    });
+  });
+}
+
 async function runMigrations(): Promise<void> {
-  const { default: appDataSource } = await import(
-    '../../../api/src/db/data-source'
-  );
-
-  if (!appDataSource.isInitialized) {
-    await appDataSource.initialize();
-  }
-
-  try {
-    await appDataSource.runMigrations();
-  } finally {
-    if (appDataSource.isInitialized) {
-      await appDataSource.destroy();
-    }
-  }
+  await runWorkspaceCommand(process.execPath, [
+    'tools/typeorm-cli.cjs',
+    '-d',
+    'apps/api/src/db/data-source.ts',
+    'migration:run',
+  ]);
 }
 
 module.exports = async function () {

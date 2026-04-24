@@ -53,7 +53,7 @@
 - web_e2e.default_browser: `chromium`
 - currently_implemented:
   - `API unit`: app controller baseline + database readiness service
-  - `API e2e`: `/api/v1`, `/api/v1/health/db`, and migration-backed schema checks (`migrations`, `users`)
+  - `API e2e`: `/api/v1`, `/api/v1/health/db`, and migration-backed schema checks (`migrations`, `users`, `users.display_name`, `UQ_users_email`, `idx_users_created_at`)
   - `Web e2e`: minimal app shell assertion (`router-outlet`)
 - planned_when_auth_starts:
   - `API auth flow`: login, refresh, protected route
