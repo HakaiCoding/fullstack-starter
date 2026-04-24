@@ -7,13 +7,13 @@
 - yyyy-mm-dd: 2026-04-24
 
 ## Status
-- In Progress (remaining implementation slice: reusable API RBAC primitives)
+- Accepted
 
 ## Repository Verification Snapshot (as of 2026-04-25)
 - `users.role` is persisted with default/constraint enforcement (`admin` | `user`)
 - login and refresh issue access-token role claim from persisted role
 - role-change-on-refresh behavior is covered in API e2e auth tests
-- reusable RBAC primitives (`Roles(...)` decorator + role guard) are still not implemented
+- reusable RBAC primitives are implemented (`Roles(...)` metadata decorator + role guard)
 
 ## Problem
 - reusable RBAC primitives are still missing from the API transport layer
@@ -43,7 +43,7 @@
   - `nestjs-best-practices`: authz policy should be explicit in guards/services, not scattered
   - `typeorm` and Postgres skills: authoritative data should be persisted with constraints
 - project constraints from docs/code:
-  - `docs/auth-security-baseline.md` explicitly flags pending RBAC primitives and deferred live route binding
+  - `docs/auth-security-baseline.md` documents implemented RBAC primitives and deferred live route binding
   - `docs/ARCHITECTURE.md` places durable domain/persistence rules in API service + DB layers
   - current code now includes persisted role column and role claim issuance paths; remaining gap is reusable RBAC primitives
 - conflict/tension:
@@ -189,14 +189,13 @@
   - prove enforcement behavior with unit tests now
   - defer live route-level RBAC application until first meaningful protected feature route exists
 
-## Remaining Implementation Slice (Next Core Prompt)
-- implement reusable API RBAC primitives only:
+## RBAC Primitives Slice Completion (2026-04-25)
+- implemented reusable API RBAC primitives:
   - `Roles(...roles)` metadata decorator
-  - role guard that enforces `401` (unauthenticated) vs `403` (authenticated but insufficient role)
-- add focused API unit tests for decorator/guard allow/deny behavior
-- wire primitives in the auth module for reuse by future protected feature routes
-- do not bind RBAC to a fake or arbitrary route in this slice
-- do not change schema/migrations/token issuance behavior in this slice
+  - role guard enforcing `401` (unauthenticated) vs `403` (authenticated but insufficient role)
+- added focused API unit tests for decorator/guard allow/deny behavior
+- wired guard provider in auth module for reuse by future protected feature routes
+- live route-level RBAC binding remains intentionally deferred
 
 ## Forbidden Behavior
 - role-specific one-off patches in controllers/interceptors/helpers
@@ -273,8 +272,7 @@
 - expected now:
   - auth regression coverage exists for login/refresh/logout/me behavior, including role-change-on-refresh semantics
   - migration/schema validation coverage exists for role constraints/defaults
-- expected in remaining RBAC-primitives slice:
-  - passing API unit tests for `Roles(...)` decorator + role guard behavior (`401` vs `403`)
+  - API unit tests pass for `Roles(...)` decorator + role guard behavior (`401` vs `403`)
 - expected later (deferred):
   - route-level RBAC e2e allow/deny against first real protected endpoint
 
@@ -321,7 +319,7 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 - docs to update:
   - `docs/auth-security-baseline.md` status corrected to reflect completed role persistence/claim propagation and pending RBAC primitives
   - `docs/implementation-baseline.md` schema snapshot corrected to include `users.role` migration baseline
-  - this spec status should move from `In Progress` to `Accepted` after RBAC primitives are implemented and validated
+  - this spec status moved from `In Progress` to `Accepted` after RBAC primitives were implemented and validated
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:

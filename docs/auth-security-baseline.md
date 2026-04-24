@@ -49,11 +49,12 @@ Related docs:
 - `users.role` is persisted (`admin` | `user`) with default/constraint enforcement
 - access token issuance includes role claim derived from persisted user role on login and refresh
 - `auth/me` returns role from validated access-token claim (no fallback-role policy)
-- route-level RBAC enforcement remains pending
+- reusable RBAC primitives are implemented (`Roles(...)` metadata + role guard)
+- live route-level RBAC application remains pending
 
 ## 4. Known Gaps
-- reusable route-level RBAC primitives are still pending (`Roles(...)` metadata + role guard)
 - live route-level RBAC application remains pending until a meaningful protected feature route exists
+- e2e allow/deny assertions for a real role-protected endpoint remain pending
 
 ## 5. Auth/Security Tests and Gates
 Relevant commands (see [`commands-reference.md`](./commands-reference.md) for full profiles):
