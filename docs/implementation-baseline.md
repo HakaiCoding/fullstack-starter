@@ -1,83 +1,96 @@
 # Full-Stack Starter Implementation Baseline
 
-## 0. Status
-- `state`: `active baseline`
-- `implemented_in_code`: `partial` (as of `2026-04-24`)
-- notes:
-  - `i18n`: not implemented yet
-  - `auth/security`: partially implemented (`API auth endpoints + JWT guard + refresh-session persistence + web auth interceptor baseline`; access-token issuance currently carries baseline claims with `sub` + `tokenType` only and no persisted role claim; `auth/me` role currently falls back to `user` unless an `admin` claim is present; API CORS allowlist + credentials bootstrap wiring implemented; route-level RBAC enforcement pending)
-  - `typeorm/postgresql persistence foundation`: implemented
-  - `e2e projects`: scaffolded and runnable with local prerequisites
-  - `web-e2e prerequisite`: `npx nx e2e web-e2e` auto-runs `web-e2e:install-chromium`; optional prewarm remains `npx playwright install chromium`
+## 1. Purpose
+Status/reference snapshot for implementation details that are not primarily architectural policy.
 
-## 1. Internationalization (i18n)
-- library: `Transloco`
-- supported_languages:
-  - `en`
-  - `es`
-- fallback_language: `en`
-- scope: `UI translations only`
+Authoritative docs for other concerns:
+- architecture and placement: [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+- AI workflow rules: [`AI_CONTRACT.md`](./AI_CONTRACT.md)
+- auth/security invariants and status: [`auth-security-baseline.md`](./auth-security-baseline.md)
+- commands/gate profiles: [`commands-reference.md`](./commands-reference.md)
+- long-lived policy decisions: [`DECISIONS.md`](./DECISIONS.md)
 
-## 2. Data Conventions
-- id_strategy: `UUID`
-- column_naming: `snake_case` (custom TypeORM naming strategy)
-- schema_change_strategy: `TypeORM migrations only`
-- schema_sync: `disabled (no auto schema sync)`
-- persistence_runtime:
-  - `Nest ConfigModule` + typed `database` config namespace
-  - strict env validation (`POSTGRES_*`)
-  - `TypeOrmModule.forRootAsync` with shared options
-- current_schema_baseline:
-  - `users` table implemented (`id`, `email`, `display_name`, `password_hash`, `created_at`, `updated_at`)
-  - unique constraint on `users.email`
-  - index `idx_users_created_at`
-  - check `CHK_users_password_hash_not_blank`
-  - `auth_sessions` table implemented (`id`, `user_id`, `refresh_token_hash`, `expires_at`, `revoked_at`, timestamps)
-  - unique constraints `UQ_auth_sessions_user_id`, `UQ_auth_sessions_refresh_token_hash`
-  - indexes `idx_auth_sessions_expires_at`, `idx_auth_sessions_revoked_at`
-  - migration `1713528000000-create-users-table` implemented and runnable via TypeORM
-  - migration `1777036800000-add-auth-foundation` implemented and runnable via TypeORM
-- migration_workflow:
-  - `npm run db:migration:create`
-  - `npm run db:migration:run`
-  - `npm run db:migration:revert`
-  - `db:typeorm` is routed through `tools/typeorm-cli.cjs`
-- api_db_env_contract:
-  - `POSTGRES_HOST`
-  - `POSTGRES_PORT`
-  - `POSTGRES_DB`
-  - `POSTGRES_USER`
-  - `POSTGRES_PASSWORD`
-  - `POSTGRES_SSL` (optional; default `false`)
-- api_auth_env_contract:
-  - `NODE_ENV` (required; explicit runtime mode, no implicit default)
-  - `AUTH_ACCESS_TOKEN_SECRET`
-  - `AUTH_ACCESS_TOKEN_TTL_SECONDS`
-  - `AUTH_REFRESH_TOKEN_SECRET`
-  - `AUTH_REFRESH_TOKEN_TTL_SECONDS`
-  - `AUTH_REFRESH_COOKIE_NAME`
-  - `AUTH_REFRESH_COOKIE_SECURE`
-  - `AUTH_REFRESH_COOKIE_SAME_SITE`
-  - runtime_validation_enforcement:
-    - `NODE_ENV` must be explicitly set
-    - `NODE_ENV=production` requires `AUTH_REFRESH_COOKIE_SECURE=true`
-    - `AUTH_REFRESH_COOKIE_SAME_SITE=none` requires `AUTH_REFRESH_COOKIE_SECURE=true`
-    - known placeholder JWT secret patterns are rejected outside local/dev/test
-- api_cors_env_contract:
-  - `API_CORS_ALLOWED_ORIGINS` (required; comma-separated `http`/`https` origins)
-  - parsing behavior: normalized to origin form and deduplicated during env validation/config load
-  - runtime behavior: allowlisted origins only with `credentials=true`; requests without `Origin` are allowed
+## 2. Status Snapshot (as of 2026-04-24)
+- state: `active baseline`
+- implemented_in_code: `partial`
+- i18n: not implemented yet
+- persistence foundation: implemented (TypeORM + PostgreSQL)
+- e2e projects: scaffolded and runnable with local prerequisites
+- web-e2e chromium install: `npx nx e2e web-e2e` auto-runs `web-e2e:install-chromium`; optional prewarm remains `npx playwright install chromium`
 
-## 3. Testing Baseline
-- scope: `bare minimum for starter`
-- e2e_projects:
-  - `apps/web-e2e`: `keep`
-  - `apps/api-e2e`: `keep`
-- web_e2e.default_browser: `chromium`
-- currently_implemented:
-  - `API unit`: app controller baseline + database readiness service
-  - `API e2e`: `/api/v1`, `/api/v1/health/db`, migration-backed schema checks (`migrations`, `users`, `users.display_name`, `UQ_users_email`, `idx_users_created_at`), and auth-flow coverage (`login`, `refresh`, refresh rotation rejection, protected `auth/me`, `logout`, single-session replacement)
-  - `Web e2e`: minimal app shell assertion (`router-outlet`)
-  - `Web auth client baseline`: in-memory access-token state + auth interceptor (single refresh attempt + one retry + clear-on-failure)
-- pending_auth_related:
-  - `full RBAC policy enforcement beyond baseline role typing`
+## 3. Data and Persistence Baseline
+- id strategy: `UUID`
+- column naming: `snake_case` (custom TypeORM naming strategy)
+- schema change strategy: `TypeORM migrations only`
+- schema sync: disabled (`no auto schema sync`)
+
+### 3.1 Runtime Persistence Wiring
+- `Nest ConfigModule` + typed `database` config namespace
+- strict env validation for `POSTGRES_*`
+- `TypeOrmModule.forRootAsync` with shared options
+
+### 3.2 Current Schema Baseline
+- `users` table implemented (`id`, `email`, `display_name`, `password_hash`, `created_at`, `updated_at`)
+- `users.email` unique constraint
+- `idx_users_created_at` index
+- `CHK_users_password_hash_not_blank` check
+- `auth_sessions` table implemented (`id`, `user_id`, `refresh_token_hash`, `expires_at`, `revoked_at`, timestamps)
+- unique constraints: `UQ_auth_sessions_user_id`, `UQ_auth_sessions_refresh_token_hash`
+- indexes: `idx_auth_sessions_expires_at`, `idx_auth_sessions_revoked_at`
+- migrations in use:
+  - `1713528000000-create-users-table`
+  - `1777036800000-add-auth-foundation`
+
+### 3.3 Migration Workflow
+Use commands from [`commands-reference.md`](./commands-reference.md):
+- `npm run db:migration:create`
+- `npm run db:migration:run`
+- `npm run db:migration:revert`
+- `db:typeorm` is routed through `tools/typeorm-cli.cjs`
+
+## 4. Environment Contract Baseline
+### 4.1 Database
+- `POSTGRES_HOST`
+- `POSTGRES_PORT`
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_SSL` (optional, default `false`)
+
+### 4.2 Auth/Cookie
+For auth invariants and status, see [`auth-security-baseline.md`](./auth-security-baseline.md).
+Required keys currently include:
+- `NODE_ENV`
+- `AUTH_ACCESS_TOKEN_SECRET`
+- `AUTH_ACCESS_TOKEN_TTL_SECONDS`
+- `AUTH_REFRESH_TOKEN_SECRET`
+- `AUTH_REFRESH_TOKEN_TTL_SECONDS`
+- `AUTH_REFRESH_COOKIE_NAME`
+- `AUTH_REFRESH_COOKIE_SECURE`
+- `AUTH_REFRESH_COOKIE_SAME_SITE`
+
+Runtime validation enforcement currently includes:
+- explicit `NODE_ENV`
+- production secure-cookie requirement
+- `sameSite=none` secure-cookie requirement
+- placeholder JWT secret rejection outside local/dev/test
+
+### 4.3 CORS
+- `API_CORS_ALLOWED_ORIGINS` required (comma-separated `http`/`https` origins)
+- values normalized and deduplicated during config load
+- runtime uses allowlisted origins with `credentials=true`
+
+## 5. Testing Baseline
+- scope: bare minimum starter baseline
+- e2e projects in use:
+  - `apps/web-e2e`
+  - `apps/api-e2e`
+- web e2e default browser: `chromium`
+
+Currently implemented test coverage highlights:
+- API unit: app controller baseline + database readiness service
+- API e2e: `/api/v1`, `/api/v1/health/db`, migration-backed schema checks, auth-flow coverage
+- Web e2e: minimal app shell assertion (`router-outlet`)
+- Web auth client baseline: in-memory access token state + interceptor refresh retry behavior
+
+Use gate profiles and exact commands from [`commands-reference.md`](./commands-reference.md).
