@@ -7,7 +7,7 @@
 - yyyy-mm-dd: 2026-04-24
 
 ## Status
-- Proposed
+- In Progress
 
 ## Problem
 - user roles are not currently persisted as an authoritative user property in the database model
