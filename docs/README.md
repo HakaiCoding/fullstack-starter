@@ -16,7 +16,8 @@ Documentation entry point for architecture, AI workflow constraints, decisions, 
 2. [`AI_CONTRACT.md`](./AI_CONTRACT.md)
 3. [`commands-reference.md`](./commands-reference.md)
 4. Domain-specific docs as needed (for example [`auth-security-baseline.md`](./auth-security-baseline.md))
-5. For technology/tooling/workflow guidance, check relevant local skills in `C:\Users\Development\.agents\skills\` (reference material only; project docs remain authoritative).
+5. For technology/tooling/workflow guidance, inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default (especially for core changes, auth/security work, framework usage, database/migration work, testing, and build/tooling work).
+6. Keep project docs/specs/decisions authoritative for repository-specific architecture, boundaries, and accepted policies.
 
 ## What Codex Should Read Before Core Changes
 For core changes (domain/auth/persistence/cross-module behavior):
@@ -44,9 +45,10 @@ All executable commands and gate profiles are in:
 
 ## Local AI Skills Reference
 - Location: `C:\Users\Development\.agents\skills\`
-- Use local skills as reference material for technology/tooling/workflow practices.
-- Project docs remain authoritative for project-specific architecture, rules, and decisions.
-- If local skills conflict with project docs, flag the conflict instead of silently choosing one.
+- Inspect and use relevant local skills by default for technology/tooling/workflow guidance.
+- Local skills are the preferred reference source for current technology/framework/tooling best practices.
+- Project docs/specs/decisions remain authoritative for repository-specific architecture, boundaries, and accepted policies.
+- If local skills conflict with project docs/specs/decisions, flag the conflict and choose the safest project-compatible option.
 
 ## Authoritative Sources
 - Architecture/placement authority: [`ARCHITECTURE.md`](./ARCHITECTURE.md)

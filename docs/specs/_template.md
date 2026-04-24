@@ -31,6 +31,13 @@
 - where logic should live and why
 - where logic should not live
 
+## Relevant Local Skills
+- skills inspected:
+- skills used:
+- why each skill is relevant:
+- conflicts/tensions with project docs/spec:
+- project-compatible decision:
+
 ## Edge Cases
 - case 1
 - case 2

@@ -57,8 +57,12 @@ This contract uses explicit status labels:
 - `Accepted policy`: State docs/spec/decision updates completed or still required.
 
 ## 7. Local Skills Reference Guidance
-- `Accepted policy`: For technology-specific or workflow-specific tasks, check relevant local skills in `C:\Users\Development\.agents\skills\` when useful.
-- `Accepted policy`: Treat local skills as reference material for technology/tooling/workflow practices.
-- `Accepted policy`: Project docs remain authoritative for project-specific architecture, rules, and decisions.
-- `Accepted policy`: If a local skill conflicts with project docs, explicitly flag the conflict instead of silently choosing one.
+- `Accepted policy`: For technology-specific, framework-specific, library-specific, tooling-specific, security-sensitive, or workflow-specific tasks, inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default.
+- `Accepted policy`: Local skills are the preferred reference source for current technology/tooling/framework best practices.
+- `Accepted policy`: Project docs, approved specs, and [`DECISIONS.md`](./DECISIONS.md) remain authoritative for repository-specific architecture, boundaries, and accepted policy.
+- `Accepted policy`: Generic model knowledge must not override relevant local skills.
+- `Accepted policy`: If no relevant local skill exists, explicitly say so.
+- `Accepted policy`: If a relevant local skill is intentionally not used, explicitly explain why.
+- `Accepted policy`: For implementation tasks, report which skills were inspected, which were used, and any conflicts/tensions found.
+- `Accepted policy`: If local skill guidance conflicts with project docs/specs/decisions, flag the conflict and follow the safest project-compatible option.
 - `Accepted policy`: Do not copy large skill contents into project docs; summarize only what is needed.

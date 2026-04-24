@@ -3,7 +3,8 @@
 Practical commands for this workspace.
 Run from repository root.
 
-For command/tool usage questions, AI sessions may cross-check relevant local skills in `C:\Users\Development\.agents\skills\`.
+For tooling/workflow command tasks (including Nx, migrations, tests, e2e, CI, and related command flows), AI sessions should inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default as the preferred modern-practice reference.
+Project docs/specs/decisions remain authoritative for repository-specific rules and policies.
 This file remains the canonical command and gate source for this repository.
 
 ## 1. Setup

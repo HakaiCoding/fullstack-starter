@@ -148,5 +148,5 @@ Use other docs for non-architectural detail:
 - implementation status snapshots: [`implementation-baseline.md`](./implementation-baseline.md)
 - AI workflow/policy rules: [`AI_CONTRACT.md`](./AI_CONTRACT.md)
 - design decision log: [`DECISIONS.md`](./DECISIONS.md)
-- project boundaries and architectural decisions live in project docs under `docs/*`.
-- technology/tooling/workflow practices may be cross-checked in local skills: `C:\Users\Development\.agents\skills\`.
+- architecture boundaries and project decisions live in project docs under `docs/*`.
+- technology/framework implementation practices should use relevant local skills in `C:\Users\Development\.agents\skills\` as the preferred modern-practice reference.

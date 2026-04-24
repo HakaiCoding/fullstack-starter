@@ -65,3 +65,11 @@ Decision: For core changes, create or update a feature spec using [`specs/_templ
 Alternatives considered: Ticket-only descriptions; implementation-first approach.
 Consequences: Better systemic correctness and traceability; adds a lightweight upfront documentation step.
 Related docs/specs: [`specs/_template.md`](./specs/_template.md), [`AI_CONTRACT.md`](./AI_CONTRACT.md)
+
+## 2026-04-24 — Use local skills as preferred technology-practice reference for AI-assisted work
+Status: Accepted
+Context: AI-assisted sessions need current technology/tooling/workflow guidance and can drift when relying on generic model assumptions alone.
+Decision: For technology-specific, framework-specific, library-specific, tooling-specific, security-sensitive, and workflow-specific tasks, AI sessions are expected to inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default. Project docs/specs/decisions remain authoritative for repository-specific architecture, boundaries, and accepted policy.
+Alternatives considered: Treat local skills as optional references; rely on generic model memory for best-practice guidance.
+Consequences: Guidance quality should stay current with local skill updates; conflicts with repository docs/specs/decisions must be surfaced explicitly and resolved using the safest project-compatible option; non-trivial implementation/planning outputs should report relevant skills inspected/used and any conflicts or tensions.
+Related docs/specs: [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`README.md`](./README.md), [`specs/_template.md`](./specs/_template.md), [`commands-reference.md`](./commands-reference.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)
