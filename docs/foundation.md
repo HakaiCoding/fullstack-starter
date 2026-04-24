@@ -19,8 +19,11 @@
 - frontend.angular: `declared ~21.2.0 (resolved 21.2.10)`
 - frontend.angular_material: `planned (not installed)`
 - backend.nestjs: `11.1.19`
-- orm.typeorm: `planned (not installed)`
-- database.postgresql: `planned (not installed)`
+- backend.nest_config: `declared ^4.0.4 (resolved 4.0.4)`
+- orm.typeorm: `declared ^0.3.28 (resolved 0.3.28), implemented for runtime + migrations`
+- orm.nest_typeorm: `declared ^11.0.1 (resolved 11.0.1), implemented`
+- database.postgresql_driver: `pg declared ^8.20.0 (resolved 8.20.0), implemented`
+- database.postgresql_local: `implemented (docker-compose PostgreSQL + .env.docker contract)`
 - i18n.transloco: `planned (not installed)`
 - local_infra: `implemented (docker-compose.yml for database-only local PostgreSQL; env/scripts wired in workspace)`
 

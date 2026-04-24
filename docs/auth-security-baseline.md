@@ -3,6 +3,11 @@
 ## 0. Status
 - `state`: `planned baseline`
 - `implemented_in_code`: `no` (as of `2026-04-24`)
+- current_workspace_state:
+  - no auth module/endpoints are implemented yet
+  - no JWT strategy/guards are implemented yet
+  - no RBAC enforcement is implemented yet
+  - persistence foundation is ready; auth implementation is pending
 
 ## 1. Authentication
 

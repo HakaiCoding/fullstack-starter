@@ -88,6 +88,8 @@ npm run db:up
 
 If you changed `POSTGRES_VOLUME_NAME` in `.env.docker`, replace `fullstack-starter-pgdata` with your configured volume name.
 
+API persistence runtime uses the same PostgreSQL env keys: `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and optional `POSTGRES_SSL`.
+
 ## Docs
 
 - Foundation summary: [`docs/foundation.md`](./docs/foundation.md)

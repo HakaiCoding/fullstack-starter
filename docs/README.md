@@ -4,9 +4,9 @@ Architecture and baseline references for the monorepo.
 
 ## Files
 
-- [`foundation.md`](./foundation.md) - foundation contract, source-of-truth policy, stack snapshot, and boundary model
-- [`auth-security-baseline.md`](./auth-security-baseline.md) - auth, authorization, cookie, and CORS baseline
-- [`implementation-baseline.md`](./implementation-baseline.md) - i18n, data conventions, and testing baseline
+- [`foundation.md`](./foundation.md) - foundation contract, source-of-truth policy, synced stack snapshot, and boundary model
+- [`auth-security-baseline.md`](./auth-security-baseline.md) - planned auth, authorization, cookie, and CORS baseline
+- [`implementation-baseline.md`](./implementation-baseline.md) - current implementation baseline (implemented vs planned) for i18n, data/persistence, and testing
 - [`scaffolding-reference.md`](./scaffolding-reference.md) - generation defaults and scaffold commands
 
 ## Boundary Model
