@@ -21,6 +21,8 @@ interface MeResponse {
   role: 'admin' | 'user';
 }
 
+type UserRole = 'admin' | 'user';
+
 function readRequiredEnv(key: string): string {
   const value = process.env[key];
   if (!value || value.trim() === '') {
@@ -164,6 +166,17 @@ describe('Auth flow e2e', () => {
     return user;
   }
 
+  async function updateUserRole(userId: string, role: UserRole): Promise<void> {
+    await dbClient.query(
+      `
+        UPDATE "users"
+        SET "role" = $2
+        WHERE "id" = $1
+      `,
+      [userId, role],
+    );
+  }
+
   it('login success and login failure', async () => {
     const plainPassword = 'S3curePassw0rd!';
     const user = await createUser(plainPassword);
@@ -278,6 +291,59 @@ describe('Auth flow e2e', () => {
       displayName: 'Auth E2E User',
       role: 'user',
     });
+  });
+
+  it('applies role changes on refresh while existing access token stays valid until expiry', async () => {
+    const plainPassword = 'RoleChangePassw0rd!';
+    const user = await createUser(plainPassword);
+
+    const login = await request<LoginResponse>('POST', '/api/v1/auth/login', {
+      data: {
+        email: user.email,
+        password: plainPassword,
+      },
+    });
+    expect(login.status).toBe(201);
+
+    const originalAccessToken = login.data.accessToken;
+    const loginMe = await request<MeResponse>('GET', '/api/v1/auth/me', {
+      headers: {
+        Authorization: `Bearer ${originalAccessToken}`,
+      },
+    });
+    expect(loginMe.status).toBe(200);
+    expect(loginMe.data.role).toBe('user');
+
+    await updateUserRole(user.id, 'admin');
+
+    const staleTokenMe = await request<MeResponse>('GET', '/api/v1/auth/me', {
+      headers: {
+        Authorization: `Bearer ${originalAccessToken}`,
+      },
+    });
+    expect(staleTokenMe.status).toBe(200);
+    expect(staleTokenMe.data.role).toBe('user');
+
+    const refreshToken = getCookieValueFromSetCookie(
+      getSetCookieHeaders(login),
+      refreshCookieName,
+    );
+    expect(refreshToken).toEqual(expect.any(String));
+
+    const refresh = await request<LoginResponse>('POST', '/api/v1/auth/refresh', {
+      headers: {
+        Cookie: buildCookieHeader(refreshCookieName, String(refreshToken)),
+      },
+    });
+    expect(refresh.status).toBe(201);
+
+    const refreshedTokenMe = await request<MeResponse>('GET', '/api/v1/auth/me', {
+      headers: {
+        Authorization: `Bearer ${refresh.data.accessToken}`,
+      },
+    });
+    expect(refreshedTokenMe.status).toBe(200);
+    expect(refreshedTokenMe.data.role).toBe('admin');
   });
 
   it('logout invalidates refresh token', async () => {

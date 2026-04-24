@@ -24,13 +24,21 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: AccessTokenPayload): Promise<AuthenticatedRequestUser> {
-    if (payload.tokenType !== 'access') {
+    if (
+      payload.tokenType !== 'access' ||
+      (payload.role !== 'admin' && payload.role !== 'user')
+    ) {
       throw new UnauthorizedException('Invalid access token.');
     }
 
     const user = await this.usersRepository.findOne({
       where: {
         id: payload.sub,
+      },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
       },
     });
 
@@ -42,7 +50,7 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
       userId: user.id,
       email: user.email,
       displayName: user.displayName,
-      role: payload.role === 'admin' ? 'admin' : 'user',
+      role: payload.role,
     };
   }
 }

@@ -3,7 +3,7 @@ export type AuthRole = 'admin' | 'user';
 export interface AccessTokenPayload {
   sub: string;
   tokenType: 'access';
-  role?: AuthRole;
+  role: AuthRole;
 }
 
 export interface AuthenticatedRequestUser {

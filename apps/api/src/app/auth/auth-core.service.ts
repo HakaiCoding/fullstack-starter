@@ -7,6 +7,7 @@ import { DataSource, Repository } from 'typeorm';
 import { AuthSessionEntity } from '../../db/entities/auth-session.entity';
 import { UserEntity } from '../../db/entities/user.entity';
 import { type AuthConfig, authConfig } from '../config/auth.config';
+import { type AuthRole } from './auth.types';
 
 const scryptAsync = promisify(scrypt);
 const PASSWORD_HASH_ALGORITHM = 'scrypt';
@@ -90,18 +91,8 @@ export class AuthCoreService {
   }
 
   async issueTokenPairForUser(userId: string): Promise<IssuedAuthTokenPair> {
-    await this.ensureUserExists(userId);
-
-    const issuedTokenPair = await this.createSignedTokenPair(userId);
-    const hashedRefreshToken = this.hashRefreshToken(issuedTokenPair.refreshToken);
-
-    await this.replaceSessionForUser(
-      userId,
-      hashedRefreshToken,
-      issuedTokenPair.refreshTokenExpiresAt,
-    );
-
-    return issuedTokenPair;
+    const user = await this.getUserForTokenIssuance(userId);
+    return this.issueTokenPairForPersistedUser(user);
   }
 
   async issueTokenPairForCredentials(
@@ -123,7 +114,7 @@ export class AuthCoreService {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
-    const tokenPair = await this.issueTokenPairForUser(user.id);
+    const tokenPair = await this.issueTokenPairForPersistedUser(user);
     return {
       userId: user.id,
       ...tokenPair,
@@ -171,7 +162,10 @@ export class AuthCoreService {
         throw new UnauthorizedException('Invalid refresh token.');
       }
 
-      const nextTokenPair = await this.createSignedTokenPair(payload.sub);
+      const nextTokenPair = await this.createSignedTokenPair(
+        activeSession.user.id,
+        activeSession.user.role,
+      );
       activeSession.refreshTokenHash = this.hashRefreshToken(
         nextTokenPair.refreshToken,
       );
@@ -242,6 +236,7 @@ export class AuthCoreService {
 
   private async createSignedTokenPair(
     userId: string,
+    role: AuthRole,
   ): Promise<IssuedAuthTokenPair> {
     const refreshTokenId = randomUUID();
     const refreshTokenExpiresAt = new Date(
@@ -252,6 +247,7 @@ export class AuthCoreService {
       {
         sub: userId,
         tokenType: ACCESS_TOKEN_TYPE,
+        role,
       },
       {
         secret: this.authConfiguration.accessToken.secret,
@@ -394,15 +390,37 @@ export class AuthCoreService {
     return timingSafeEqual(leftBuffer, rightBuffer);
   }
 
-  private async ensureUserExists(userId: string): Promise<void> {
-    const userExists = await this.usersRepository.exists({
+  private async getUserForTokenIssuance(
+    userId: string,
+  ): Promise<Pick<UserEntity, 'id' | 'role'>> {
+    const user = await this.usersRepository.findOne({
       where: {
         id: userId,
       },
     });
 
-    if (!userExists) {
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials.');
     }
+
+    return {
+      id: user.id,
+      role: user.role,
+    };
+  }
+
+  private async issueTokenPairForPersistedUser(
+    user: Pick<UserEntity, 'id' | 'role'>,
+  ): Promise<IssuedAuthTokenPair> {
+    const issuedTokenPair = await this.createSignedTokenPair(user.id, user.role);
+    const hashedRefreshToken = this.hashRefreshToken(issuedTokenPair.refreshToken);
+
+    await this.replaceSessionForUser(
+      user.id,
+      hashedRefreshToken,
+      issuedTokenPair.refreshTokenExpiresAt,
+    );
+
+    return issuedTokenPair;
   }
 }
