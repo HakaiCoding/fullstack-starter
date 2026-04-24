@@ -7,15 +7,19 @@
 - yyyy-mm-dd: 2026-04-24
 
 ## Status
-- In Progress
+- In Progress (remaining implementation slice: reusable API RBAC primitives)
+
+## Repository Verification Snapshot (as of 2026-04-25)
+- `users.role` is persisted with default/constraint enforcement (`admin` | `user`)
+- login and refresh issue access-token role claim from persisted role
+- role-change-on-refresh behavior is covered in API e2e auth tests
+- reusable RBAC primitives (`Roles(...)` decorator + role guard) are still not implemented
 
 ## Problem
-- user roles are not currently persisted as an authoritative user property in the database model
-- access tokens do not consistently carry role information from authoritative user state
-- refresh does not clearly propagate role from authoritative user state
-- route-level RBAC enforcement is still pending
-- fallback role behavior (`user` when claim is missing) must not become long-term authorization policy
-- without explicit source-of-truth and enforcement semantics, future auth changes can drift and create inconsistent authorization outcomes
+- reusable RBAC primitives are still missing from the API transport layer
+- unauthenticated vs insufficient-role behavior must be enforced consistently (`401` vs `403`)
+- first live route-level RBAC binding remains deferred until a meaningful protected feature route exists
+- without reusable primitives, future route-level authorization can drift into ad hoc controller logic
 
 ## Non-Goals
 - user registration
@@ -39,9 +43,9 @@
   - `nestjs-best-practices`: authz policy should be explicit in guards/services, not scattered
   - `typeorm` and Postgres skills: authoritative data should be persisted with constraints
 - project constraints from docs/code:
-  - `docs/auth-security-baseline.md` explicitly flags role-claim consistency and pending RBAC
+  - `docs/auth-security-baseline.md` explicitly flags pending RBAC primitives and deferred live route binding
   - `docs/ARCHITECTURE.md` places durable domain/persistence rules in API service + DB layers
-  - current code has no persisted role column yet and uses fallback role behavior
+  - current code now includes persisted role column and role claim issuance paths; remaining gap is reusable RBAC primitives
 - conflict/tension:
   - token-only truth is operationally simple but conflicts with need for canonical persisted user policy
 - final recommendation:
@@ -185,6 +189,15 @@
   - prove enforcement behavior with unit tests now
   - defer live route-level RBAC application until first meaningful protected feature route exists
 
+## Remaining Implementation Slice (Next Core Prompt)
+- implement reusable API RBAC primitives only:
+  - `Roles(...roles)` metadata decorator
+  - role guard that enforces `401` (unauthenticated) vs `403` (authenticated but insufficient role)
+- add focused API unit tests for decorator/guard allow/deny behavior
+- wire primitives in the auth module for reuse by future protected feature routes
+- do not bind RBAC to a fake or arbitrary route in this slice
+- do not change schema/migrations/token issuance behavior in this slice
+
 ## Forbidden Behavior
 - role-specific one-off patches in controllers/interceptors/helpers
 - using fallback `user` role as a persistent authorization policy instead of persisted role source-of-truth
@@ -258,9 +271,10 @@
 
 ## Test Expectations for This Baseline
 - expected now:
-  - passing API unit tests for role propagation + RBAC primitives
-  - passing auth regression tests for login/refresh/logout/me behavior
-  - passing migration/schema validation tests for role constraints/defaults
+  - auth regression coverage exists for login/refresh/logout/me behavior, including role-change-on-refresh semantics
+  - migration/schema validation coverage exists for role constraints/defaults
+- expected in remaining RBAC-primitives slice:
+  - passing API unit tests for `Roles(...)` decorator + role guard behavior (`401` vs `403`)
 - expected later (deferred):
   - route-level RBAC e2e allow/deny against first real protected endpoint
 
@@ -305,9 +319,9 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 
 ## Documentation Updates Needed
 - docs to update:
-  - `docs/auth-security-baseline.md` (role persistence, claim propagation semantics, RBAC status)
-  - `docs/implementation-baseline.md` (schema baseline includes `users.role`, test coverage notes)
-  - this spec status (Proposed -> In Progress -> Accepted)
+  - `docs/auth-security-baseline.md` status corrected to reflect completed role persistence/claim propagation and pending RBAC primitives
+  - `docs/implementation-baseline.md` schema snapshot corrected to include `users.role` migration baseline
+  - this spec status should move from `In Progress` to `Accepted` after RBAC primitives are implemented and validated
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
@@ -318,7 +332,7 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 ```md
 ## 2026-04-24 - Persist user role and define RBAC baseline semantics
 Status: Proposed
-Context: Authorization baseline requires consistent role semantics across persistence, token issuance, refresh behavior, and route-level enforcement. Current implementation lacks persisted role authority and route-level RBAC primitives.
+Context: Authorization baseline requires consistent role semantics across persistence, token issuance, refresh behavior, and route-level enforcement. Persisted role authority and role-claim propagation are implemented; reusable route-level RBAC primitives remain pending.
 Decision: Persist `users.role` as authoritative role (`admin` | `user`, default `user`) using DB constraints, issue access-token role claim from persisted role on login/refresh, trust validated token role claim at request time until token expiry, and implement reusable RBAC guard/decorator primitives now. Defer live route-level RBAC application until first meaningful protected feature route exists.
 Alternatives considered: token-only role authority; DB rehydration on every request; synthetic admin-only endpoint for demonstration; immediate revocation/versioning model in baseline.
 Consequences: Authorization semantics become explicit and testable with bounded scope; migration and auth tests are required; stronger immediate-revocation and high-risk-route freshness models are deferred to future specs.

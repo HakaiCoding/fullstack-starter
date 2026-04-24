@@ -30,16 +30,20 @@ Authoritative docs for other concerns:
 - `TypeOrmModule.forRootAsync` with shared options
 
 ### 3.2 Current Schema Baseline
-- `users` table implemented (`id`, `email`, `display_name`, `password_hash`, `created_at`, `updated_at`)
+- `users` table implemented (`id`, `email`, `display_name`, `password_hash`, `role`, `created_at`, `updated_at`)
 - `users.email` unique constraint
 - `idx_users_created_at` index
 - `CHK_users_password_hash_not_blank` check
+- `users.role` baseline:
+  - default: `'user'`
+  - allowed values check: `CHK_users_role_allowed` (`admin` | `user`)
 - `auth_sessions` table implemented (`id`, `user_id`, `refresh_token_hash`, `expires_at`, `revoked_at`, timestamps)
 - unique constraints: `UQ_auth_sessions_user_id`, `UQ_auth_sessions_refresh_token_hash`
 - indexes: `idx_auth_sessions_expires_at`, `idx_auth_sessions_revoked_at`
 - migrations in use:
   - `1713528000000-create-users-table`
   - `1777036800000-add-auth-foundation`
+  - `1777123200000-add-user-role-baseline`
 
 ### 3.3 Migration Workflow
 Use commands from [`commands-reference.md`](./commands-reference.md):
@@ -89,7 +93,7 @@ Runtime validation enforcement currently includes:
 
 Currently implemented test coverage highlights:
 - API unit: app controller baseline + database readiness service
-- API e2e: `/api/v1`, `/api/v1/health/db`, migration-backed schema checks, auth-flow coverage
+- API e2e: `/api/v1`, `/api/v1/health/db`, migration-backed schema checks, auth-flow coverage including role-change-on-refresh claim propagation
 - Web e2e: minimal app shell assertion (`router-outlet`)
 - Web auth client baseline: in-memory access token state + interceptor refresh retry behavior
 

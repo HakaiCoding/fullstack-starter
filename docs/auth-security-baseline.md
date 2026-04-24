@@ -41,18 +41,19 @@ Related docs:
   - `credentials=true`
   - requests without `Origin` are allowed
 
-## 3. Current Implementation Status (as of 2026-04-24)
+## 3. Current Implementation Status (as of 2026-04-25)
 - auth module/endpoints are implemented
 - JWT strategy + guard are implemented
 - refresh-session persistence/rotation is implemented
 - single-session replacement is implemented
-- access token issuance currently includes `sub` and `tokenType`; persisted role claim is not currently issued
-- `auth/me` currently falls back to `user` unless `admin` claim exists in token
+- `users.role` is persisted (`admin` | `user`) with default/constraint enforcement
+- access token issuance includes role claim derived from persisted user role on login and refresh
+- `auth/me` returns role from validated access-token claim (no fallback-role policy)
 - route-level RBAC enforcement remains pending
 
 ## 4. Known Gaps
-- route-level RBAC enforcement beyond baseline role typing
-- role claim propagation and consistency across auth flows
+- reusable route-level RBAC primitives are still pending (`Roles(...)` metadata + role guard)
+- live route-level RBAC application remains pending until a meaningful protected feature route exists
 
 ## 5. Auth/Security Tests and Gates
 Relevant commands (see [`commands-reference.md`](./commands-reference.md) for full profiles):
