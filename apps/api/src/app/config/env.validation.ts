@@ -1,3 +1,5 @@
+import { parseCorsAllowedOrigins } from './cors.config';
+
 type Environment = Record<string, unknown>;
 
 const TRUE_VALUES = new Set(['1', 'true', 'yes', 'on']);
@@ -176,6 +178,10 @@ export function validateEnvironment(env: Environment): Environment {
     readRequiredString(env, 'AUTH_REFRESH_COOKIE_SAME_SITE'),
     'AUTH_REFRESH_COOKIE_SAME_SITE',
   );
+  const corsAllowedOrigins = parseCorsAllowedOrigins(
+    readRequiredString(env, 'API_CORS_ALLOWED_ORIGINS'),
+    'API_CORS_ALLOWED_ORIGINS',
+  );
   const isRefreshCookieSecure = isTruthyBooleanFlag(refreshCookieSecure);
 
   if (nodeEnv === 'production' && !isRefreshCookieSecure) {
@@ -205,5 +211,6 @@ export function validateEnvironment(env: Environment): Environment {
     AUTH_REFRESH_COOKIE_NAME: refreshCookieName,
     AUTH_REFRESH_COOKIE_SECURE: refreshCookieSecure,
     AUTH_REFRESH_COOKIE_SAME_SITE: refreshCookieSameSite,
+    API_CORS_ALLOWED_ORIGINS: corsAllowedOrigins.join(','),
   };
 }

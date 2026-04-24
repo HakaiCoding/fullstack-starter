@@ -10,6 +10,9 @@ npm ci
 copy .env.docker.example .env.docker
 ```
 
+`API_CORS_ALLOWED_ORIGINS` in `.env.docker` is required for API startup (comma-separated allowlist).  
+Default local value in `.env.docker.example`: `http://localhost:4200`.
+
 ## 2. Daily Development
 
 ```sh
@@ -91,4 +94,3 @@ npx nx affected -t lint,test,build
 # Clear Nx cache/daemon state
 npx nx reset
 ```
-

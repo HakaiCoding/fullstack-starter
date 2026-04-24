@@ -13,7 +13,7 @@
   - route-level RBAC enforcement is not implemented yet
   - env validation now enforces cookie safety (`NODE_ENV=production` requires `AUTH_REFRESH_COOKIE_SECURE=true`; `AUTH_REFRESH_COOKIE_SAME_SITE=none` requires `AUTH_REFRESH_COOKIE_SECURE=true`)
   - env validation rejects known placeholder JWT secret patterns outside local/dev/test
-  - CORS allowlist + credentials wiring is still pending in API bootstrap
+  - CORS allowlist + credentials wiring is implemented in API bootstrap (`credentials=true`, allowlisted origins only, requests without `Origin` allowed)
 
 ## 1. Authentication
 
@@ -55,4 +55,4 @@
 - cors:
   - `origin`: allowlist web origin
   - `credentials`: `true`
-  - implementation_status: `planned (not enabled in API bootstrap yet)`
+  - implementation_status: `implemented in API bootstrap`

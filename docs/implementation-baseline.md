@@ -5,7 +5,7 @@
 - `implemented_in_code`: `partial` (as of `2026-04-24`)
 - notes:
   - `i18n`: not implemented yet
-  - `auth/security`: partially implemented (`API auth endpoints + JWT guard + refresh-session persistence + web auth interceptor baseline`; access-token issuance currently carries baseline claims with `sub` + `tokenType` only and no persisted role claim; `auth/me` role currently falls back to `user` unless an `admin` claim is present; route-level RBAC enforcement pending)
+  - `auth/security`: partially implemented (`API auth endpoints + JWT guard + refresh-session persistence + web auth interceptor baseline`; access-token issuance currently carries baseline claims with `sub` + `tokenType` only and no persisted role claim; `auth/me` role currently falls back to `user` unless an `admin` claim is present; API CORS allowlist + credentials bootstrap wiring implemented; route-level RBAC enforcement pending)
   - `typeorm/postgresql persistence foundation`: implemented
   - `e2e projects`: scaffolded and runnable with local prerequisites
   - `web-e2e prerequisite`: run `npx playwright install chromium` once before first `npx nx e2e web-e2e`
@@ -61,6 +61,10 @@
     - `NODE_ENV=production` requires `AUTH_REFRESH_COOKIE_SECURE=true`
     - `AUTH_REFRESH_COOKIE_SAME_SITE=none` requires `AUTH_REFRESH_COOKIE_SECURE=true`
     - known placeholder JWT secret patterns are rejected outside local/dev/test
+- api_cors_env_contract:
+  - `API_CORS_ALLOWED_ORIGINS` (required; comma-separated `http`/`https` origins)
+  - parsing behavior: normalized to origin form and deduplicated during env validation/config load
+  - runtime behavior: allowlisted origins only with `credentials=true`; requests without `Origin` are allowed
 
 ## 3. Testing Baseline
 - scope: `bare minimum for starter`
@@ -74,5 +78,4 @@
   - `Web e2e`: minimal app shell assertion (`router-outlet`)
   - `Web auth client baseline`: in-memory access-token state + auth interceptor (single refresh attempt + one retry + clear-on-failure)
 - pending_auth_related:
-  - `API CORS allowlist + credentials bootstrap wiring`
   - `full RBAC policy enforcement beyond baseline role typing`

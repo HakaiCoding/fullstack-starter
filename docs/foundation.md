@@ -30,7 +30,7 @@
 - database.postgresql_local: `implemented (docker-compose PostgreSQL + .env.docker contract)`
 - i18n.transloco: `planned (not installed)`
 - local_infra: `implemented (docker-compose.yml for database-only local PostgreSQL; env/scripts wired in workspace)`
-- auth.security: `partially implemented (JWT access + refresh tokens, hashed refresh-session persistence, single-session policy); CORS allowlist/credentials wiring pending`
+- auth.security: `partially implemented (JWT access + refresh tokens, hashed refresh-session persistence, single-session policy, CORS allowlist/credentials bootstrap wiring); route-level RBAC enforcement pending`
 
 ## 3. Base Architecture
 - monorepo: `Nx`
