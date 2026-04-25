@@ -31,6 +31,7 @@ Read [`docs/README.md`](./docs/README.md) for:
 - architecture and AI workflow constraints
 - feature spec requirements for core changes
 - commands and gate profiles
+Canonical "When a Spec Is Required" criteria live in [`docs/README.md`](./docs/README.md#when-a-spec-is-required).
 
 ## Common Commands
 For the canonical command list, use:

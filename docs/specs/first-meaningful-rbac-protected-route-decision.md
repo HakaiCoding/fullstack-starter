@@ -40,8 +40,8 @@
   - deferred; this route is admin-only list access, not self-service
 
 ## Problem
-- route-level RBAC remains pending in `docs/auth-security-baseline.md`
-- without one real protected endpoint, RBAC remains only primitive-level and not validated end-to-end on a live feature route
+- route-level RBAC was previously pending in `docs/auth-security-baseline.md` before this spec-defined route closure
+- without one real protected endpoint, RBAC would remain only primitive-level and not validated end-to-end on a live feature route
 
 ## Non-Goals
 - product-domain features beyond admin-only user listing baseline
@@ -210,8 +210,8 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 
 ## Documentation Updates Needed
 - docs to update during/after implementation:
-  - `docs/auth-security-baseline.md` (route-level RBAC pending gap status)
-  - `docs/specs/role-persistence-jwt-claim-rbac-baseline.md` (deferred live-route item closure linkage)
+  - `docs/auth-security-baseline.md` (route-level RBAC gap-closure status)
+  - `docs/specs/role-persistence-jwt-claim-rbac-baseline.md` (live-route item closure linkage)
   - `docs/implementation-baseline.md` (test/endpoint baseline highlights as needed)
 
 ## Decision Log Updates Needed

@@ -36,7 +36,7 @@ This contract uses explicit status labels:
   - `normal implementation`: bounded implementation changes within existing module boundaries.
   - `core`: domain/auth/persistence/cross-module/security/business-rule changes.
 - `Accepted policy`: `tiny/local` and `normal implementation` changes do not require a spec by default.
-- `Accepted policy`: if the change matches spec-required criteria in [`README.md`](./README.md), treat it as `core`.
+- `Accepted policy`: if the change matches spec-required criteria in [`docs/README.md` ("When a Spec Is Required")](./README.md#when-a-spec-is-required), treat it as `core`.
 
 2. Read relevant docs before editing:
 - `Accepted policy`: For `normal implementation` and `core` work, always read [`ARCHITECTURE.md`](./ARCHITECTURE.md) and [`commands-reference.md`](./commands-reference.md).
