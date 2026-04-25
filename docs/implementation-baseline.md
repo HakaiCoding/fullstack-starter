@@ -17,6 +17,7 @@ Authoritative docs for other concerns:
 - persistence foundation: implemented (TypeORM + PostgreSQL)
 - e2e projects: scaffolded and runnable with local prerequisites
 - web-e2e chromium install: `npx nx e2e web-e2e` auto-runs `web-e2e:install-chromium`; optional prewarm remains `npx playwright install chromium`
+- auth/session/RBAC consolidated status snapshot: [`auth-security-baseline.md` section 3](./auth-security-baseline.md#3-authsessionrbac-status-snapshot-as-of-2026-04-25) (starts at line 44)
 
 ## 3. Data and Persistence Baseline
 - id strategy: `UUID`

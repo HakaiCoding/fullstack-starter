@@ -41,19 +41,46 @@ Related docs:
   - `credentials=true`
   - requests without `Origin` are allowed
 
-## 3. Current Implementation Status (as of 2026-04-25)
-- auth module/endpoints are implemented
-- JWT strategy + guard are implemented
-- refresh-session persistence/rotation is implemented
+## 3. Auth/Session/RBAC Status Snapshot (as of 2026-04-25)
+### 3.1 Currently Implemented
+- auth endpoints are implemented: login, refresh, logout, and JWT-protected `auth/me`
+- JWT access strategy/guard are implemented
+- refresh-session persistence and rotation are implemented (hashed refresh-token session records)
 - single-session replacement is implemented
 - `users.role` is persisted (`admin` | `user`) with default/constraint enforcement
-- access token issuance includes role claim derived from persisted user role on login and refresh
-- `auth/me` returns role from validated access-token claim (no fallback-role policy)
-- reusable RBAC primitives are implemented (`Roles(...)` metadata + role guard)
-- live route-level RBAC application is implemented for `GET /api/v1/users` with `401`/`403`/`200` policy coverage
+- access-token role claim is issued from persisted role on login and refresh
+- `auth/me` role comes from validated access-token claim (no fallback-role policy)
+- RBAC primitives are implemented (`Roles(...)` metadata + role guard)
+- first live route-level RBAC is implemented on `GET /api/v1/users` (admin-only)
 
-## 4. Known Gaps
-- additional role-protected feature routes beyond `GET /api/v1/users` remain future work
+### 3.2 Currently Verified by Tests/E2E
+- API e2e verifies auth flow: login success/failure, refresh rotation and old-token rejection, `auth/me` protection, logout invalidation, and single-session replacement
+- API e2e verifies role-change-on-refresh behavior: stale access token remains valid until expiry; refreshed token reflects updated persisted role
+- API e2e verifies `GET /api/v1/users` allow/deny matrix (`401` unauthenticated, `403` non-admin, `200` admin), payload shaping, and deterministic ordering
+- API unit tests verify RBAC primitives (`Roles(...)` metadata and role guard `401`/`403`/allow semantics)
+
+### 3.3 Accepted Project Tradeoffs
+- JWT access + rotating persisted refresh sessions with single-session replacement is the accepted baseline (see [`DECISIONS.md`](./DECISIONS.md))
+- HS256 JWT baseline is currently accepted for this starter scope; asymmetric signing is not currently required
+- request-time authorization trusts validated access-token role claim until access-token expiry
+- first live RBAC scope is intentionally limited to `GET /api/v1/users`; broader user-management policy is out of this baseline
+
+### 3.4 Optional Future Hardening (Not Current Requirements)
+- add focused auth-internal unit tests for core service/controller/strategy paths
+- add DTO/class-validator input pipeline hardening for auth request payloads
+- add stronger JWT claim profile (`iss`/`aud`/`kid`) when scope requires it
+- plan asymmetric JWT signing if/when project scope/security requirements expand
+
+### 3.5 Intentionally Deferred / User-Decision Items
+- RBAC expansion beyond current `GET /api/v1/users` baseline route
+- ownership rules and user-access semantics beyond current admin-only list baseline
+- pagination/filter/sort query contracts for user listing
+- strict custom error-body contracts for `401`/`403` responses
+- broader authorization model expansion (additional roles/permissions matrix)
+
+## 4. Known Gaps (Deferred by Design)
+- no additional live role-protected feature routes are accepted yet beyond `GET /api/v1/users`
+- this doc does not claim full frontend/product auth UX completion beyond the frontend baseline in section 2.1
 
 ## 5. Auth/Security Tests and Gates
 Relevant commands (see [`commands-reference.md`](./commands-reference.md) for full profiles):
@@ -74,4 +101,4 @@ npx nx run web:build
 npx nx e2e web-e2e
 ```
 
-Current API e2e coverage includes auth flow checks for login, refresh, rotation rejection, protected `auth/me`, logout, and single-session replacement.
+Current API e2e coverage includes auth flow checks for login, refresh, rotation rejection, protected `auth/me`, logout, single-session replacement, role-change-on-refresh semantics, and admin-route RBAC coverage for `GET /api/v1/users`.
