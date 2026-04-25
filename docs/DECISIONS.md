@@ -73,3 +73,11 @@ Decision: For technology-specific, framework-specific, library-specific, tooling
 Alternatives considered: Treat local skills as optional references; rely on generic model memory for best-practice guidance.
 Consequences: Guidance quality should stay current with local skill updates; conflicts with repository docs/specs/decisions must be surfaced explicitly and resolved using the safest project-compatible option; non-trivial implementation/planning outputs should report relevant skills inspected/used and any conflicts or tensions.
 Related docs/specs: [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`README.md`](./README.md), [`specs/_template.md`](./specs/_template.md), [`commands-reference.md`](./commands-reference.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+
+## 2026-04-25 - Use `GET /api/v1/users` as first live RBAC route
+Status: Accepted
+Context: RBAC primitives (`Roles(...)` + `RolesGuard`) were implemented, but live route-level enforcement and end-to-end allow/deny assertions were still pending.
+Decision: Adopt `GET /api/v1/users` as the first live RBAC-protected route with admin-only access and explicit behavior: unauthenticated requests return `401`, authenticated `user` role requests return `403`, and authenticated `admin` role requests return `200` with `{ users: UserListItem[] }` where each item contains only `id`, `email`, `displayName`, and `role`.
+Alternatives considered: Protect health/readiness endpoints; defer route-level RBAC further; add fake/demo endpoints only to claim completion.
+Consequences: RBAC is now exercised on a real API route with deterministic list ordering and payload-shaping constraints, while ownership logic, pagination/filter/sort query contracts, and broader user-management scope remain explicitly deferred.
+Related docs/specs: [`auth-security-baseline.md`](./auth-security-baseline.md), [`implementation-baseline.md`](./implementation-baseline.md), [`specs/first-meaningful-rbac-protected-route-decision.md`](./specs/first-meaningful-rbac-protected-route-decision.md), [`specs/role-persistence-jwt-claim-rbac-baseline.md`](./specs/role-persistence-jwt-claim-rbac-baseline.md)

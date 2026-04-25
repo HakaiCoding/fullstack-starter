@@ -93,7 +93,7 @@ Runtime validation enforcement currently includes:
 
 Currently implemented test coverage highlights:
 - API unit: app controller baseline + database readiness service
-- API e2e: `/api/v1`, `/api/v1/health/db`, migration-backed schema checks, auth-flow coverage including role-change-on-refresh claim propagation
+- API e2e: `/api/v1`, `/api/v1/health/db`, migration-backed schema checks, auth-flow coverage including role-change-on-refresh claim propagation, and admin-only RBAC route coverage for `GET /api/v1/users` (`401`/`403`/`200`, payload-shape/sensitive-field assertions, deterministic ordering checks)
 - Web e2e: minimal app shell assertion (`router-outlet`)
 - Web auth client baseline: in-memory access token state + interceptor refresh retry behavior
 

@@ -29,7 +29,7 @@ Related docs:
 ### 2.3 Authorization Baseline
 - model: basic RBAC (`admin`, `user`)
 - default intent: user accesses own resources; admin can access all
-- current state: route-level RBAC enforcement is pending
+- current state: first live route-level RBAC enforcement is implemented on `GET /api/v1/users` (admin-only)
 
 ### 2.4 Cookie and CORS Safety Baseline
 - refresh cookie: `HttpOnly=true`, `path=/`, `sameSite=Lax` baseline
@@ -50,11 +50,10 @@ Related docs:
 - access token issuance includes role claim derived from persisted user role on login and refresh
 - `auth/me` returns role from validated access-token claim (no fallback-role policy)
 - reusable RBAC primitives are implemented (`Roles(...)` metadata + role guard)
-- live route-level RBAC application remains pending
+- live route-level RBAC application is implemented for `GET /api/v1/users` with `401`/`403`/`200` policy coverage
 
 ## 4. Known Gaps
-- live route-level RBAC application remains pending until a meaningful protected feature route exists
-- e2e allow/deny assertions for a real role-protected endpoint remain pending
+- additional role-protected feature routes beyond `GET /api/v1/users` remain future work
 
 ## 5. Auth/Security Tests and Gates
 Relevant commands (see [`commands-reference.md`](./commands-reference.md) for full profiles):

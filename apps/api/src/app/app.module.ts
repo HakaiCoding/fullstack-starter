@@ -10,6 +10,7 @@ import { type DatabaseConfig, databaseConfig } from './config/database.config';
 import { validateEnvironment } from './config/env.validation';
 import { buildTypeOrmModuleOptions } from '../db/typeorm.options';
 import { DatabaseReadinessService } from './database-readiness.service';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { DatabaseReadinessService } from './database-readiness.service';
         buildTypeOrmModuleOptions(dbConfig),
     }),
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseReadinessService],

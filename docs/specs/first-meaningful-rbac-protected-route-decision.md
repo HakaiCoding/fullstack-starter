@@ -7,12 +7,13 @@
 - yyyy-mm-dd: 2026-04-25
 
 ## Status
-- In Progress
+- Accepted
 
 ## Repository Verification Snapshot (as of 2026-04-25)
 - existing API route inventory:
   - `GET /api/v1`
   - `GET /api/v1/health/db`
+  - `GET /api/v1/users`
   - `POST /api/v1/auth/login`
   - `POST /api/v1/auth/refresh`
   - `POST /api/v1/auth/logout`
@@ -23,7 +24,7 @@
 - auth and persistence baseline is implemented:
   - `users.role` exists (`admin` | `user`) with default/constraint enforcement
   - JWT access token role claim is issued from persisted role and validated at request time
-- no current runtime route is wired with live `Roles(...)` metadata
+- runtime route-level RBAC is live on `GET /api/v1/users` with admin-only policy
 
 ## Approved Route Decision
 - route: `GET /api/v1/users`

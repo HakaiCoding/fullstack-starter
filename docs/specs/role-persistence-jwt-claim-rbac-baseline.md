@@ -9,6 +9,11 @@
 ## Status
 - Accepted
 
+## Follow-Up Closure (2026-04-25)
+- deferred item from this baseline ("first live route-level RBAC binding") is now implemented via:
+  - [`first-meaningful-rbac-protected-route-decision.md`](./first-meaningful-rbac-protected-route-decision.md)
+- live route: `GET /api/v1/users` (admin-only with `401`/`403`/`200` coverage)
+
 ## Repository Verification Snapshot (as of 2026-04-25)
 - `users.role` is persisted with default/constraint enforcement (`admin` | `user`)
 - login and refresh issue access-token role claim from persisted role
