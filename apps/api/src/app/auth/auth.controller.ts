@@ -10,6 +10,11 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import type {
+  AccessTokenResponse,
+  AuthMeResponse,
+  LogoutResponse,
+} from '@fullstack-starter/contracts';
 import { type Request, type Response, type CookieOptions } from 'express';
 import { type AuthConfig, authConfig } from '../config/auth.config';
 import { AuthCoreService } from './auth-core.service';
@@ -19,21 +24,6 @@ import { JwtAccessAuthGuard } from './jwt-access-auth.guard';
 interface LoginRequestBody {
   email?: unknown;
   password?: unknown;
-}
-
-interface AccessTokenResponse {
-  accessToken: string;
-}
-
-interface LogoutResponse {
-  success: true;
-}
-
-interface AuthMeResponse {
-  id: string;
-  email: string;
-  displayName: string | null;
-  role: 'admin' | 'user';
 }
 
 @Controller({

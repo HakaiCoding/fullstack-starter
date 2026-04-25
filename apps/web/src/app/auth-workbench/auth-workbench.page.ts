@@ -1,6 +1,7 @@
 import { JsonPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import type { AuthMeResponse, UsersListResponse } from '@fullstack-starter/contracts';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -14,7 +15,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { firstValueFrom } from 'rxjs';
 import { AuthApiService } from '../auth/auth-api.service';
 import { AuthStateService } from '../auth/auth-state.service';
-import { type AuthMeResponse, type UsersListResponse } from '../auth/auth.types';
 
 interface HttpFailure {
   status: number | null;

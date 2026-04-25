@@ -1,4 +1,6 @@
-export type AuthRole = 'admin' | 'user';
+import type { AuthRole } from '@fullstack-starter/contracts';
+
+export type { AuthRole };
 
 export interface AccessTokenPayload {
   sub: string;

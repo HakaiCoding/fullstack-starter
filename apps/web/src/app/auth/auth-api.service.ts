@@ -1,15 +1,15 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import type {
+  AccessTokenResponse,
+  AuthMeResponse,
+  LogoutResponse,
+  UsersListResponse,
+} from '@fullstack-starter/contracts';
 import { tap } from 'rxjs';
 import { authInterceptorContext } from './auth.interceptor';
 import { AuthStateService } from './auth-state.service';
-import {
-  type AccessTokenResponse,
-  type AuthMeResponse,
-  type LoginRequest,
-  type LogoutResponse,
-  type UsersListResponse,
-} from './auth.types';
+import { type LoginRequest } from './auth.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {

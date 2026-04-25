@@ -1,8 +1,8 @@
 import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import type { AccessTokenResponse } from '@fullstack-starter/contracts';
 import { Observable, finalize, map, shareReplay, tap } from 'rxjs';
 import { AuthStateService } from './auth-state.service';
-import { type AccessTokenResponse } from './auth.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthRefreshService {
@@ -40,4 +40,3 @@ export class AuthRefreshService {
     this.authState.clear();
   }
 }
-

@@ -89,3 +89,11 @@ Decision: Adopt Angular Material (`@angular/material`) with Angular CDK (`@angul
 Alternatives considered: No shared UI component library; custom-only component implementations; postpone UI library standardization.
 Consequences: Faster and more consistent UI development with established accessibility primitives; frontend implementation should prefer Material/CDK primitives unless there is a clear project-specific reason not to.
 Related docs/specs: [`../apps/web/README.md`](../apps/web/README.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`implementation-baseline.md`](./implementation-baseline.md)
+
+## 2026-04-26 - Consolidate shared auth-user external contracts in `libs/shared/contracts`
+Status: Accepted
+Context: External auth/user API contract shapes were duplicated across API and web while `libs/shared/contracts` remained scaffold-only for this surface.
+Decision: `libs/shared/contracts` is the accepted home for shared API/web external auth-user contract shapes in this consolidation scope. The first-pass shared set is exactly `AuthRole`, `AccessTokenResponse`, `LogoutResponse`, `AuthMeResponse`, `UserListItem`, and `UsersListResponse`. `LoginRequest` remains deferred for this first pass. API-internal, persistence/entity, guard/decorator/strategy, token-internal, request-user, and controller-validation internals remain excluded from shared contracts.
+Alternatives considered: Keep duplicate app-local contract types; include deferred `LoginRequest` in the first pass; move API-internal or persistence-layer types into the shared contracts library.
+Consequences: API and web now compile against a single shared external contract source for the approved set with unchanged runtime/API semantics; follow-up consolidations must remain boundary-safe and explicit about deferred/internal exclusions.
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`specs/auth-user-shared-contract-consolidation.md`](./specs/auth-user-shared-contract-consolidation.md)

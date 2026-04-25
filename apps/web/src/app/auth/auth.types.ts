@@ -1,32 +1,13 @@
-export interface AccessTokenResponse {
-  accessToken: string;
-}
+export type {
+  AccessTokenResponse,
+  AuthMeResponse,
+  AuthRole,
+  LogoutResponse,
+  UserListItem,
+  UsersListResponse,
+} from '@fullstack-starter/contracts';
 
 export interface LoginRequest {
   email: string;
   password: string;
-}
-
-export interface LogoutResponse {
-  success: true;
-}
-
-export type AuthRole = 'admin' | 'user';
-
-export interface AuthMeResponse {
-  id: string;
-  email: string;
-  displayName: string | null;
-  role: AuthRole;
-}
-
-export interface UserListItem {
-  id: string;
-  email: string;
-  displayName: string | null;
-  role: AuthRole;
-}
-
-export interface UsersListResponse {
-  users: UserListItem[];
 }
