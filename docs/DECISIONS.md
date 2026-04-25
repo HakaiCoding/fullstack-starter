@@ -81,3 +81,11 @@ Decision: Adopt `GET /api/v1/users` as the first live RBAC-protected route with 
 Alternatives considered: Protect health/readiness endpoints; defer route-level RBAC further; add fake/demo endpoints only to claim completion.
 Consequences: RBAC is now exercised on a real API route with deterministic list ordering and payload-shaping constraints, while ownership logic, pagination/filter/sort query contracts, and broader user-management scope remain explicitly deferred.
 Related docs/specs: [`auth-security-baseline.md`](./auth-security-baseline.md), [`implementation-baseline.md`](./implementation-baseline.md), [`specs/first-meaningful-rbac-protected-route-decision.md`](./specs/first-meaningful-rbac-protected-route-decision.md), [`specs/role-persistence-jwt-claim-rbac-baseline.md`](./specs/role-persistence-jwt-claim-rbac-baseline.md)
+
+## 2026-04-25 - Use Angular Material as the `apps/web` UI component library baseline
+Status: Accepted
+Context: The web app needed a standardized, maintained component library and theming baseline for consistent UI implementation.
+Decision: Adopt Angular Material (`@angular/material`) with Angular CDK (`@angular/cdk`) as the default UI component library for `apps/web`, with Material theming configured in `apps/web/src/styles.scss` and animation providers configured in app bootstrap.
+Alternatives considered: No shared UI component library; custom-only component implementations; postpone UI library standardization.
+Consequences: Faster and more consistent UI development with established accessibility primitives; frontend implementation should prefer Material/CDK primitives unless there is a clear project-specific reason not to.
+Related docs/specs: [`../apps/web/README.md`](../apps/web/README.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`implementation-baseline.md`](./implementation-baseline.md)

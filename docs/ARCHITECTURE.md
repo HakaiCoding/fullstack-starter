@@ -19,14 +19,14 @@ For AI-assisted work, read this with:
 Full-stack starter monorepo for side projects and small/medium applications.
 
 Current baseline capabilities:
-- Angular web app (`apps/web`)
+- Angular web app (`apps/web`) using Angular Material as the default UI component library
 - NestJS API (`apps/api`) under `/api/v1`
 - PostgreSQL persistence via TypeORM
 - JWT access + refresh session auth foundation
 - e2e projects for API and web
 
 ## 3. High-Level System Map
-- `apps/web`: UI, routing, client auth state/interceptor, HTTP calls to `/api`
+- `apps/web`: UI (Angular Material), routing, client auth state/interceptor, HTTP calls to `/api`
 - `apps/api`: HTTP endpoints, auth flows, business orchestration, configuration
 - `apps/api/src/db`: entities, migrations, TypeORM data-source options
 - `libs/shared/contracts`: shared DTO-like contract shapes only
@@ -74,6 +74,7 @@ Request flow (baseline):
 ### 5.1 UI Layer (`apps/web`)
 Belongs here:
 - rendering, presentation state, user interaction
+- Angular Material component composition and theming usage for web presentation
 - request orchestration from UI to API
 - auth token attachment/refresh flow wiring on the client
 

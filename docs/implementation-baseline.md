@@ -14,6 +14,7 @@ Authoritative docs for other concerns:
 - state: `active baseline`
 - implemented_in_code: `partial`
 - i18n: not implemented yet
+- web UI library baseline: Angular Material (`@angular/material` + `@angular/cdk`) installed and configured
 - persistence foundation: implemented (TypeORM + PostgreSQL)
 - e2e projects: scaffolded and runnable with local prerequisites
 - web-e2e chromium install: `npx nx e2e web-e2e` auto-runs `web-e2e:install-chromium`; optional prewarm remains `npx playwright install chromium`

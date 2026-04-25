@@ -6,6 +6,12 @@ Angular frontend application.
 - Local URL: `http://localhost:4200`
 - API access: proxied from `/api` to `http://localhost:3000` via `proxy.conf.json`
 
+## UI Baseline
+- UI component library: Angular Material (`@angular/material`) with CDK (`@angular/cdk`)
+- Theme baseline: Material 3 theme configured in `src/styles.scss` via `mat.theme(...)`
+- Animations baseline: `provideAnimationsAsync()` in `src/app/app.config.ts`
+- Typography/icons baseline: Roboto + Material Icons loaded in `src/index.html`
+
 ## Nx Targets
 ```sh
 npx nx run web:serve

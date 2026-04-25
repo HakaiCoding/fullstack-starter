@@ -3,7 +3,7 @@
 Nx monorepo starter for side projects and small-to-medium full-stack apps.
 
 ## Workspace Structure
-- `apps/web` - Angular frontend app
+- `apps/web` - Angular frontend app (Angular Material UI library)
 - `apps/api` - NestJS backend app (`/api/v1`)
 - `apps/web-e2e` - Playwright e2e tests for `web`
 - `apps/api-e2e` - Jest e2e tests for `api`
