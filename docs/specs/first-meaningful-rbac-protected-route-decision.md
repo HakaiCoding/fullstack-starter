@@ -60,7 +60,17 @@
   - auth role `admin` -> `200`
 - ownership rules are out of scope for this route
 - role source-of-truth and token-role claim semantics remain unchanged from existing baseline
-- response payload must avoid sensitive fields (especially `passwordHash` and session token artifacts)
+- `200` response contract for this slice is explicit:
+  - JSON object shape: `{ users: UserListItem[] }`
+  - `UserListItem` fields: `id`, `email`, `displayName`, `role`
+  - forbidden in payload: `passwordHash`, refresh/session token artifacts, or other secret/internal auth data
+- list semantics for this slice are explicit:
+  - no pagination/filter/sort query contract is introduced in this slice
+  - route returns the full list visible to `admin` for the current baseline
+  - ordering is deterministic: `createdAt DESC`, tie-breaker `id ASC`
+- error response contract is explicit:
+  - status code is the required public contract for `401` and `403`
+  - response-body schema for `401`/`403` remains framework-default and is intentionally not a stable API contract in this slice
 
 ## Forbidden Behavior
 - demo-only or fake protected endpoints unrelated to this approved route
@@ -98,18 +108,15 @@
 - skills inspected:
   - `nestjs-best-practices`
   - `jwt-security`
-  - `nx-workspace-patterns`
   - `typeorm`
 - skills used:
   - `nestjs-best-practices`
   - `jwt-security`
-  - `nx-workspace-patterns`
-- skills not used directly for this slice:
-  - `typeorm` (inspected; no schema change is planned in this scope)
+  - `typeorm`
 - why each used skill is relevant:
-  - `nestjs-best-practices`: guard/controller/service placement and authorization concerns in NestJS
-  - `jwt-security`: preserve secure auth boundaries while reusing existing token validation model
-  - `nx-workspace-patterns`: keep implementation and testing changes inside current workspace boundaries and gates
+  - `nestjs-best-practices`: reinforces guard-based authorization and explicit response DTO/serialization boundaries to avoid sensitive-field leakage
+  - `jwt-security`: preserves secure auth boundaries while keeping claims minimal and avoiding sensitive data exposure
+  - `typeorm`: supports explicit deterministic ordering and bounded query behavior for a baseline list endpoint
 - conflicts/tensions with project docs/spec:
   - `jwt-security` generally recommends asymmetric signing by default; project baseline is HS256-based and accepted in docs/code
 - project-compatible decision:
@@ -121,6 +128,7 @@
 - stale token-role behavior follows current baseline:
   - token role remains effective until expiry; role changes apply on next token issuance (already defined in accepted RBAC baseline spec)
 - invalid token/auth context on this route should produce `401`, not `403`
+- users with identical `createdAt` timestamps still return in deterministic order via `id ASC` tie-breaker
 
 ## Risks
 - risk 1 and mitigation:
@@ -143,8 +151,13 @@
     - authenticated bearer for role `user` -> `403`
     - authenticated bearer for role `admin` -> `200`
   - payload assertions on `200`:
-    - list shape is deterministic
-    - sensitive fields are excluded (at minimum `passwordHash`)
+    - body shape is `{ users: [...] }`
+    - each user item contains only: `id`, `email`, `displayName`, `role`
+    - list order is deterministic (`createdAt DESC`, `id ASC` tie-break)
+    - sensitive fields are excluded (at minimum `passwordHash` and session/token artifacts)
+  - payload assertions on `401`/`403`:
+    - assert status code contract (`401`/`403`)
+    - do not require exact framework error-body text
 - regression coverage:
   - existing auth flow behavior remains intact:
     - login / refresh / logout / `auth/me`
@@ -182,8 +195,17 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
   - authenticated `user` `403`
   - authenticated `admin` `200`
 - route remains read-only list baseline and does not include ownership logic
+- `200` response shape is `{ users: UserListItem[] }` with `UserListItem = { id, email, displayName, role }`
+- deterministic ordering is enforced (`createdAt DESC`, `id ASC` tie-break)
 - response excludes sensitive fields
+- `401`/`403` behavior contract is status-code based; no strict error-body contract is required in this slice
 - no non-goal scope (CRUD/UI/permissions-matrix/IAM redesign) is introduced
+
+## Explicit Deferrals (Not In This Slice)
+- query-parameter contract for pagination/filtering/sorting
+- paginated envelope/meta contract
+- strict custom error-body schema for `401`/`403`
+- if any of the above is needed now, update this spec before implementation rather than deciding during coding
 
 ## Documentation Updates Needed
 - docs to update during/after implementation:
