@@ -1,0 +1,197 @@
+<mat-toolbar>Auth Workbench</mat-toolbar>
+
+<main class="page-shell">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Session State</mat-card-title>
+      <mat-card-subtitle>
+        Existing baseline: memory access token + HttpOnly refresh cookie.
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="state-row" data-testid="auth-state">
+        Status: {{ isAuthenticated() ? 'Authenticated' : 'Logged out' }}
+      </p>
+      <p class="state-row">
+        Access token in memory: {{ hasAccessToken() ? 'present' : 'missing' }}
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Login</mat-card-title>
+      <mat-card-subtitle>POST /api/v1/auth/login</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="onLogin()"
+        class="login-form"
+        data-testid="login-form"
+      >
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            formControlName="email"
+            type="email"
+            autocomplete="email"
+            data-testid="login-email"
+          />
+          @if (loginForm.controls.email.hasError('required') && loginForm.controls.email.touched)
+          {
+            <mat-error>Email is required.</mat-error>
+          }
+          @if (loginForm.controls.email.hasError('email') && loginForm.controls.email.touched) {
+            <mat-error>Enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            formControlName="password"
+            type="password"
+            autocomplete="current-password"
+            data-testid="login-password"
+          />
+          @if (loginForm.controls.password.hasError('required') && loginForm.controls.password.touched)
+          {
+            <mat-error>Password is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="button-row">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="loginPending()"
+            data-testid="login-button"
+          >
+            Login
+          </button>
+          @if (loginPending()) {
+            <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+          }
+        </div>
+      </form>
+
+      @if (loginFailure(); as failure) {
+        <p class="error-text" data-testid="login-error">
+          Login failed (HTTP {{ failure.status ?? 'n/a' }}): {{ failure.message }}
+        </p>
+        <pre>{{ failure.body | json }}</pre>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Auth Actions</mat-card-title>
+      <mat-card-subtitle>
+        Existing routes: GET /api/v1/auth/me, POST /api/v1/auth/logout, GET /api/v1/users.
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="button-row">
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="onLoadMe()"
+          [disabled]="mePending()"
+          data-testid="load-me-button"
+        >
+          Load auth/me
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="onLoadUsers()"
+          [disabled]="usersPending()"
+          data-testid="load-users-button"
+        >
+          Call GET /api/v1/users
+        </button>
+        <button
+          mat-flat-button
+          color="warn"
+          type="button"
+          (click)="onLogout()"
+          [disabled]="logoutPending()"
+          data-testid="logout-button"
+        >
+          Logout
+        </button>
+      </div>
+      @if (logoutFailure(); as failure) {
+        <p class="error-text" data-testid="logout-error">
+          Logout failed (HTTP {{ failure.status ?? 'n/a' }}): {{ failure.message }}
+        </p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-divider></mat-divider>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>GET /api/v1/auth/me Result</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (mePending()) {
+        <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+      } @else if (meResult(); as me) {
+        <div data-testid="me-success">
+          <p class="state-row">id: {{ me.id }}</p>
+          <p class="state-row">email: {{ me.email }}</p>
+          <p class="state-row">displayName: {{ me.displayName ?? '(null)' }}</p>
+          <p class="state-row">role: {{ me.role }}</p>
+        </div>
+      } @else if (meFailure(); as failure) {
+        <p class="error-text" data-testid="me-error">
+          Request failed (HTTP {{ failure.status ?? 'n/a' }}): {{ failure.message }}
+        </p>
+        <pre>{{ failure.body | json }}</pre>
+      } @else {
+        <p class="state-row">No response yet.</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>GET /api/v1/users Result</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (usersPending()) {
+        <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+      } @else if (usersResult(); as usersResponse) {
+        <mat-list data-testid="users-success">
+          @for (user of usersResponse.users; track user.id) {
+            <mat-list-item>
+              <span matListItemTitle>{{ user.email }} ({{ user.role }})</span>
+              <span matListItemLine>id: {{ user.id }}</span>
+              <span matListItemLine>displayName: {{ user.displayName ?? '(null)' }}</span>
+            </mat-list-item>
+          }
+        </mat-list>
+      } @else if (usersFailure(); as failure) {
+        @if (usersRbacDenied()) {
+          <p class="state-row" data-testid="users-rbac-denied">
+            Expected RBAC denial (HTTP {{ failure.status }})
+          </p>
+        } @else {
+          <p class="error-text">
+            Request failed (HTTP {{ failure.status ?? 'n/a' }}): {{ failure.message }}
+          </p>
+        }
+        <pre>{{ failure.body | json }}</pre>
+      } @else {
+        <p class="state-row">No response yet.</p>
+      }
+    </mat-card-content>
+  </mat-card>
+</main>

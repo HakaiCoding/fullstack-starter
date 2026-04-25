@@ -16,13 +16,7 @@
       }
     },
     "e2e": {
-      "dependsOn": [
-        "install-chromium",
-        {
-          "projects": ["web"],
-          "target": "serve"
-        }
-      ]
+      "dependsOn": ["install-chromium"]
     },
     "e2e-ci": {
       "dependsOn": ["install-chromium"]
