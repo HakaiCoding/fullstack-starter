@@ -27,9 +27,30 @@ Related docs:
   - `GET /api/v1/auth/me` (JWT-protected)
 
 ### 2.3 Authorization Baseline
-- model: basic RBAC (`admin`, `user`)
-- default intent: user accesses own resources; admin can access all
+- model: basic RBAC persisted roles for authenticated accounts (`admin`, `user`)
+- unauthenticated state is treated as a public visitor context, not a persisted role
 - current state: first live route-level RBAC enforcement is implemented on `GET /api/v1/users` (admin-only)
+
+#### Account and Access Model
+##### Public visitor
+- unauthenticated request/user state, not a persisted role
+- has no auth role
+- may access only routes/pages that are explicitly documented or implemented as public
+- requests to protected routes follow documented auth/RBAC policy, including `401` when authentication is required
+
+##### User
+- authenticated normal account
+- persisted role value: `user`
+- default persisted role for new users
+- may access authenticated routes/features only where documented route/feature policy allows it
+- ownership/self-access rules beyond currently documented behavior are not implied by this label
+
+##### Admin
+- authenticated privileged account
+- persisted role value: `admin`
+- may access admin-only routes only where RBAC policy explicitly allows it
+- current documented live admin-only baseline is `GET /api/v1/users`; additional admin-only routes require explicit RBAC policy/spec approval
+- this label does not by itself imply a full admin dashboard, full user-management scope, ownership policy rollout, permissions matrix, or additional protected routes
 
 ### 2.4 Cookie and CORS Safety Baseline
 - refresh cookie: `HttpOnly=true`, `path=/`, `sameSite=Lax` baseline
