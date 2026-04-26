@@ -50,6 +50,36 @@ describe('AuthApiService', () => {
     expect(authState.accessToken()).toBe('token-from-login');
   });
 
+  it('does not mutate auth state when login fails', () => {
+    authState.setAccessToken('token-before-login-failure');
+    let receivedStatus: number | null = null;
+
+    service
+      .login({
+        email: 'test@example.com',
+        password: 'WrongPassword123!',
+      })
+      .subscribe({
+        error: (error: { status: number }) => {
+          receivedStatus = error.status;
+        },
+      });
+
+    const request = httpController.expectOne('/api/v1/auth/login');
+    request.flush(
+      {
+        message: 'Unauthorized',
+      },
+      {
+        status: 401,
+        statusText: 'Unauthorized',
+      },
+    );
+
+    expect(receivedStatus).toBe(401);
+    expect(authState.accessToken()).toBe('token-before-login-failure');
+  });
+
   it('requests auth/me using bearer token from auth state', () => {
     authState.setAccessToken('active-access-token');
 
@@ -86,6 +116,37 @@ describe('AuthApiService', () => {
     });
 
     expect(authState.accessToken()).toBeNull();
+  });
+
+  it('keeps auth state unchanged when logout fails', () => {
+    authState.setAccessToken('token-before-logout-failure');
+    let receivedStatus: number | null = null;
+
+    service.logout().subscribe({
+      error: (error: { status: number }) => {
+        receivedStatus = error.status;
+      },
+    });
+
+    const request = httpController.expectOne('/api/v1/auth/logout');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
+    expect(
+      request.request.context.get(authInterceptorContext.skipAuthInterceptor),
+    ).toBe(true);
+
+    request.flush(
+      {
+        message: 'Server error',
+      },
+      {
+        status: 500,
+        statusText: 'Server Error',
+      },
+    );
+
+    expect(receivedStatus).toBe(500);
+    expect(authState.accessToken()).toBe('token-before-logout-failure');
   });
 
   it('requests users list using bearer token from auth state', () => {
