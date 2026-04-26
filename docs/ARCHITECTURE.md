@@ -87,11 +87,13 @@ Does not belong here:
 Belongs here:
 - route mapping, request/response shaping
 - authentication/authorization transport checks
+- structured request validation DTOs for request body/query/params transport inputs
 - calling service/domain layer
 
 Does not belong here:
 - durable business/domain rules that should be reused outside one route
 - schema/data-access rule decisions
+- replacing entities/DB constraints/guards/services/domain rules with transport DTOs
 
 ### 5.3 Service/Business/Domain Layer (`apps/api/src/app/**` services/modules)
 Belongs here:
@@ -116,6 +118,7 @@ Does not belong here:
 ### 5.5 Shared Libraries
 - `libs/shared/contracts`:
   - contract primitives only, no business logic or runtime side effects
+  - request-validation DTOs are not auto-shared; keep app-local unless a spec/decision accepts shared external-contract scope
 - `libs/shared/utils`:
   - pure reusable helpers, not a catch-all for domain rules
 
@@ -133,6 +136,9 @@ Workspace-level import/tag boundaries are enforced via:
 - Contract shape change used by API and web:
   - start in `libs/shared/contracts/*`
   - then update API/web callers
+- Structured API request-validation change:
+  - start in owning API feature module DTO/pipes near the route/controller
+  - keep request DTO app-local unless shared external-contract scope is explicitly accepted
 - Schema/constraint/index change:
   - start with new migration in `apps/api/src/db/migrations/*`
   - update related entities in `apps/api/src/db/entities/*`

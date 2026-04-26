@@ -62,7 +62,7 @@ Related docs:
   - `credentials=true`
   - requests without `Origin` are allowed
 
-## 3. Auth/Session/RBAC Status Snapshot (as of 2026-04-25)
+## 3. Auth/Session/RBAC Status Snapshot (as of 2026-04-27)
 ### 3.1 Currently Implemented
 - auth endpoints are implemented: login, refresh, logout, and JWT-protected `auth/me`
 - JWT access strategy/guard are implemented
@@ -73,6 +73,7 @@ Related docs:
 - `auth/me` role comes from validated access-token claim (no fallback-role policy)
 - RBAC primitives are implemented (`Roles(...)` metadata + role guard)
 - first live route-level RBAC is implemented on `GET /api/v1/users` (admin-only)
+- `POST /api/v1/auth/login` now uses app-local DTO/class-validator validation for required string credential fields
 
 ### 3.2 Currently Verified by Tests/E2E
 - API e2e verifies auth flow: login success/failure, refresh rotation and old-token rejection, `auth/me` protection, logout invalidation, and single-session replacement
@@ -89,7 +90,6 @@ Related docs:
 
 ### 3.4 Optional Future Hardening (Not Current Requirements)
 - add focused auth-internal unit tests for core service/controller/strategy paths
-- add DTO/class-validator input pipeline hardening for auth request payloads
 - add stronger JWT claim profile (`iss`/`aud`/`kid`) when scope requires it
 - plan asymmetric JWT signing if/when project scope/security requirements expand
 
@@ -107,6 +107,22 @@ Related docs:
   - status-code behavior is documented and preserved as current accepted behavior.
   - framework-default error body details are not treated as stable unless explicitly documented as stable.
   - no custom stable `400` error-body contract is accepted in this baseline.
+
+### 3.7 Backend HTTP Request Validation Baseline (as of 2026-04-27)
+- DTO/class-validator is the accepted backend baseline for structured HTTP request validation.
+- DTOs are transport-layer request validation objects.
+- DTOs do not replace TypeORM entities, DB constraints, guards, services, or domain/auth rules.
+- DTOs should live near the relevant API feature/module unless docs/specs define another convention.
+- this pass implements the baseline first for `POST /api/v1/auth/login`.
+- future endpoints with structured request bodies or query params should follow this baseline unless a spec documents an exception.
+- request contracts are not automatically added to `libs/shared/contracts`.
+- `LoginRequest` remains app-local in this pass.
+- no custom stable `400` error-body contract is introduced in this pass.
+- framework-default `400/401/403` error body details remain non-stable unless explicitly documented otherwise.
+- stable behavior in this pass remains status-code level:
+  - malformed semantic login payloads return `400`.
+  - invalid credentials return `401`.
+- global validation rollout is deferred; this pass uses route-level validation on login to avoid unrelated endpoint behavior changes.
 
 ## 4. Known Gaps (Deferred by Design)
 - no additional live role-protected feature routes are accepted yet beyond `GET /api/v1/users`

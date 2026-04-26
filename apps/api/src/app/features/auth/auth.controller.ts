@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -9,6 +8,8 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import type {
   AccessTokenResponse,
@@ -19,12 +20,8 @@ import { type Request, type Response, type CookieOptions } from 'express';
 import { type AuthConfig, authConfig } from '../../config/auth.config';
 import { AuthCoreService } from './auth-core.service';
 import { type AuthenticatedRequestUser } from './auth.types';
+import { LoginRequestDto } from './dto/login-request.dto';
 import { JwtAccessAuthGuard } from './jwt-access-auth.guard';
-
-interface LoginRequestBody {
-  email?: unknown;
-  password?: unknown;
-}
 
 @Controller({
   path: 'auth',
@@ -38,16 +35,18 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  )
   async login(
-    @Body() body: LoginRequestBody,
+    @Body() body: LoginRequestDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AccessTokenResponse> {
-    const email = this.readRequiredString(body.email, 'email');
-    const password = this.readRequiredString(body.password, 'password');
-
     const tokenPair = await this.authCoreService.issueTokenPairForCredentials(
-      email,
-      password,
+      body.email,
+      body.password,
     );
 
     this.setRefreshCookie(
@@ -165,18 +164,5 @@ export class AuthController {
     }
 
     return null;
-  }
-
-  private readRequiredString(value: unknown, key: string): string {
-    if (typeof value !== 'string') {
-      throw new BadRequestException(`Invalid "${key}" value.`);
-    }
-
-    const trimmed = value.trim();
-    if (trimmed === '') {
-      throw new BadRequestException(`Invalid "${key}" value.`);
-    }
-
-    return trimmed;
   }
 }

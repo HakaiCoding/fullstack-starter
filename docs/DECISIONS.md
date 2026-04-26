@@ -108,3 +108,11 @@ Decision: Adopt a simple default app-folder baseline:
 Alternatives considered: Keep flat/legacy placement under `app/*`; adopt deeper layered structures (`feature/data/ui/model` or similar) in this pass.
 Consequences: Placement conventions are clearer and consistent across apps where useful, while preserving framework-specific boundaries; implementation requires path-only file moves and import updates without behavior changes.
 Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/app-folder-convention-baseline-restructure.md`](./specs/app-folder-convention-baseline-restructure.md), [`../apps/web/README.md`](../apps/web/README.md), [`../apps/api/README.md`](../apps/api/README.md)
+
+## 2026-04-27 - Adopt DTO/class-validator as backend structured request-validation baseline
+Status: Accepted
+Context: Auth invalid-input handling was manually validated in controller code and docs still described DTO/class-validator request validation as optional future hardening.
+Decision: DTO/class-validator is the accepted backend baseline for structured HTTP request validation at the API transport layer (request body/query/params). DTOs are transport request-validation objects and do not replace TypeORM entities, DB constraints, guards, services, or domain/auth rules. DTOs should live near their owning API feature/module unless another convention is documented. This pass applies the baseline first to `POST /api/v1/auth/login` with an app-local login request DTO.
+Alternatives considered: Keep manual controller validation per endpoint; defer DTO/class-validator baseline; roll out global ValidationPipe in this pass.
+Consequences: Malformed semantic login payloads continue to return `400` and invalid credentials continue to return `401`, while framework-default error body details remain non-stable unless explicitly documented. Future endpoints with structured request bodies/query params are expected to follow this baseline unless a spec documents an exception. Request contracts are not auto-promoted into `libs/shared/contracts`, and `LoginRequest` remains app-local in this pass.
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`auth-security-baseline.md`](./auth-security-baseline.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)

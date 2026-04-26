@@ -1,9 +1,15 @@
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  type ArgumentMetadata,
+  BadRequestException,
+  UnauthorizedException,
+  ValidationPipe,
+} from '@nestjs/common';
 import { type Request, type Response } from 'express';
 import { type AuthConfig } from '../../config/auth.config';
 import { type AuthenticatedRequestUser } from './auth.types';
 import { AuthController } from './auth.controller';
 import { type AuthCoreService } from './auth-core.service';
+import { LoginRequestDto } from './dto/login-request.dto';
 
 const TEST_AUTH_CONFIG: AuthConfig = {
   accessToken: {
@@ -28,6 +34,23 @@ function createResponseMock(): Pick<Response, 'cookie' | 'clearCookie'> {
     cookie: jest.fn(),
     clearCookie: jest.fn(),
   };
+}
+
+const loginValidationPipe = new ValidationPipe({
+  transform: true,
+});
+
+const loginBodyMetadata: ArgumentMetadata = {
+  type: 'body',
+  metatype: LoginRequestDto,
+  data: undefined,
+};
+
+async function validateLoginBody(value: unknown): Promise<LoginRequestDto> {
+  return (await loginValidationPipe.transform(
+    value,
+    loginBodyMetadata,
+  )) as LoginRequestDto;
 }
 
 describe('AuthController', () => {
@@ -62,13 +85,11 @@ describe('AuthController', () => {
     });
     const response = createResponseMock();
 
-    const result = await controller.login(
-      {
-        email: '  admin@example.com  ',
-        password: '  S3curePassw0rd!  ',
-      },
-      response as Response,
-    );
+    const validatedBody = await validateLoginBody({
+      email: '  admin@example.com  ',
+      password: '  S3curePassw0rd!  ',
+    });
+    const result = await controller.login(validatedBody, response as Response);
 
     expect(authCoreServiceMock.issueTokenPairForCredentials).toHaveBeenCalledWith(
       'admin@example.com',
@@ -90,28 +111,37 @@ describe('AuthController', () => {
     });
   });
 
-  it('rejects login when email or password input is invalid', async () => {
-    const response = createResponseMock();
+  it('rejects invalid login request payload shapes via dto validation', async () => {
+    const invalidPayloads: unknown[] = [
+      {
+        password: 'pw',
+      },
+      {
+        email: 'admin@example.com',
+      },
+      {
+        email: 123,
+        password: 'pw',
+      },
+      {
+        email: 'admin@example.com',
+        password: 123,
+      },
+      {
+        email: '   ',
+        password: 'pw',
+      },
+      {
+        email: 'admin@example.com',
+        password: '   ',
+      },
+    ];
 
-    await expect(
-      controller.login(
-        {
-          email: undefined,
-          password: 'pw',
-        },
-        response as Response,
-      ),
-    ).rejects.toThrow(BadRequestException);
+    for (const payload of invalidPayloads) {
+      await expect(validateLoginBody(payload)).rejects.toThrow(BadRequestException);
+    }
 
-    await expect(
-      controller.login(
-        {
-          email: 'admin@example.com',
-          password: '   ',
-        },
-        response as Response,
-      ),
-    ).rejects.toThrow(BadRequestException);
+    expect(authCoreServiceMock.issueTokenPairForCredentials).not.toHaveBeenCalled();
   });
 
   it('refreshes access token with cookie token and resets refresh cookie', async () => {

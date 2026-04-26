@@ -10,7 +10,7 @@ Authoritative docs for other concerns:
 - commands/gate profiles: [`commands-reference.md`](./commands-reference.md)
 - long-lived policy decisions: [`DECISIONS.md`](./DECISIONS.md)
 
-## 2. Status Snapshot (as of 2026-04-25)
+## 2. Status Snapshot (as of 2026-04-27)
 - state: `active baseline`
 - implemented_in_code: `partial`
 - i18n: not implemented yet
@@ -18,7 +18,8 @@ Authoritative docs for other concerns:
 - persistence foundation: implemented (TypeORM + PostgreSQL)
 - e2e projects: scaffolded and runnable with local prerequisites
 - web-e2e chromium install: `npx nx e2e web-e2e` auto-runs `web-e2e:install-chromium`; optional prewarm remains `npx playwright install chromium`
-- auth/session/RBAC consolidated status snapshot: [`auth-security-baseline.md` section 3](./auth-security-baseline.md#3-authsessionrbac-status-snapshot-as-of-2026-04-25) (starts at line 44)
+- auth/session/RBAC consolidated status snapshot: [`auth-security-baseline.md` section 3](./auth-security-baseline.md#3-authsessionrbac-status-snapshot-as-of-2026-04-27) (starts at line 44)
+- backend structured request-validation baseline: DTO/class-validator accepted at transport layer; first implementation is route-level validation for `POST /api/v1/auth/login` with app-local request DTO scope
 
 ## 3. Data and Persistence Baseline
 - id strategy: `UUID`

@@ -9,66 +9,80 @@
 ## Status
 - Accepted
 - lifecycle note:
-  - this spec documents current implemented behavior and existing evidence.
-  - this spec does not introduce runtime behavior changes.
+  - this spec originally documented status-code behavior before DTO validation rollout.
+  - this pass updates policy + implementation baseline so DTO/class-validator is accepted and first applied to `POST /api/v1/auth/login`.
 
 ## Problem
-- auth invalid-input and auth error behavior exists in code/tests but was not captured in one explicit contract-style matrix.
-- without a focused baseline, future validation hardening could accidentally change status semantics or over-lock framework-default error bodies.
+- auth invalid-input/error behavior needed a stable status-code contract that survives validation implementation updates.
+- DTO/class-validator guidance was previously treated as optional future hardening, which conflicted with the accepted user decision for backend validation baseline.
 
 ## Non-Goals
-- no runtime auth/session/JWT/RBAC changes.
-- no DTO/class-validator/class-transformer introduction in this pass.
-- no ValidationPipe/global-pipe rollout in this pass.
+- no JWT signing/payload/session-policy changes.
+- no RBAC scope expansion or role-policy changes.
 - no new routes.
-- no RBAC scope expansion.
-- no shared request-contract expansion (`LoginRequest` remains deferred).
-- no custom `400` error-body contract unless explicitly accepted in a future scope.
+- no TypeORM entity, migration, repository, or persistence behavior changes.
+- no global ValidationPipe rollout that could change unrelated endpoint behavior in this pass.
+- no shared request-contract expansion (`LoginRequest` remains app-local in this pass).
+- no custom stable `400` error-body contract in this pass.
+- no malformed-JSON parsing contract acceptance in this pass.
 
 ## Behavior Rules
-- this spec records current status-code behavior and coverage evidence for auth invalid-input and auth error paths.
-- for error responses, status codes are the stable contract where documented; framework-default body details are not stable unless explicitly documented as stable.
-- response contracts for successful `200/201` auth/user paths remain aligned with accepted shared contract shapes.
-- DTO/class-validator input-pipeline work remains optional future hardening (not a current requirement) per `docs/auth-security-baseline.md`.
+- DTO/class-validator is the accepted backend baseline for structured HTTP request validation.
+- DTOs are transport-layer request validation objects.
+- DTOs do not replace TypeORM entities, DB constraints, guards, services, or domain/auth rules.
+- DTOs should live near the owning API feature/module unless docs/specs define another convention.
+- this pass applies the baseline first to `POST /api/v1/auth/login` using app-local DTO + route-level `ValidationPipe`.
+- future endpoints with structured request body/query params should follow this baseline unless a spec documents an exception.
+- request contracts are not automatically added to `libs/shared/contracts`; `LoginRequest` remains app-local in this pass.
+- error-status behavior is the stable contract in this scope; framework-default error-body details remain non-stable unless explicitly documented.
+- no custom stable `400` error-body contract is introduced in this pass.
+- stable auth behavior in this pass:
+  - malformed semantic login payloads return `400`.
+  - invalid credentials return `401`.
 
 ### Behavior Matrix (Current State)
 | Behavior | Endpoint / code path | Current status code | Body stability | Coverage | Evidence | State |
 | --- | --- | --- | --- | --- | --- | --- |
-| malformed login request body (semantic payload invalid for required string fields) | `POST /api/v1/auth/login` via `AuthController.readRequiredString(...)` | `400` | not stable (`BadRequestException` body is framework-shaped, no strict body contract) | unit (partial), no dedicated e2e malformed-body matrix | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts` | accepted current behavior |
-| malformed login request body (syntactically malformed JSON before controller) | `POST /api/v1/auth/login` request parsing path | not explicitly documented in current accepted docs/specs; runtime expected to be framework-handled | not stable | missing dedicated unit/e2e coverage in current baseline | absence of explicit case in `apps/api-e2e/src/api/auth.spec.ts` and baseline docs/specs | unresolved |
-| missing login email | `POST /api/v1/auth/login` (`email` undefined -> `BadRequestException`) | `400` | not stable | unit | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts` | accepted current behavior |
-| missing login password | `POST /api/v1/auth/login` (`password` undefined -> `BadRequestException`) | `400` | not stable | code path exists, explicit dedicated test missing | `apps/api/src/app/features/auth/auth.controller.ts` | accepted current behavior with coverage gap |
-| non-string login email/password | `POST /api/v1/auth/login` (`typeof value !== 'string'`) | `400` | not stable | code path exists, explicit dedicated test missing | `apps/api/src/app/features/auth/auth.controller.ts` | accepted current behavior with coverage gap |
-| blank login email/password | `POST /api/v1/auth/login` (`trim() === ''`) | `400` | not stable | unit (blank password covered), no dedicated e2e malformed-body matrix | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts` | accepted current behavior with partial coverage |
-| invalid credentials | `POST /api/v1/auth/login` via `AuthCoreService.issueTokenPairForCredentials(...)` | `401` | not stable | both (unit + e2e) | `apps/api/src/app/features/auth/auth-core.service.ts`, `apps/api/src/app/features/auth/auth-core.service.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| missing refresh cookie | `POST /api/v1/auth/refresh` (`Missing refresh token.`) | `401` | not stable | unit, no dedicated e2e missing-cookie case | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts` | accepted current behavior with e2e gap |
-| invalid/rotated refresh token | `POST /api/v1/auth/refresh` via `verifyRefreshToken(...)` and rotation checks | `401` | not stable | both (unit + e2e) | `apps/api/src/app/features/auth/auth-core.service.ts`, `apps/api/src/app/features/auth/auth-core.service.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| malformed login request body (semantic payload invalid for required string fields) | `POST /api/v1/auth/login` via `LoginRequestDto` + route-level `ValidationPipe` | `400` | not stable (framework ValidationPipe/BadRequest body) | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| malformed login request body (syntactically malformed JSON before controller) | `POST /api/v1/auth/login` request parsing path | not explicitly documented in current accepted docs/specs; runtime expected to be framework-handled | not stable | missing dedicated unit/e2e coverage in current baseline | absence of explicit case in `apps/api-e2e/src/api/auth.spec.ts` and accepted docs/specs | unresolved |
+| missing login email | `POST /api/v1/auth/login` (`email` missing) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| missing login password | `POST /api/v1/auth/login` (`password` missing) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| non-string login email/password | `POST /api/v1/auth/login` (`@IsString`) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| blank login email/password | `POST /api/v1/auth/login` (`trim` transform + `@IsNotEmpty`) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| invalid credentials | `POST /api/v1/auth/login` via `AuthCoreService.issueTokenPairForCredentials(...)` | `401` | not stable | unit + e2e | `apps/api/src/app/features/auth/auth-core.service.ts`, `apps/api/src/app/features/auth/auth-core.service.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| missing refresh cookie | `POST /api/v1/auth/refresh` (`Missing refresh token.`) | `401` | not stable | unit + e2e | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| invalid/rotated refresh token | `POST /api/v1/auth/refresh` via `verifyRefreshToken(...)` and rotation checks | `401` | not stable | unit + e2e | `apps/api/src/app/features/auth/auth-core.service.ts`, `apps/api/src/app/features/auth/auth-core.service.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
 | accessing protected auth endpoint without access token | `GET /api/v1/auth/me` with `JwtAccessAuthGuard` and JWT strategy | `401` | not stable | e2e | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/jwt-access-auth.guard.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| accessing RBAC-protected users endpoint without token | `GET /api/v1/users` with `JwtAccessAuthGuard` + `RolesGuard` | `401` | intentionally not stable body for `401`/`403` on this route; status is stable | both (unit guard semantics + e2e route) | `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `docs/specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
-| accessing RBAC-protected users endpoint with insufficient role | `GET /api/v1/users` with role check (`user` vs required `admin`) | `403` | intentionally not stable body for `401`/`403` on this route; status is stable | both (unit guard semantics + e2e route) | `apps/api/src/app/features/auth/roles.guard.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `docs/specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
+| accessing RBAC-protected users endpoint without token | `GET /api/v1/users` with `JwtAccessAuthGuard` + `RolesGuard` | `401` | intentionally not stable body for `401`/`403`; status is stable | unit + e2e | `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `docs/specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
+| accessing RBAC-protected users endpoint with insufficient role | `GET /api/v1/users` with role check (`user` vs required `admin`) | `403` | intentionally not stable body for `401`/`403`; status is stable | unit + e2e | `apps/api/src/app/features/auth/roles.guard.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `docs/specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
 | successful authorized access (contrast): authenticated profile | `GET /api/v1/auth/me` with valid bearer token | `200` | stable shape (shared `AuthMeResponse`) | e2e | `libs/shared/contracts/src/lib/contracts.ts`, `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| successful authorized access (contrast): admin users list | `GET /api/v1/users` as `admin` | `200` | stable shape (shared `UsersListResponse`) | both (unit + e2e) | `libs/shared/contracts/src/lib/contracts.ts`, `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/users/users.service.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `docs/specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
+| successful authorized access (contrast): admin users list | `GET /api/v1/users` as `admin` | `200` | stable shape (shared `UsersListResponse`) | unit + e2e | `libs/shared/contracts/src/lib/contracts.ts`, `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/users/users.service.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `docs/specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
 
 ## Forbidden Behavior
-- treating framework-default error body fields/messages as stable API contract when docs/tests do not lock them.
-- changing auth status-code semantics (`400/401/403`) in the name of documentation cleanup.
-- widening shared contracts with login request internals in this baseline.
-- converting optional validation hardening into a required immediate implementation scope.
+- treating framework-default error-body fields/messages as stable API contract when docs/tests do not lock them.
+- changing auth status-code semantics (`400/401/403`) while implementing DTO validation.
+- widening shared contracts with login request internals in this pass.
+- implementing global validation rollout in this pass without explicit spec/decision scope.
+- introducing email-format validation in this pass without explicit accepted behavior update.
 
 ## Affected Domains/Modules
 - domains:
   - auth transport invalid-input handling.
   - auth/session error handling.
   - RBAC route-level allow/deny behavior for users list.
-- modules/files likely affected:
+- modules/files:
+  - `apps/api/src/app/features/auth/dto/*`
+  - `apps/api/src/app/features/auth/auth.controller.ts`
+  - `apps/api/src/app/features/auth/auth.controller.spec.ts`
+  - `apps/api-e2e/src/api/auth.spec.ts`
   - `docs/auth-security-baseline.md`
-  - `docs/specs/auth-invalid-input-auth-error-behavior-baseline.md`
-  - evidence sources in `apps/api/src/app/features/auth/*`, `apps/api/src/app/features/users/*`, and `apps/api-e2e/src/api/*`
+  - `docs/ARCHITECTURE.md`
+  - `docs/DECISIONS.md`
 
 ## Design Placement Summary
-- detailed behavior matrix belongs in a focused spec under `docs/specs/*`.
-- canonical auth baseline doc (`docs/auth-security-baseline.md`) should keep a concise summary and link to this detailed spec.
-- implementation details remain in API feature modules and tests; this pass does not move logic.
+- DTO/class-validator request validation belongs in API transport layer near the owning route/controller.
+- DTOs stay app-local by default in this scope (`LoginRequest` is app-local).
+- persistence and domain/auth rules remain in entities/migrations/services/guards as already documented.
 
 ## Relevant Local Skills
 - skills inspected:
@@ -80,67 +94,62 @@
   - `jwt-security`
   - `nx-workspace-patterns`
 - why each skill is relevant:
-  - `nestjs-best-practices`: error-handling and validation documentation framing.
-  - `jwt-security`: token error-path semantics and security-sensitive auth documentation.
-  - `nx-workspace-patterns`: test/gate/workflow alignment for monorepo docs updates.
+  - `nestjs-best-practices`: DTO/class-validator + pipe placement for transport validation.
+  - `jwt-security`: ensure no token/session behavior drift while changing login input validation.
+  - `nx-workspace-patterns`: gate command discipline in Nx workspace.
 - conflicts/tensions with project docs/spec:
-  - skills generally recommend DTO/class-validator pipelines; project baseline keeps that as optional future hardening.
-- project-compatible decision:
-  - document and lock current behavior first; keep DTO/class-validator as optional follow-up hardening only.
+  - `jwt-security` prefers asymmetric signing in general; project accepted HS256 baseline remains unchanged in this pass.
 
 ## Edge Cases
-- malformed JSON parse errors before controller execution are not currently documented as a stable contract in this baseline.
-- invalid-login permutations are partially covered in unit tests and not fully enumerated in API e2e.
-- missing-refresh-cookie behavior is unit-covered but lacks a dedicated API e2e assertion.
+- malformed JSON before controller remains unresolved/non-stable in this pass.
+- no stable framework error-body field/message contract is introduced for `400/401/403`.
+- no email-format validation is added in this pass; only string/non-blank validation is required.
 
 ## Risks
 - risk 1 and mitigation:
-  - risk: accidental over-commitment to unstable framework error-body details.
-  - mitigation: explicitly mark non-stable error body details for `400/401/403` unless already accepted.
+  - risk: accidental behavior drift on non-login endpoints.
+  - mitigation: apply route-level validation to login only; no global rollout in this pass.
 - risk 2 and mitigation:
-  - risk: future validation hardening changes status semantics unintentionally.
-  - mitigation: keep this explicit status/coverage matrix as pre-hardening baseline.
+  - risk: accidental contract-locking on framework error-body details.
+  - mitigation: keep status-code-level contract only for error behavior unless explicitly documented.
 - risk 3 and mitigation:
-  - risk: scope creep into implementation work during docs pass.
-  - mitigation: explicit non-goals and no runtime-code changes in this pass.
+  - risk: scope creep into shared-contract or auth policy changes.
+  - mitigation: keep `LoginRequest` app-local and preserve JWT/session/RBAC/persistence behavior.
 
 ## Test Plan
 - unit tests:
-  - existing `auth.controller`, `auth-core.service`, `jwt-access.strategy`, and `roles.guard` tests remain evidence sources.
+  - update auth controller unit tests for DTO + route-level validation behavior (missing/non-string/blank + trim behavior).
+  - keep auth core/jwt strategy/roles guard tests unchanged.
 - integration/e2e tests:
-  - existing `apps/api-e2e/src/api/auth.spec.ts` and `apps/api-e2e/src/api/users.spec.ts` remain evidence sources.
+  - preserve malformed-login `400` matrix in `apps/api-e2e/src/api/auth.spec.ts`.
+  - preserve invalid credentials `401`.
+  - preserve login success, refresh/logout/auth-me, and users RBAC route behavior.
 - regression coverage:
-  - no runtime changes in this pass; regression execution deferred.
-- anti-hack coverage for behavior changes (general rule coverage, not only the shown example):
-  - reject example-specific patches.
-  - reject hardcoded special cases when the real rule is broader.
-  - reject wrong-layer business-rule placement.
+  - no malformed JSON parse tests are added in this pass.
 
 ## Required Gates
 Use commands from [`../commands-reference.md`](../commands-reference.md).
-- tiny/local gates (if applicable):
-  - docs-only, no runtime impact: gates may be skipped per `commands-reference.md` section `8.1`.
-- normal implementation gates (if applicable):
-  - n/a (no implementation changes in this pass).
-- core gates:
-  - n/a (no runtime behavior changes; documentation/spec pass only).
-- additional domain gates (if applicable):
-  - n/a.
-- manual/proposed checks:
-  - confirm no production code files changed.
-  - confirm spec text aligns with current docs/code/tests evidence only.
+- `npx nx run api:lint`
+- `npx nx run api:test`
+- `npx nx run api:build`
+- `npx nx e2e api-e2e`
 
 ## Acceptance Checks
-- requested auth invalid-input/error behaviors are explicitly documented with endpoint, status, body-stability note, coverage state, and evidence.
-- accepted behavior, optional future hardening, and unresolved gaps are explicitly separated.
-- `401/403` body-stability constraints remain aligned with accepted RBAC spec and baseline docs.
-- no runtime behavior changes are introduced.
+- DTO/class-validator baseline is explicitly accepted for structured backend request validation.
+- login route is first concrete implementation with app-local DTO scope.
+- malformed semantic login payloads return `400`; invalid credentials return `401`.
+- no custom stable `400` error-body contract is introduced.
+- framework-default error body remains non-stable unless explicitly documented.
+- no JWT/session/RBAC/persistence/shared-contract-scope drift is introduced.
 
 ## Documentation Updates Needed
 - docs to update:
-  - `docs/auth-security-baseline.md` to reference this spec from the auth status/baseline section.
+  - `docs/auth-security-baseline.md`
+  - `docs/ARCHITECTURE.md`
+  - `docs/DECISIONS.md`
+  - `docs/implementation-baseline.md`
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
-  - not required in this pass.
-  - reason: this documents existing behavior; no new long-lived policy/architecture decision is introduced.
+  - required and completed in this pass.
+  - entry: `2026-04-27 - Adopt DTO/class-validator as backend structured request-validation baseline`.
