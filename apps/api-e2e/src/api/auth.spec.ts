@@ -2,6 +2,12 @@ import axios, { type AxiosResponse, type Method } from 'axios';
 import { createHmac, randomBytes, scrypt } from 'node:crypto';
 import { promisify } from 'node:util';
 import { Client } from 'pg';
+import type {
+  AccessTokenResponse,
+  AuthMeResponse,
+  AuthRole,
+  LogoutResponse,
+} from '@fullstack-starter/contracts';
 
 const scryptAsync = promisify(scrypt);
 const TRUE_VALUES = new Set(['1', 'true', 'yes', 'on']);
@@ -9,19 +15,6 @@ const FALSE_VALUES = new Set(['0', 'false', 'no', 'off']);
 const PASSWORD_HASH_ALGORITHM = 'scrypt';
 const PASSWORD_KEY_LENGTH = 64;
 const PASSWORD_SALT_BYTES = 16;
-
-interface LoginResponse {
-  accessToken: string;
-}
-
-interface MeResponse {
-  id: string;
-  email: string;
-  displayName: string | null;
-  role: 'admin' | 'user';
-}
-
-type UserRole = 'admin' | 'user';
 
 function readRequiredEnv(key: string): string {
   const value = process.env[key];
@@ -166,7 +159,7 @@ describe('Auth flow e2e', () => {
     return user;
   }
 
-  async function updateUserRole(userId: string, role: UserRole): Promise<void> {
+  async function updateUserRole(userId: string, role: AuthRole): Promise<void> {
     await dbClient.query(
       `
         UPDATE "users"
@@ -181,7 +174,7 @@ describe('Auth flow e2e', () => {
     const plainPassword = 'S3curePassw0rd!';
     const user = await createUser(plainPassword);
 
-    const success = await request<LoginResponse>('POST', '/api/v1/auth/login', {
+    const success = await request<AccessTokenResponse>('POST', '/api/v1/auth/login', {
       data: {
         email: user.email,
         password: plainPassword,
@@ -215,7 +208,7 @@ describe('Auth flow e2e', () => {
     const plainPassword = 'RefreshPassw0rd!';
     const user = await createUser(plainPassword);
 
-    const login = await request<LoginResponse>('POST', '/api/v1/auth/login', {
+    const login = await request<AccessTokenResponse>('POST', '/api/v1/auth/login', {
       data: {
         email: user.email,
         password: plainPassword,
@@ -229,11 +222,15 @@ describe('Auth flow e2e', () => {
     );
     expect(initialRefreshToken).toEqual(expect.any(String));
 
-    const firstRefresh = await request<LoginResponse>('POST', '/api/v1/auth/refresh', {
-      headers: {
-        Cookie: buildCookieHeader(refreshCookieName, String(initialRefreshToken)),
+    const firstRefresh = await request<AccessTokenResponse>(
+      'POST',
+      '/api/v1/auth/refresh',
+      {
+        headers: {
+          Cookie: buildCookieHeader(refreshCookieName, String(initialRefreshToken)),
+        },
       },
-    });
+    );
     expect(firstRefresh.status).toBe(201);
 
     const rotatedRefreshToken = getCookieValueFromSetCookie(
@@ -271,7 +268,7 @@ describe('Auth flow e2e', () => {
     const denied = await request('GET', '/api/v1/auth/me');
     expect(denied.status).toBe(401);
 
-    const login = await request<LoginResponse>('POST', '/api/v1/auth/login', {
+    const login = await request<AccessTokenResponse>('POST', '/api/v1/auth/login', {
       data: {
         email: user.email,
         password: plainPassword,
@@ -279,7 +276,7 @@ describe('Auth flow e2e', () => {
     });
     expect(login.status).toBe(201);
 
-    const allowed = await request<MeResponse>('GET', '/api/v1/auth/me', {
+    const allowed = await request<AuthMeResponse>('GET', '/api/v1/auth/me', {
       headers: {
         Authorization: `Bearer ${login.data.accessToken}`,
       },
@@ -297,7 +294,7 @@ describe('Auth flow e2e', () => {
     const plainPassword = 'RoleChangePassw0rd!';
     const user = await createUser(plainPassword);
 
-    const login = await request<LoginResponse>('POST', '/api/v1/auth/login', {
+    const login = await request<AccessTokenResponse>('POST', '/api/v1/auth/login', {
       data: {
         email: user.email,
         password: plainPassword,
@@ -306,7 +303,7 @@ describe('Auth flow e2e', () => {
     expect(login.status).toBe(201);
 
     const originalAccessToken = login.data.accessToken;
-    const loginMe = await request<MeResponse>('GET', '/api/v1/auth/me', {
+    const loginMe = await request<AuthMeResponse>('GET', '/api/v1/auth/me', {
       headers: {
         Authorization: `Bearer ${originalAccessToken}`,
       },
@@ -316,7 +313,7 @@ describe('Auth flow e2e', () => {
 
     await updateUserRole(user.id, 'admin');
 
-    const staleTokenMe = await request<MeResponse>('GET', '/api/v1/auth/me', {
+    const staleTokenMe = await request<AuthMeResponse>('GET', '/api/v1/auth/me', {
       headers: {
         Authorization: `Bearer ${originalAccessToken}`,
       },
@@ -330,14 +327,14 @@ describe('Auth flow e2e', () => {
     );
     expect(refreshToken).toEqual(expect.any(String));
 
-    const refresh = await request<LoginResponse>('POST', '/api/v1/auth/refresh', {
+    const refresh = await request<AccessTokenResponse>('POST', '/api/v1/auth/refresh', {
       headers: {
         Cookie: buildCookieHeader(refreshCookieName, String(refreshToken)),
       },
     });
     expect(refresh.status).toBe(201);
 
-    const refreshedTokenMe = await request<MeResponse>('GET', '/api/v1/auth/me', {
+    const refreshedTokenMe = await request<AuthMeResponse>('GET', '/api/v1/auth/me', {
       headers: {
         Authorization: `Bearer ${refresh.data.accessToken}`,
       },
@@ -350,7 +347,7 @@ describe('Auth flow e2e', () => {
     const plainPassword = 'LogoutPassw0rd!';
     const user = await createUser(plainPassword);
 
-    const login = await request<LoginResponse>('POST', '/api/v1/auth/login', {
+    const login = await request<AccessTokenResponse>('POST', '/api/v1/auth/login', {
       data: {
         email: user.email,
         password: plainPassword,
@@ -364,7 +361,7 @@ describe('Auth flow e2e', () => {
     );
     expect(refreshToken).toEqual(expect.any(String));
 
-    const logout = await request<{ success: true }>('POST', '/api/v1/auth/logout', {
+    const logout = await request<LogoutResponse>('POST', '/api/v1/auth/logout', {
       headers: {
         Cookie: buildCookieHeader(refreshCookieName, String(refreshToken)),
       },
@@ -386,7 +383,7 @@ describe('Auth flow e2e', () => {
     const plainPassword = 'SingleSessionPassw0rd!';
     const user = await createUser(plainPassword);
 
-    const firstLogin = await request<LoginResponse>('POST', '/api/v1/auth/login', {
+    const firstLogin = await request<AccessTokenResponse>('POST', '/api/v1/auth/login', {
       data: {
         email: user.email,
         password: plainPassword,
@@ -399,7 +396,7 @@ describe('Auth flow e2e', () => {
     );
     expect(firstRefreshToken).toEqual(expect.any(String));
 
-    const secondLogin = await request<LoginResponse>('POST', '/api/v1/auth/login', {
+    const secondLogin = await request<AccessTokenResponse>('POST', '/api/v1/auth/login', {
       data: {
         email: user.email,
         password: plainPassword,

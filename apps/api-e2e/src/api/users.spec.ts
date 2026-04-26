@@ -2,6 +2,11 @@ import axios, { type AxiosResponse, type Method } from 'axios';
 import { randomBytes, randomUUID, scrypt } from 'node:crypto';
 import { promisify } from 'node:util';
 import { Client } from 'pg';
+import type {
+  AccessTokenResponse,
+  AuthRole,
+  UsersListResponse,
+} from '@fullstack-starter/contracts';
 
 const scryptAsync = promisify(scrypt);
 const TRUE_VALUES = new Set(['1', 'true', 'yes', 'on']);
@@ -10,24 +15,9 @@ const PASSWORD_HASH_ALGORITHM = 'scrypt';
 const PASSWORD_KEY_LENGTH = 64;
 const PASSWORD_SALT_BYTES = 16;
 
-interface LoginResponse {
-  accessToken: string;
-}
-
-interface UserListItem {
-  id: string;
-  email: string;
-  displayName: string | null;
-  role: 'admin' | 'user';
-}
-
-interface UsersListResponse {
-  users: UserListItem[];
-}
-
 interface CreateUserInput {
   passwordHash: string | null;
-  role: 'admin' | 'user';
+  role: AuthRole;
   displayName: string | null;
   createdAt?: Date;
   explicitId?: string;
@@ -37,7 +27,7 @@ interface CreatedUser {
   id: string;
   email: string;
   displayName: string | null;
-  role: 'admin' | 'user';
+  role: AuthRole;
 }
 
 function readRequiredEnv(key: string): string {
@@ -162,12 +152,16 @@ describe('Users RBAC e2e', () => {
     email: string,
     password: string,
   ): Promise<string> {
-    const loginResponse = await request<LoginResponse>('POST', '/api/v1/auth/login', {
-      data: {
-        email,
-        password,
+    const loginResponse = await request<AccessTokenResponse>(
+      'POST',
+      '/api/v1/auth/login',
+      {
+        data: {
+          email,
+          password,
+        },
       },
-    });
+    );
     expect(loginResponse.status).toBe(201);
     return loginResponse.data.accessToken;
   }
