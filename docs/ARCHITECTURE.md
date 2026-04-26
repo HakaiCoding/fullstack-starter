@@ -43,10 +43,10 @@ Request flow (baseline):
 ## 4. Core Domains and Modules
 ### 4.1 Authentication and Sessions
 - API ownership:
-  - `apps/api/src/app/auth/*`
+  - `apps/api/src/app/features/auth/*`
   - `apps/api/src/db/entities/auth-session.entity.ts`
 - Web ownership:
-  - `apps/web/src/app/auth/*`
+  - `apps/web/src/app/core/auth/*`
 - Domain baseline details:
   - [`auth-security-baseline.md`](./auth-security-baseline.md)
 
@@ -125,10 +125,10 @@ Workspace-level import/tag boundaries are enforced via:
 
 ## 6. Change Placement Guidance (Start Here)
 - API behavior change in auth/session flow:
-  - start in `apps/api/src/app/auth/*`
+  - start in `apps/api/src/app/features/auth/*`
   - update persistence entities/migrations only if data model changes
 - Web display or interaction change:
-  - start in `apps/web/src/app/*`
+  - start in `apps/web/src/app/features/*` (or `apps/web/src/app/layout/*` for app-shell/layout concerns)
   - keep business rules in API/domain layer
 - Contract shape change used by API and web:
   - start in `libs/shared/contracts/*`

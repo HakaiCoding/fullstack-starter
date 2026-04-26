@@ -4,9 +4,9 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService, type JwtVerifyOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { AuthSessionEntity } from '../../db/entities/auth-session.entity';
-import { UserEntity } from '../../db/entities/user.entity';
-import { type AuthConfig, authConfig } from '../config/auth.config';
+import { AuthSessionEntity } from '../../../db/entities/auth-session.entity';
+import { UserEntity } from '../../../db/entities/user.entity';
+import { type AuthConfig, authConfig } from '../../config/auth.config';
 import { type AuthRole } from './auth.types';
 
 const scryptAsync = promisify(scrypt);

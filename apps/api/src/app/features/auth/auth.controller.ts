@@ -16,7 +16,7 @@ import type {
   LogoutResponse,
 } from '@fullstack-starter/contracts';
 import { type Request, type Response, type CookieOptions } from 'express';
-import { type AuthConfig, authConfig } from '../config/auth.config';
+import { type AuthConfig, authConfig } from '../../config/auth.config';
 import { AuthCoreService } from './auth-core.service';
 import { type AuthenticatedRequestUser } from './auth.types';
 import { JwtAccessAuthGuard } from './jwt-access-auth.guard';

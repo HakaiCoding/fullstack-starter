@@ -35,3 +35,9 @@ Placement reminders:
 - Controllers/guards/strategies handle transport/auth wiring.
 - Business/domain rules belong in service/domain modules.
 - Persistence rules belong in `apps/api/src/db/*` entities/migrations/options.
+
+## Source Structure Baseline
+- `src/app/config/*`: configuration parsing and validation
+- `src/app/system/*`: root app system files (root controller/service/readiness)
+- `src/app/features/*`: API feature modules (for example `auth`, `users`)
+- `src/db/*`: persistence boundary (entities, migrations, data-source, TypeORM options)

@@ -29,3 +29,9 @@ Placement reminders:
 - UI/components handle rendering, interaction, and API call orchestration.
 - Business/domain rules should not be implemented in UI components.
 - Cross-app contracts should live in `libs/shared/contracts`.
+
+## Source Structure Baseline
+- `src/app/core/*`: app-wide infrastructure (for example auth services/interceptors/types)
+- `src/app/layout/*`: shell/layout components
+- `src/app/features/*`: routed/user-facing features
+- keep root app bootstrap/wiring files in `src/app/` (`app.ts`, `app.config.ts`, `app.routes.ts`)

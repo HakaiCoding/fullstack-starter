@@ -97,3 +97,14 @@ Decision: `libs/shared/contracts` is the accepted home for shared API/web extern
 Alternatives considered: Keep duplicate app-local contract types; include deferred `LoginRequest` in the first pass; move API-internal or persistence-layer types into the shared contracts library.
 Consequences: API and web now compile against a single shared external contract source for the approved set with unchanged runtime/API semantics; follow-up consolidations must remain boundary-safe and explicit about deferred/internal exclusions.
 Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`specs/auth-user-shared-contract-consolidation.md`](./specs/auth-user-shared-contract-consolidation.md)
+
+## 2026-04-26 - Adopt baseline app folder conventions for web and api apps
+Status: Accepted
+Context: `apps/web/src/app` and `apps/api/src/app` had mixed placement of app-wide infrastructure, layout/system files, and feature modules, which reduced clarity for change placement and onboarding.
+Decision: Adopt a simple default app-folder baseline:
+- web: `apps/web/src/app/core/*` for app-wide infrastructure, `apps/web/src/app/layout/*` for shell/layout components, and `apps/web/src/app/features/*` for routed/user-facing features.
+- api: `apps/api/src/app/config/*` for config, `apps/api/src/app/system/*` for root app system files, and `apps/api/src/app/features/*` for API feature modules.
+- keep `apps/api/src/db/*` as the persistence boundary.
+Alternatives considered: Keep flat/legacy placement under `app/*`; adopt deeper layered structures (`feature/data/ui/model` or similar) in this pass.
+Consequences: Placement conventions are clearer and consistent across apps where useful, while preserving framework-specific boundaries; implementation requires path-only file moves and import updates without behavior changes.
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/app-folder-convention-baseline-restructure.md`](./specs/app-folder-convention-baseline-restructure.md), [`../apps/web/README.md`](../apps/web/README.md), [`../apps/api/README.md`](../apps/api/README.md)

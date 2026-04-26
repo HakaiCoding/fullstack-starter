@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
+import { AppController } from './system/app.controller';
+import { AppService } from './system/app.service';
+import { AuthModule } from './features/auth/auth.module';
 import { authConfig } from './config/auth.config';
 import { corsConfig } from './config/cors.config';
 import { type DatabaseConfig, databaseConfig } from './config/database.config';
 import { validateEnvironment } from './config/env.validation';
 import { buildTypeOrmModuleOptions } from '../db/typeorm.options';
-import { DatabaseReadinessService } from './database-readiness.service';
-import { UsersModule } from './users/users.module';
+import { DatabaseReadinessService } from './system/database-readiness.service';
+import { UsersModule } from './features/users/users.module';
 
 @Module({
   imports: [
