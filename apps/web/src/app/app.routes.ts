@@ -1,14 +1,9 @@
 import { Route } from '@angular/router';
-import { AuthStatusPage } from './auth-status/auth-status.page';
+import { HomePage } from './home/home.page';
 
 export const appRoutes: Route[] = [
   {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'auth-status',
-  },
-  {
-    path: 'auth-status',
-    component: AuthStatusPage,
+    component: HomePage,
   },
 ];

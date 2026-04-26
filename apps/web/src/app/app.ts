@@ -1,14 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { RouterOutlet } from '@angular/router';
+import { AppShellComponent } from './app-shell/app-shell.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatToolbarModule, RouterOutlet],
+  imports: [AppShellComponent],
   selector: 'app-root',
   templateUrl: './app.html',
-  styleUrl: './app.scss',
 })
-export class App {
-  protected title = 'web';
-}
+export class App {}
