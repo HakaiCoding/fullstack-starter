@@ -8,10 +8,16 @@
 
 ## Status
 - Proposed | In Progress | Accepted | Deprecated
+- guidance:
+  - accepted/deprecated specs may include concise lifecycle bullets (for example closure or superseded references).
+  - avoid transient process notes tied to one cleanup/edit pass.
 
 ## Problem
 - what is failing or missing today
 - why this matters
+- guidance:
+  - keep this focused on the problem context and impact.
+  - do not use this section as a broad repository-state dump.
 
 ## Non-Goals
 - explicit things this change will not do
@@ -70,6 +76,12 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 
 ## Documentation Updates Needed
 - docs to update:
+- guidance:
+  - record durable documentation obligations or closure status.
+  - avoid transient notes about a one-time cleanup/normalization pass.
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry
+- guidance:
+  - state clearly whether decision work is required, closed, or intentionally not needed.
+  - if closed, reference the accepted decision entry.
