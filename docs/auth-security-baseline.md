@@ -79,6 +79,7 @@ Related docs:
 - API e2e verifies role-change-on-refresh behavior: stale access token remains valid until expiry; refreshed token reflects updated persisted role
 - API e2e verifies `GET /api/v1/users` allow/deny matrix (`401` unauthenticated, `403` non-admin, `200` admin), payload shaping, and deterministic ordering
 - API unit tests verify RBAC primitives (`Roles(...)` metadata and role guard `401`/`403`/allow semantics)
+- detailed auth invalid-input and auth error behavior matrix is documented in [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)
 
 ### 3.3 Accepted Project Tradeoffs
 - JWT access + rotating persisted refresh sessions with single-session replacement is the accepted baseline (see [`DECISIONS.md`](./DECISIONS.md))
@@ -98,6 +99,14 @@ Related docs:
 - pagination/filter/sort query contracts for user listing
 - strict custom error-body contracts for `401`/`403` responses
 - broader authorization model expansion (additional roles/permissions matrix)
+
+### 3.6 Auth Invalid-Input and Error Behavior Contract (as of 2026-04-27)
+- source-of-truth detail for current auth invalid-input and auth error behavior:
+  - [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)
+- current baseline posture:
+  - status-code behavior is documented and preserved as current accepted behavior.
+  - framework-default error body details are not treated as stable unless explicitly documented as stable.
+  - no custom stable `400` error-body contract is accepted in this baseline.
 
 ## 4. Known Gaps (Deferred by Design)
 - no additional live role-protected feature routes are accepted yet beyond `GET /api/v1/users`

@@ -112,6 +112,10 @@ async function request<T>(
   });
 }
 
+function expectHttpErrorResponseShape(response: AxiosResponse): void {
+  expect(response.data).toEqual(expect.any(Object));
+}
+
 describe('Auth flow e2e', () => {
   const refreshCookieName = readRequiredEnv('AUTH_REFRESH_COOKIE_NAME');
   const createdUserIds: string[] = [];
@@ -202,6 +206,73 @@ describe('Auth flow e2e', () => {
     });
 
     expect(failure.status).toBe(401);
+    expectHttpErrorResponseShape(failure);
+  });
+
+  it('returns 400 for login payload missing password', async () => {
+    const response = await request('POST', '/api/v1/auth/login', {
+      data: {
+        email: 'missing-password@example.com',
+      },
+    });
+
+    expect(response.status).toBe(400);
+    expectHttpErrorResponseShape(response);
+  });
+
+  it('returns 400 for login payload with non-string email', async () => {
+    const response = await request('POST', '/api/v1/auth/login', {
+      data: {
+        email: 123,
+        password: 'S3curePassw0rd!',
+      },
+    });
+
+    expect(response.status).toBe(400);
+    expectHttpErrorResponseShape(response);
+  });
+
+  it('returns 400 for login payload with non-string password', async () => {
+    const response = await request('POST', '/api/v1/auth/login', {
+      data: {
+        email: 'non-string-password@example.com',
+        password: 123,
+      },
+    });
+
+    expect(response.status).toBe(400);
+    expectHttpErrorResponseShape(response);
+  });
+
+  it('returns 400 for login payload with blank email', async () => {
+    const response = await request('POST', '/api/v1/auth/login', {
+      data: {
+        email: '   ',
+        password: 'S3curePassw0rd!',
+      },
+    });
+
+    expect(response.status).toBe(400);
+    expectHttpErrorResponseShape(response);
+  });
+
+  it('returns 400 for login payload with blank password', async () => {
+    const response = await request('POST', '/api/v1/auth/login', {
+      data: {
+        email: 'blank-password@example.com',
+        password: '   ',
+      },
+    });
+
+    expect(response.status).toBe(400);
+    expectHttpErrorResponseShape(response);
+  });
+
+  it('returns 401 for refresh request without refresh cookie', async () => {
+    const response = await request('POST', '/api/v1/auth/refresh');
+
+    expect(response.status).toBe(401);
+    expectHttpErrorResponseShape(response);
   });
 
   it('refresh succeeds, rotates token, and rejects old refresh token', async () => {
