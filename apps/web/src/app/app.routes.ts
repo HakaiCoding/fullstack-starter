@@ -1,14 +1,14 @@
 import { Route } from '@angular/router';
-import { AuthWorkbenchPage } from './auth-workbench/auth-workbench.page';
+import { AuthStatusPage } from './auth-status/auth-status.page';
 
 export const appRoutes: Route[] = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'auth-workbench',
+    redirectTo: 'auth-status',
   },
   {
-    path: 'auth-workbench',
-    component: AuthWorkbenchPage,
+    path: 'auth-status',
+    component: AuthStatusPage,
   },
 ];
