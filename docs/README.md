@@ -12,6 +12,10 @@ Supplementary documentation index for this repository.
 ## Supplementary Docs (This Folder)
 - [`commands-reference.md`](./commands-reference.md): runnable command bundles and gate profiles.
 
+## Workflow Docs Export Utility
+- [`../Export-AiWorkflowDocs.ps1`](../Export-AiWorkflowDocs.ps1): exports shareable AI workflow docs zip, recursively including local linked markdown files while preserving repo-relative paths.
+- run from repo root: `.\Export-AiWorkflowDocs.ps1` (optional: `-OutputPath .\ai-workflow-docs.zip`)
+
 ## Normal Read Order Before Coding
 1. [`../AI_CONTRACT.md`](../AI_CONTRACT.md)
 2. [`../projectmap.md`](../projectmap.md)
