@@ -22,8 +22,8 @@ npx nx run web:lint
 
 ## Boundary Guidance
 Before implementing web changes, read:
-- [`../../docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md)
-- [`../../docs/AI_CONTRACT.md`](../../docs/AI_CONTRACT.md)
+- [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
+- [`../../AI_CONTRACT.md`](../../AI_CONTRACT.md)
 
 Placement reminders:
 - UI/components handle rendering, interaction, and API call orchestration.

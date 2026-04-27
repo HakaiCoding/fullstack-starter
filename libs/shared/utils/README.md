@@ -25,5 +25,5 @@ npx nx lint utils
 - Allowed scope direction: `scope:shared` -> `scope:shared`
 
 For repository-wide AI and placement rules:
-- [`../../../docs/AI_CONTRACT.md`](../../../docs/AI_CONTRACT.md)
-- [`../../../docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md)
+- [`../../../AI_CONTRACT.md`](../../../AI_CONTRACT.md)
+- [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md)

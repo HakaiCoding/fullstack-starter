@@ -27,9 +27,9 @@ npx nx run api:lint
 
 ## Boundary Guidance
 Before implementing API changes, read:
-- [`../../docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md)
-- [`../../docs/AI_CONTRACT.md`](../../docs/AI_CONTRACT.md)
-- [`../../docs/auth-security-baseline.md`](../../docs/auth-security-baseline.md) (for auth/session changes)
+- [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
+- [`../../AI_CONTRACT.md`](../../AI_CONTRACT.md)
+- [`../../DECISIONS.md`](../../DECISIONS.md) and relevant auth/security specs in [`../../specs/`](../../specs/) (for auth/session changes)
 
 Placement reminders:
 - Controllers/guards/strategies handle transport/auth wiring.
