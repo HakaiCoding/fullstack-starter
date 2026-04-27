@@ -17,7 +17,7 @@ Add an entry when a change:
 Use this format for every entry:
 
 ```md
-## YYYY-MM-DD — Decision title
+## YYYY-MM-DD - Decision title
 Status:
 Context:
 Decision:
@@ -26,31 +26,31 @@ Consequences:
 Related docs/specs:
 ```
 
-## 2026-04-24 — Enforce Nx module boundaries with project tags
+## 2026-04-24 - Enforce Nx module boundaries with project tags
 Status: Accepted
 Context: The workspace contains multiple apps and shared libraries that must remain decoupled.
 Decision: Use `@nx/enforce-module-boundaries` constraints for `type:*` and `scope:*` tags as the enforced dependency model.
 Alternatives considered: Unrestricted imports; convention-only boundaries.
 Consequences: Architectural drift is reduced; some cross-module shortcuts are blocked and require explicit shared-library design.
-Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`../eslint.config.mjs`](../eslint.config.mjs)
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`eslint.config.mjs`](./eslint.config.mjs)
 
-## 2026-04-24 — Use JWT access tokens with rotating refresh sessions
+## 2026-04-24 - Use JWT access tokens with rotating refresh sessions
 Status: Accepted
 Context: Auth baseline requires short-lived access tokens plus revocable session continuity.
-Decision: Use JWT access tokens and refresh tokens stored as hashed session records with rotation and single-session replacement behavior.
+Decision: Use JWT access tokens and refresh tokens stored as hashed session records with rotation and single-session replacement behavior. Frontend baseline uses access-token storage in memory only, refresh-token storage in `HttpOnly` cookie, and one refresh attempt followed by one retry of the original request.
 Alternatives considered: Stateless long-lived JWT only; server session-only auth.
 Consequences: Better revocation/session control; additional session persistence and refresh flow complexity.
-Related docs/specs: [`auth-security-baseline.md`](./auth-security-baseline.md)
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/role-persistence-jwt-claim-rbac-baseline.md`](./specs/role-persistence-jwt-claim-rbac-baseline.md)
 
-## 2026-04-24 — Use migration-driven schema changes (no auto sync)
+## 2026-04-24 - Use migration-driven schema changes (no auto sync)
 Status: Accepted
 Context: Database evolution should be reviewable and reproducible.
 Decision: Apply schema changes via TypeORM migrations only and keep schema auto-sync disabled.
 Alternatives considered: Runtime schema sync; manual out-of-band SQL changes only.
 Consequences: Stronger change traceability; migration maintenance is required for every schema change.
-Related docs/specs: [`implementation-baseline.md`](./implementation-baseline.md), [`commands-reference.md`](./commands-reference.md)
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`docs/commands-reference.md`](./docs/commands-reference.md)
 
-## 2026-04-24 — Establish AI contract workflow for core changes
+## 2026-04-24 - Establish AI contract workflow for core changes
 Status: Accepted
 Context: AI sessions can over-optimize local fixes and place logic in the wrong layer without explicit workflow constraints.
 Decision: Use [`AI_CONTRACT.md`](./AI_CONTRACT.md) as the required session workflow and completion checklist for AI-assisted coding.
@@ -58,7 +58,7 @@ Alternatives considered: Keep guidance only in ad hoc chat prompts; rely on revi
 Consequences: More predictable AI sessions and clearer review criteria; requires ongoing discipline until automated enforcement exists.
 Related docs/specs: [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
-## 2026-04-24 — Require feature specs for core changes
+## 2026-04-24 - Require feature specs for core changes
 Status: Accepted
 Context: Core-domain changes need explicit problem/rule/edge-case/test constraints before implementation.
 Decision: For core changes, create or update a feature spec using [`specs/_template.md`](./specs/_template.md) before coding.
@@ -66,13 +66,13 @@ Alternatives considered: Ticket-only descriptions; implementation-first approach
 Consequences: Better systemic correctness and traceability; adds a lightweight upfront documentation step.
 Related docs/specs: [`specs/_template.md`](./specs/_template.md), [`AI_CONTRACT.md`](./AI_CONTRACT.md)
 
-## 2026-04-24 — Use local skills as preferred technology-practice reference for AI-assisted work
+## 2026-04-24 - Use local skills as preferred technology-practice reference for AI-assisted work
 Status: Accepted
 Context: AI-assisted sessions need current technology/tooling/workflow guidance and can drift when relying on generic model assumptions alone.
-Decision: For technology-specific, framework-specific, library-specific, tooling-specific, security-sensitive, and workflow-specific tasks, AI sessions are expected to inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default. Project docs/specs/decisions remain authoritative for repository-specific architecture, boundaries, and accepted policy.
+Decision: For technology-specific, framework-specific, library-specific, tooling-specific, security-sensitive, and workflow-specific tasks, AI sessions are expected to inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default. Canonical project artifacts/specs/decisions remain authoritative for repository-specific architecture, boundaries, and accepted policy.
 Alternatives considered: Treat local skills as optional references; rely on generic model memory for best-practice guidance.
-Consequences: Guidance quality should stay current with local skill updates; conflicts with repository docs/specs/decisions must be surfaced explicitly and resolved using the safest project-compatible option; non-trivial implementation/planning outputs should report relevant skills inspected/used and any conflicts or tensions.
-Related docs/specs: [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`README.md`](./README.md), [`specs/_template.md`](./specs/_template.md), [`commands-reference.md`](./commands-reference.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+Consequences: Guidance quality should stay current with local skill updates; conflicts with repository artifacts/specs/decisions must be surfaced explicitly and resolved using the safest project-compatible option; non-trivial implementation/planning outputs should report relevant skills inspected/used and any conflicts or tensions.
+Related docs/specs: [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`docs/README.md`](./docs/README.md), [`specs/_template.md`](./specs/_template.md), [`docs/commands-reference.md`](./docs/commands-reference.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
 ## 2026-04-25 - Use `GET /api/v1/users` as first live RBAC route
 Status: Accepted
@@ -80,7 +80,7 @@ Context: RBAC primitives (`Roles(...)` + `RolesGuard`) were implemented, but liv
 Decision: Adopt `GET /api/v1/users` as the first live RBAC-protected route with admin-only access and explicit behavior: unauthenticated requests return `401`, authenticated `user` role requests return `403`, and authenticated `admin` role requests return `200` with `{ users: UserListItem[] }` where each item contains only `id`, `email`, `displayName`, and `role`.
 Alternatives considered: Protect health/readiness endpoints; defer route-level RBAC further; add fake/demo endpoints only to claim completion.
 Consequences: RBAC is now exercised on a real API route with deterministic list ordering and payload-shaping constraints, while ownership logic, pagination/filter/sort query contracts, and broader user-management scope remain explicitly deferred.
-Related docs/specs: [`auth-security-baseline.md`](./auth-security-baseline.md), [`implementation-baseline.md`](./implementation-baseline.md), [`specs/first-meaningful-rbac-protected-route-decision.md`](./specs/first-meaningful-rbac-protected-route-decision.md), [`specs/role-persistence-jwt-claim-rbac-baseline.md`](./specs/role-persistence-jwt-claim-rbac-baseline.md)
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/first-meaningful-rbac-protected-route-decision.md`](./specs/first-meaningful-rbac-protected-route-decision.md), [`specs/role-persistence-jwt-claim-rbac-baseline.md`](./specs/role-persistence-jwt-claim-rbac-baseline.md)
 
 ## 2026-04-25 - Use Angular Material as the `apps/web` UI component library baseline
 Status: Accepted
@@ -88,7 +88,7 @@ Context: The web app needed a standardized, maintained component library and the
 Decision: Adopt Angular Material (`@angular/material`) with Angular CDK (`@angular/cdk`) as the default UI component library for `apps/web`, with Material theming configured in `apps/web/src/styles.scss` and animation providers configured in app bootstrap.
 Alternatives considered: No shared UI component library; custom-only component implementations; postpone UI library standardization.
 Consequences: Faster and more consistent UI development with established accessibility primitives; frontend implementation should prefer Material/CDK primitives unless there is a clear project-specific reason not to.
-Related docs/specs: [`../apps/web/README.md`](../apps/web/README.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`implementation-baseline.md`](./implementation-baseline.md)
+Related docs/specs: [`apps/web/README.md`](./apps/web/README.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
 ## 2026-04-26 - Consolidate shared auth-user external contracts in `libs/shared/contracts`
 Status: Accepted
@@ -107,7 +107,7 @@ Decision: Adopt a simple default app-folder baseline:
 - keep `apps/api/src/db/*` as the persistence boundary.
 Alternatives considered: Keep flat/legacy placement under `app/*`; adopt deeper layered structures (`feature/data/ui/model` or similar) in this pass.
 Consequences: Placement conventions are clearer and consistent across apps where useful, while preserving framework-specific boundaries; implementation requires path-only file moves and import updates without behavior changes.
-Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/app-folder-convention-baseline-restructure.md`](./specs/app-folder-convention-baseline-restructure.md), [`../apps/web/README.md`](../apps/web/README.md), [`../apps/api/README.md`](../apps/api/README.md)
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/app-folder-convention-baseline-restructure.md`](./specs/app-folder-convention-baseline-restructure.md), [`apps/web/README.md`](./apps/web/README.md), [`apps/api/README.md`](./apps/api/README.md)
 
 ## 2026-04-27 - Adopt DTO/class-validator as backend structured request-validation baseline
 Status: Accepted
@@ -115,4 +115,20 @@ Context: Auth invalid-input handling was manually validated in controller code a
 Decision: DTO/class-validator is the accepted backend baseline for structured HTTP request validation at the API transport layer (request body/query/params). DTOs are transport request-validation objects and do not replace TypeORM entities, DB constraints, guards, services, or domain/auth rules. DTOs should live near their owning API feature/module unless another convention is documented. This pass applies the baseline first to `POST /api/v1/auth/login` with an app-local login request DTO.
 Alternatives considered: Keep manual controller validation per endpoint; defer DTO/class-validator baseline; roll out global ValidationPipe in this pass.
 Consequences: Malformed semantic login payloads continue to return `400` and invalid credentials continue to return `401`, while framework-default error body details remain non-stable unless explicitly documented. Future endpoints with structured request bodies/query params are expected to follow this baseline unless a spec documents an exception. Request contracts are not auto-promoted into `libs/shared/contracts`, and `LoginRequest` remains app-local in this pass.
-Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`auth-security-baseline.md`](./auth-security-baseline.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)
+
+## 2026-04-27 - Define auth account and authorization baseline model
+Status: Accepted
+Context: Durable auth/account semantics were previously summarized in supplementary baseline docs and need canonical decision placement.
+Decision: Use the following baseline account and authorization model: persisted authenticated roles are `admin` and `user`; unauthenticated requests/users are treated as a public visitor context (not a persisted role); request-time authorization trusts validated access-token role claim until token expiry; protected-route semantics remain `401` for unauthenticated requests and `403` for authenticated requests without the required role; live admin-only RBAC scope remains intentionally limited to `GET /api/v1/users` until expanded by explicit spec/decision.
+Alternatives considered: Keep account model semantics only in supplementary baseline docs; expand immediately to a broader permissions matrix.
+Consequences: Canonical source-of-truth for account/authorization semantics no longer depends on supplementary baseline docs; broader authorization scope still requires explicit follow-up specs/decisions.
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/role-persistence-jwt-claim-rbac-baseline.md`](./specs/role-persistence-jwt-claim-rbac-baseline.md), [`specs/first-meaningful-rbac-protected-route-decision.md`](./specs/first-meaningful-rbac-protected-route-decision.md)
+
+## 2026-04-27 - Define refresh-cookie and CORS safety baseline
+Status: Accepted
+Context: Runtime cookie/CORS safety constraints were previously captured in supplementary baseline docs and need canonical decision placement.
+Decision: Adopt the following baseline transport-safety posture: refresh cookie uses `HttpOnly=true`, `path=/`, and `sameSite=Lax`; runtime must enforce `AUTH_REFRESH_COOKIE_SECURE=true` in production and when `AUTH_REFRESH_COOKIE_SAME_SITE=none`; CORS uses explicit allowlisted origins from `API_CORS_ALLOWED_ORIGINS` with credentials enabled, while requests without `Origin` remain allowed.
+Alternatives considered: Leave cookie/CORS constraints as implementation-only details; require stricter defaults immediately without preserving current accepted baseline.
+Consequences: Canonical source-of-truth for accepted cookie/CORS safety constraints is preserved without supplementary baseline docs; stricter hardening options remain explicit future scope.
+Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md), [`specs/global-validationpipe-rollout-decision.md`](./specs/global-validationpipe-rollout-decision.md)

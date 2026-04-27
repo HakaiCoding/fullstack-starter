@@ -1,4 +1,4 @@
-# Feature Spec (Core Change)
+﻿# Feature Spec (Core Change)
 
 ## Feature/Change Name
 - name: Auth-user shared contract consolidation baseline
@@ -70,13 +70,13 @@
 - modules/files likely affected:
   - `libs/shared/contracts/src/lib/*`
   - `libs/shared/contracts/src/index.ts`
-  - `apps/api/src/app/auth/auth.controller.ts` (external response typing only)
-  - `apps/api/src/app/users/users.types.ts` (external response contract typing)
-  - `apps/web/src/app/auth/auth.types.ts` and web consumers of these external shapes
+  - `apps/api/src/app/features/auth/auth.controller.ts` (external response typing only)
+  - `apps/api/src/app/features/users/users.types.ts` (external response contract typing)
+  - `apps/web/src/app/core/auth/auth.types.ts` and web consumers of these external shapes
 - implementation verification anchors:
   - shared contracts: `libs/shared/contracts/src/lib/contracts.ts`
-  - API consumers: `apps/api/src/app/auth/auth.controller.ts`, `apps/api/src/app/users/users.types.ts`
-  - web consumers: `apps/web/src/app/auth/auth.types.ts`, `apps/web/src/app/auth/auth-api.service.ts`
+  - API consumers: `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/users/users.types.ts`
+  - web consumers: `apps/web/src/app/core/auth/auth.types.ts`, `apps/web/src/app/core/auth/auth-api.service.ts`
 
 ## Design Placement Summary
 - where logic/types should live and why:
@@ -137,7 +137,7 @@
 - this spec originated as planning text; implementation outcome is now reflected in accepted state and decision log.
 
 ## Required Gates
-Use commands from [`../commands-reference.md`](../commands-reference.md).
+Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
 - tiny/local gates (if applicable):
   - n/a (core change implementation scope).
 - normal implementation gates (if applicable):
@@ -147,7 +147,7 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
   - `npx nx e2e api-e2e`
   - `npx nx e2e web-e2e`
 - additional domain gates (if applicable):
-  - manual boundary checks against `docs/ARCHITECTURE.md`, `docs/AI_CONTRACT.md`, and this spec.
+  - manual boundary checks against `ARCHITECTURE.md`, `AI_CONTRACT.md`, and this spec.
 - manual/proposed checks:
   - confirm shared-contract boundary discipline and deferred/excluded scope remains intact.
 ### Historical note
@@ -172,3 +172,4 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
   - status: closed.
   - accepted decision entry already exists:
     - `2026-04-26 - Consolidate shared auth-user external contracts in libs/shared/contracts`.
+

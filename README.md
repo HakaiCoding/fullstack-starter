@@ -9,7 +9,8 @@ Nx monorepo starter for side projects and small-to-medium full-stack apps.
 - `apps/api-e2e` - Jest e2e tests for `api`
 - `libs/shared/contracts` - shared contracts/types
 - `libs/shared/utils` - shared utility functions
-- `docs` - architecture, AI workflow contract, specs, decisions, and command gates
+- Root workflow artifacts: `AI_CONTRACT.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `projectmap.md`, `specs/`
+- `docs` - supplementary workflow documentation (commands/index)
 
 ## Prerequisites
 - Node.js `24.15.0`
@@ -26,12 +27,8 @@ npx nx run web:serve
 `web:serve` depends on `api:serve`, so both apps start together.
 
 ## Docs First
-Read [`docs/README.md`](./docs/README.md) for:
-- required read order before coding
-- architecture and AI workflow constraints
-- feature spec requirements for core changes
-- commands and gate profiles
-Canonical "When a Spec Is Required" criteria live in [`docs/README.md`](./docs/README.md#when-a-spec-is-required).
+Start with [`docs/README.md`](./docs/README.md) for canonical document index and read order.
+Workflow/spec-trigger authority lives in [`AI_CONTRACT.md`](./AI_CONTRACT.md).
 
 ## Common Commands
 For the canonical command list, use:

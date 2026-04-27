@@ -1,4 +1,4 @@
-# Feature Spec (Core Change)
+﻿# Feature Spec (Core Change)
 
 ## Feature/Change Name
 - name: Auth invalid-input and auth error behavior baseline contract
@@ -53,10 +53,10 @@
 | missing refresh cookie | `POST /api/v1/auth/refresh` (`Missing refresh token.`) | `401` | not stable | unit + e2e | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
 | invalid/rotated refresh token | `POST /api/v1/auth/refresh` via `verifyRefreshToken(...)` and rotation checks | `401` | not stable | unit + e2e | `apps/api/src/app/features/auth/auth-core.service.ts`, `apps/api/src/app/features/auth/auth-core.service.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
 | accessing protected auth endpoint without access token | `GET /api/v1/auth/me` with `JwtAccessAuthGuard` and JWT strategy | `401` | not stable | e2e | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/jwt-access-auth.guard.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| accessing RBAC-protected users endpoint without token | `GET /api/v1/users` with `JwtAccessAuthGuard` + `RolesGuard` | `401` | intentionally not stable body for `401`/`403`; status is stable | unit + e2e | `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `docs/specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
-| accessing RBAC-protected users endpoint with insufficient role | `GET /api/v1/users` with role check (`user` vs required `admin`) | `403` | intentionally not stable body for `401`/`403`; status is stable | unit + e2e | `apps/api/src/app/features/auth/roles.guard.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `docs/specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
+| accessing RBAC-protected users endpoint without token | `GET /api/v1/users` with `JwtAccessAuthGuard` + `RolesGuard` | `401` | intentionally not stable body for `401`/`403`; status is stable | unit + e2e | `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
+| accessing RBAC-protected users endpoint with insufficient role | `GET /api/v1/users` with role check (`user` vs required `admin`) | `403` | intentionally not stable body for `401`/`403`; status is stable | unit + e2e | `apps/api/src/app/features/auth/roles.guard.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
 | successful authorized access (contrast): authenticated profile | `GET /api/v1/auth/me` with valid bearer token | `200` | stable shape (shared `AuthMeResponse`) | e2e | `libs/shared/contracts/src/lib/contracts.ts`, `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| successful authorized access (contrast): admin users list | `GET /api/v1/users` as `admin` | `200` | stable shape (shared `UsersListResponse`) | unit + e2e | `libs/shared/contracts/src/lib/contracts.ts`, `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/users/users.service.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `docs/specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
+| successful authorized access (contrast): admin users list | `GET /api/v1/users` as `admin` | `200` | stable shape (shared `UsersListResponse`) | unit + e2e | `libs/shared/contracts/src/lib/contracts.ts`, `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/users/users.service.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
 
 ## Forbidden Behavior
 - treating framework-default error-body fields/messages as stable API contract when docs/tests do not lock them.
@@ -75,9 +75,9 @@
   - `apps/api/src/app/features/auth/auth.controller.ts`
   - `apps/api/src/app/features/auth/auth.controller.spec.ts`
   - `apps/api-e2e/src/api/auth.spec.ts`
-  - `docs/auth-security-baseline.md`
-  - `docs/ARCHITECTURE.md`
-  - `docs/DECISIONS.md`
+  - `DECISIONS.md`
+  - `ARCHITECTURE.md`
+  - `DECISIONS.md`
 
 ## Design Placement Summary
 - DTO/class-validator request validation belongs in API transport layer near the owning route/controller.
@@ -128,7 +128,7 @@
   - no malformed JSON parse tests are added in this pass.
 
 ## Required Gates
-Use commands from [`../commands-reference.md`](../commands-reference.md).
+Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
 - `npx nx run api:lint`
 - `npx nx run api:test`
 - `npx nx run api:build`
@@ -144,12 +144,13 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 
 ## Documentation Updates Needed
 - docs to update:
-  - `docs/auth-security-baseline.md`
-  - `docs/ARCHITECTURE.md`
-  - `docs/DECISIONS.md`
-  - `docs/implementation-baseline.md`
+  - `DECISIONS.md`
+  - `ARCHITECTURE.md`
+  - `DECISIONS.md`
+  - `projectmap.md`
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
   - required and completed in this pass.
   - entry: `2026-04-27 - Adopt DTO/class-validator as backend structured request-validation baseline`.
+

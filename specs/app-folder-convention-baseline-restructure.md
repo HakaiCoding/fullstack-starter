@@ -1,4 +1,4 @@
-# Feature Spec
+﻿# Feature Spec
 
 ## Feature/Change Name
 - name: App folder convention baseline restructure (`apps/web/src`, `apps/api/src`)
@@ -76,8 +76,8 @@ apps/api/src/
 - modules/files likely affected:
   - `apps/web/src/app/**`
   - `apps/api/src/app/**`
-  - `docs/ARCHITECTURE.md`
-  - `docs/DECISIONS.md`
+  - `ARCHITECTURE.md`
+  - `DECISIONS.md`
   - `apps/web/README.md`
   - `apps/api/README.md`
 
@@ -137,13 +137,13 @@ apps/api/src/
   - reject wrong-layer business-rule placement
 
 ## Required Gates
-Use commands from [`../commands-reference.md`](../commands-reference.md).
+Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
 - core gates:
   - `npx nx run-many -t lint,test,build --all`
   - `npx nx e2e api-e2e`
   - `npx nx e2e web-e2e`
 - manual/proposed checks:
-  - verify architecture placement remains aligned with `docs/ARCHITECTURE.md` and `docs/AI_CONTRACT.md`
+  - verify architecture placement remains aligned with `ARCHITECTURE.md` and `AI_CONTRACT.md`
   - verify no runtime/auth/session/API contract/persistence behavior changes were introduced
 
 ## Acceptance Checks
@@ -154,14 +154,15 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 
 ## Documentation Updates Needed
 - docs to update:
-  - `docs/ARCHITECTURE.md` (path examples/ownership references)
+  - `ARCHITECTURE.md` (path examples/ownership references)
   - `apps/web/README.md` (local structure guidance)
   - `apps/api/README.md` (local structure guidance)
-- include this spec in `docs/specs/` as core-change record
+- include this spec in `specs/` as core-change record
 - completion status:
   - completed in this implementation pass
 
 ## Decision Log Updates Needed
-- `docs/DECISIONS.md` required a new accepted decision entry adopting the folder-convention baseline for `web` and `api` app sources
+- `DECISIONS.md` required a new accepted decision entry adopting the folder-convention baseline for `web` and `api` app sources
 - completion status:
   - completed in this implementation pass
+

@@ -1,4 +1,4 @@
-# Feature Spec (Core Change)
+﻿# Feature Spec (Core Change)
 
 ## Feature/Change Name
 - name: Dedicated global ValidationPipe rollout decision for API transport validation
@@ -210,7 +210,7 @@
   - verify auth refresh/logout/me and users RBAC remain unchanged across rollout.
 
 ## Required Gates
-Use commands from [`../commands-reference.md`](../commands-reference.md).
+Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
 - this documentation/design pass:
   - docs-only (`tiny/local`) change; no doc-specific automated gate is currently documented.
   - per docs, gates may be skipped for docs-only with explicit reporting.
@@ -248,11 +248,12 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 
 ## Documentation Updates Needed
 - docs updated in this pass:
-  - `docs/specs/global-validationpipe-rollout-decision.md` (new proposed spec)
+  - `specs/global-validationpipe-rollout-decision.md` (new proposed spec)
 - docs intentionally not updated in this pass:
-  - `docs/DECISIONS.md` (no accepted rollout decision yet)
+  - `DECISIONS.md` (no accepted rollout decision yet)
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
   - not in this pass.
   - add only after explicit user approval of chosen rollout policy (entry may be `Proposed` first, then moved to `Accepted` when approved).
+

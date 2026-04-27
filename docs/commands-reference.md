@@ -3,9 +3,9 @@
 Practical commands for this workspace.
 Run from repository root.
 
-For tooling/workflow command tasks (including Nx, migrations, tests, e2e, CI, and related command flows), AI sessions should inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default as the preferred modern-practice reference.
-Project docs/specs/decisions remain authoritative for repository-specific rules and policies.
-This file remains the canonical command and gate source for this repository.
+This file is the supplementary command/gate authority for runnable checks and command bundles.
+Workflow obligations (tier definitions, spec requirements, completion checklist, and broader policy rules) remain in [`../AI_CONTRACT.md`](../AI_CONTRACT.md).
+For canonical doc navigation/read order, use [`README.md`](./README.md).
 
 ## 1. Setup
 
@@ -53,6 +53,10 @@ Current practical proxy is project `build` targets.
 ## 4. E2E Commands
 
 ```sh
+# Start local DB before API e2e (recommended)
+npm run db:up
+npm run db:health
+
 # API e2e (Jest)
 npx nx e2e api-e2e
 
@@ -61,6 +65,9 @@ npx nx e2e web-e2e
 
 # Optional prewarm step for local images/CI
 npx playwright install chromium
+
+# Optional local teardown after e2e
+npm run db:down
 ```
 
 ## 5. Local PostgreSQL (Docker Compose)
@@ -106,20 +113,20 @@ npx nx reset
 
 ## 8. Gate Profiles
 
-Use workflow tiers from [`AI_CONTRACT.md`](./AI_CONTRACT.md):
+Use tier names from [`../AI_CONTRACT.md`](../AI_CONTRACT.md):
 - `tiny/local` -> use 8.1
 - `normal implementation` -> use 8.2
 - `core` -> use 8.3 plus relevant domain overlays (8.4-8.6)
 
 Notes:
 - no dedicated workspace `typecheck` command is currently documented; `build` targets are the practical proxy.
-- no standalone automated forbidden-pattern command is currently documented; review manually against [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), and relevant spec(s) when applicable.
+- no standalone automated forbidden-pattern command is currently documented.
+- when gates are skipped, report skipped gates explicitly per [`../AI_CONTRACT.md`](../AI_CONTRACT.md).
 
 ### 8.1 Tiny/Local Change Gates
-Use when change is docs/copy/style or small isolated non-behavioral work.
+Use when the tier is `tiny/local`.
 
-- specs are not required by default.
-- for docs-only changes with no runtime impact, gates may be skipped; explicitly report skipped gates.
+- for docs-only changes with no runtime impact, runtime gates may be skipped.
 - if code is touched, run impacted project gates:
 
 ```sh
@@ -137,9 +144,8 @@ npx nx affected -t lint,test,build
 ```
 
 ### 8.2 Normal Implementation Gates
-Use when implementation changes stay within existing module boundaries and do not meet `core` criteria.
+Use when the tier is `normal implementation`.
 
-- specs are not required by default.
 - run impacted project gates:
 
 ```sh
@@ -160,7 +166,7 @@ npx nx affected -t lint,test,build
 - if behavior crosses app boundaries, auth flows, routing, or API contracts, also apply 8.6.
 
 ### 8.3 Core Change Gates
-Use for domain/auth/persistence/cross-module/security/business-rule changes.
+Use when the tier is `core`.
 
 ```sh
 npx nx run-many -t lint,test,build --all
@@ -173,9 +179,7 @@ npx nx e2e api-e2e
 npx nx e2e web-e2e
 ```
 
-- manual/proposed: confirm placement/rule compliance against `docs/ARCHITECTURE.md` and `docs/AI_CONTRACT.md`.
-- manual/proposed: confirm relevant spec requirements and risk/forbidden-shortcut checks were reviewed.
-- manual/proposed: explicitly report any gate not run.
+- explicitly report any gate not run.
 
 ### 8.4 Auth/Security Change Gates
 
@@ -195,8 +199,6 @@ npx nx run web:build
 npx nx e2e web-e2e
 ```
 
-- manual/proposed: review `docs/auth-security-baseline.md` invariants before merge.
-
 ### 8.5 Database/Migration Change Gates
 
 ```sh
@@ -214,8 +216,6 @@ npm run db:up
 npm run db:health
 npm run db:down
 ```
-
-- manual/proposed: verify entity and migration changes stay consistent.
 
 ### 8.6 E2E-Relevant Change Gates
 Use when behavior crosses app boundaries, auth flows, routing, or API contracts.

@@ -1,4 +1,4 @@
-# Feature Spec Template (Core Changes)
+﻿# Feature Spec Template (Core Changes)
 
 ## Feature/Change Name
 - name:
@@ -62,7 +62,7 @@
   - reject wrong-layer business-rule placement
 
 ## Required Gates
-Use commands from [`../commands-reference.md`](../commands-reference.md).
+Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
 - tiny/local gates (if applicable):
 - normal implementation gates (if applicable):
 - core gates:
@@ -85,3 +85,4 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 - guidance:
   - state clearly whether decision work is required, closed, or intentionally not needed.
   - if closed, reference the accepted decision entry.
+

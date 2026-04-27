@@ -1,4 +1,4 @@
-# Feature Spec (Core Change)
+﻿# Feature Spec (Core Change)
 
 ## Feature/Change Name
 - name: First live RBAC-protected route - admin-only users listing baseline
@@ -67,14 +67,14 @@
   - API transport authorization.
   - user-read administration behavior (minimal baseline).
 - modules/files likely affected:
-  - `apps/api/src/app/users/*`
+  - `apps/api/src/app/features/users/*`
   - `apps/api/src/app/app.module.ts`
-  - `apps/api/src/app/auth/*` (guard/decorator reuse only; no auth-flow redesign)
+  - `apps/api/src/app/features/auth/*` (guard/decorator reuse only; no auth-flow redesign)
   - `apps/api-e2e/src/api/*` (allow/deny, payload-shape, ordering assertions)
 - related docs:
-  - `docs/auth-security-baseline.md`
-  - `docs/implementation-baseline.md`
-  - `docs/specs/role-persistence-jwt-claim-rbac-baseline.md`
+  - `DECISIONS.md`
+  - `ARCHITECTURE.md`
+  - `specs/role-persistence-jwt-claim-rbac-baseline.md`
 
 ## Design Placement Summary
 - where logic should live and why:
@@ -142,7 +142,7 @@
   - reject wrong-layer business-rule placement.
 
 ## Required Gates
-Use commands from [`../commands-reference.md`](../commands-reference.md).
+Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
 - tiny/local gates (if applicable):
   - n/a (core change implementation scope).
 - normal implementation gates (if applicable):
@@ -158,8 +158,8 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
     - `npx nx run api:build`
     - `npx nx e2e api-e2e`
 - manual/proposed checks:
-  - confirm placement against `docs/ARCHITECTURE.md`.
-  - confirm policy/spec compliance against `docs/AI_CONTRACT.md`.
+  - confirm placement against `ARCHITECTURE.md`.
+  - confirm policy/spec compliance against `AI_CONTRACT.md`.
   - confirm no JWT/session/persistence redesign introduced.
   - explicitly report any skipped gates.
 ### Historical note
@@ -180,12 +180,13 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 - docs to update:
   - status: closed for this implementation slice.
   - implementation-related docs were updated for route-level RBAC closure:
-    - `docs/auth-security-baseline.md`
-    - `docs/specs/role-persistence-jwt-claim-rbac-baseline.md`
-    - `docs/implementation-baseline.md`
+    - `DECISIONS.md`
+    - `specs/role-persistence-jwt-claim-rbac-baseline.md`
+    - `ARCHITECTURE.md`
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
   - status: closed.
   - accepted decision entry already exists:
     - `2026-04-25 - Use GET /api/v1/users as first live RBAC route`.
+

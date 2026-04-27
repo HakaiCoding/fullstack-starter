@@ -1,7 +1,8 @@
 # Full-Stack Starter Architecture
 
 ## 1. Purpose
-This file is the project map for placing changes in the right layer.
+This file is the detailed architecture and placement authority.
+For the concise project map artifact, use [`projectmap.md`](./projectmap.md).
 
 Use it to answer:
 - what this system does
@@ -10,10 +11,10 @@ Use it to answer:
 
 For AI-assisted work, read this with:
 - [`AI_CONTRACT.md`](./AI_CONTRACT.md)
-- [`commands-reference.md`](./commands-reference.md)
+- [`docs/commands-reference.md`](./docs/commands-reference.md)
 - [`specs/_template.md`](./specs/_template.md)
 - [`DECISIONS.md`](./DECISIONS.md)
-- [`auth-security-baseline.md`](./auth-security-baseline.md)
+- relevant auth/security specs in [`specs/`](./specs/)
 
 ## 2. System Purpose
 Full-stack starter monorepo for side projects and small/medium applications.
@@ -47,8 +48,12 @@ Request flow (baseline):
   - `apps/api/src/db/entities/auth-session.entity.ts`
 - Web ownership:
   - `apps/web/src/app/core/auth/*`
-- Domain baseline details:
-  - [`auth-security-baseline.md`](./auth-security-baseline.md)
+- Policy/spec references:
+  - [`DECISIONS.md`](./DECISIONS.md)
+  - [`specs/role-persistence-jwt-claim-rbac-baseline.md`](./specs/role-persistence-jwt-claim-rbac-baseline.md)
+  - [`specs/first-meaningful-rbac-protected-route-decision.md`](./specs/first-meaningful-rbac-protected-route-decision.md)
+  - [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)
+  - [`specs/global-validationpipe-rollout-decision.md`](./specs/global-validationpipe-rollout-decision.md)
 
 ### 4.2 Persistence and Schema
 - Ownership:
@@ -57,6 +62,8 @@ Request flow (baseline):
   - `apps/api/src/db/*.ts`
 - Rule baseline:
   - migration-driven schema changes (no auto schema sync)
+  - UUID id strategy
+  - snake_case naming strategy
 
 ### 4.3 Shared Cross-App Interfaces
 - Ownership:
@@ -69,6 +76,17 @@ Request flow (baseline):
   - `libs/shared/utils/*`
 - Responsibility:
   - deterministic framework-agnostic helpers
+
+### 4.5 Configuration and Runtime Contracts
+- Ownership:
+  - `apps/api/src/app/config/*`
+- Environment contract groups:
+  - database: `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, optional `POSTGRES_SSL`
+  - auth/cookie: `NODE_ENV`, `AUTH_ACCESS_TOKEN_SECRET`, `AUTH_ACCESS_TOKEN_TTL_SECONDS`, `AUTH_REFRESH_TOKEN_SECRET`, `AUTH_REFRESH_TOKEN_TTL_SECONDS`, `AUTH_REFRESH_COOKIE_NAME`, `AUTH_REFRESH_COOKIE_SECURE`, `AUTH_REFRESH_COOKIE_SAME_SITE`
+  - CORS: `API_CORS_ALLOWED_ORIGINS`
+- Runtime safety and transport policy references:
+  - [`DECISIONS.md`](./DECISIONS.md)
+  - [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)
 
 ## 5. Ownership Boundaries by Layer
 ### 5.1 UI Layer (`apps/web`)
@@ -124,7 +142,7 @@ Does not belong here:
 
 ### 5.6 Enforced Module Boundaries
 Workspace-level import/tag boundaries are enforced via:
-- [`../eslint.config.mjs`](../eslint.config.mjs)
+- [`eslint.config.mjs`](./eslint.config.mjs)
 
 ## 6. Change Placement Guidance (Start Here)
 - API behavior change in auth/session flow:
@@ -143,17 +161,17 @@ Workspace-level import/tag boundaries are enforced via:
   - start with new migration in `apps/api/src/db/migrations/*`
   - update related entities in `apps/api/src/db/entities/*`
 - Cross-cutting rule/policy change:
-  - write/update a spec first in `docs/specs/*`
+  - write/update a spec first in `specs/*`
   - record accepted trade-offs in [`DECISIONS.md`](./DECISIONS.md)
 
 ## 7. Documentation Boundaries
 This file is architectural and placement-focused.
 
 Use other docs for non-architectural detail:
-- session rules and auth status: [`auth-security-baseline.md`](./auth-security-baseline.md)
-- run commands and gate profiles: [`commands-reference.md`](./commands-reference.md)
-- implementation status snapshots: [`implementation-baseline.md`](./implementation-baseline.md)
+- run commands and gate profiles: [`docs/commands-reference.md`](./docs/commands-reference.md)
 - AI workflow/policy rules: [`AI_CONTRACT.md`](./AI_CONTRACT.md)
 - design decision log: [`DECISIONS.md`](./DECISIONS.md)
-- architecture boundaries and project decisions live in project docs under `docs/*`.
+- concise project map artifact: [`projectmap.md`](./projectmap.md)
+- auth/security behavior contracts and deferred scope: relevant files in [`specs/`](./specs/)
+- supplementary documentation lives under `docs/*`.
 - technology/framework implementation practices should use relevant local skills in `C:\Users\Development\.agents\skills\` as the preferred modern-practice reference.

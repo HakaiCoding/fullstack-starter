@@ -1,4 +1,4 @@
-# Feature Spec (Core Change)
+﻿# Feature Spec (Core Change)
 
 ## Feature/Change Name
 - name: Role persistence + JWT role claim propagation + route-level RBAC baseline
@@ -69,11 +69,11 @@
 - modules/files likely affected:
   - `apps/api/src/db/entities/user.entity.ts`
   - `apps/api/src/db/migrations/*`
-  - `apps/api/src/app/auth/auth-core.service.ts`
-  - `apps/api/src/app/auth/auth.types.ts`
-  - `apps/api/src/app/auth/jwt-access.strategy.ts`
-  - `apps/api/src/app/auth/*roles*`
-  - `apps/api/src/app/auth/auth.module.ts`
+  - `apps/api/src/app/features/auth/auth-core.service.ts`
+  - `apps/api/src/app/features/auth/auth.types.ts`
+  - `apps/api/src/app/features/auth/jwt-access.strategy.ts`
+  - `apps/api/src/app/features/auth/*roles*`
+  - `apps/api/src/app/features/auth/auth.module.ts`
   - auth-related unit tests.
   - API e2e auth regression tests.
   - `libs/shared/contracts/*` only if shared role contract is required by API/web scope.
@@ -81,8 +81,8 @@
 ## Design Placement Summary
 - where logic should live and why:
   - persisted role schema/constraints in persistence layer (`apps/api/src/db/*`).
-  - token role issuance/refresh semantics in auth service/domain layer (`apps/api/src/app/auth/*`).
-  - request authorization checks at transport layer via guards/decorators (`apps/api/src/app/auth/*`).
+  - token role issuance/refresh semantics in auth service/domain layer (`apps/api/src/app/features/auth/*`).
+  - request authorization checks at transport layer via guards/decorators (`apps/api/src/app/features/auth/*`).
   - behavior validation at unit and e2e levels.
 - where logic should not live:
   - role policy in web components/templates.
@@ -154,7 +154,7 @@
 - route-level RBAC e2e assertions were originally deferred in this baseline and later closed in follow-up.
 
 ## Required Gates
-Use commands from [`../commands-reference.md`](../commands-reference.md).
+Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
 - tiny/local gates (if applicable):
   - n/a (core change baseline scope).
 - normal implementation gates (if applicable):
@@ -176,9 +176,9 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
     - `npx nx run api:test`
     - `npx nx run api:build`
 - manual/proposed checks:
-  - confirm placement compliance with `docs/ARCHITECTURE.md`.
-  - confirm policy compliance with `docs/AI_CONTRACT.md`.
-  - review auth invariants in `docs/auth-security-baseline.md` before merge.
+  - confirm placement compliance with `ARCHITECTURE.md`.
+  - confirm policy compliance with `AI_CONTRACT.md`.
+  - review auth/account baseline decisions in `DECISIONS.md` and related auth/security specs before merge.
   - explicitly report any gate not run.
 ### Historical note
 - this gate list is retained as implementation-time reference for the accepted baseline.
@@ -199,11 +199,12 @@ Use commands from [`../commands-reference.md`](../commands-reference.md).
 - docs to update:
   - status: closed for baseline implementation lifecycle.
   - historical implementation-time updates were completed:
-    - `docs/auth-security-baseline.md` updated for role persistence/claim propagation and RBAC status.
-    - `docs/implementation-baseline.md` updated for `users.role` migration baseline.
+    - `DECISIONS.md` updated for role persistence/claim propagation and RBAC status.
+    - `ARCHITECTURE.md` updated for persistence/placement baseline.
     - this spec status moved from `In Progress` to `Accepted`.
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
   - status: no additional decision update required.
   - historical planning note retained: this baseline originally carried a draft decision text; related accepted follow-up governance is already recorded for first live RBAC route selection (`2026-04-25`).
+
