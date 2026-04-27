@@ -9,7 +9,7 @@ Nx monorepo starter for side projects and small-to-medium full-stack apps.
 - `apps/api-e2e` - Jest e2e tests for `api`
 - `libs/shared/contracts` - shared contracts/types
 - `libs/shared/utils` - shared utility functions
-- Root workflow artifacts: `AI_CONTRACT.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `projectmap.md`, `specs/`
+- Root workflow artifacts: `AI_CONTRACT.md`, `AI_SKILLS.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `projectmap.md`, `specs/`
 - `docs` - supplementary workflow documentation (commands/index)
 
 ## Prerequisites

@@ -48,6 +48,7 @@ Spec-trigger criteria (`Accepted policy`):
 
 2. Read relevant docs before editing:
 - `Accepted policy`: For `normal implementation` and `core` work, always read [`projectmap.md`](./projectmap.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), and [`docs/commands-reference.md`](./docs/commands-reference.md).
+- `Accepted policy`: For technology/framework/tooling/security/workflow-practice tasks, also follow local Skills usage policy in [`AI_SKILLS.md`](./AI_SKILLS.md).
 - `Accepted policy`: For `tiny/local` work, read the minimal relevant docs needed to avoid boundary/policy violations.
 - `Accepted policy`: Also read relevant domain decisions/specs (for example auth/security entries in [`DECISIONS.md`](./DECISIONS.md) and related files in [`specs/`](./specs/)) when applicable.
 
@@ -75,13 +76,5 @@ Spec-trigger criteria (`Accepted policy`):
 - `Accepted policy`: State docs/spec/decision updates completed or still required.
 
 ## 7. Local Skills Reference Guidance
-- `Accepted policy`: For technology-specific, framework-specific, library-specific, tooling-specific, security-sensitive, or workflow-specific tasks, inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default.
-- `Accepted policy`: Local skills are the preferred reference source for current technology/tooling/framework best practices.
-- `Accepted policy`: Canonical project artifacts, approved specs, and [`DECISIONS.md`](./DECISIONS.md) remain authoritative for repository-specific architecture, boundaries, and accepted policy.
-- `Accepted policy`: Generic model knowledge must not override relevant local skills.
-- `Accepted policy`: If no relevant local skill exists, explicitly say so.
-- `Accepted policy`: If a relevant local skill is intentionally not used, explicitly explain why.
-- `Accepted policy`: For `normal implementation` and `core` work, report which skills were inspected, which were used, and any conflicts/tensions found.
-- `Accepted policy`: For `tiny/local` work, explicitly state when no relevant skill was needed.
-- `Accepted policy`: If local skill guidance conflicts with canonical project artifacts/specs/decisions, flag the conflict and follow the safest project-compatible option.
-- `Accepted policy`: Do not copy large skill contents into project docs; summarize only what is needed.
+- `Accepted policy`: [`AI_SKILLS.md`](./AI_SKILLS.md) is canonical for local Skills usage policy (inspection, use, reporting, inventory, conflict handling).
+- `Accepted policy`: Canonical project artifacts, accepted specs, and accepted decisions remain authoritative for repo-specific behavior, boundaries, architecture, commands, and gates.

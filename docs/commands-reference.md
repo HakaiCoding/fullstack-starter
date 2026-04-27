@@ -5,6 +5,7 @@ Run from repository root.
 
 This file is the supplementary command/gate authority for runnable checks and command bundles.
 Workflow obligations (tier definitions, spec requirements, completion checklist, and broader policy rules) remain in [`../AI_CONTRACT.md`](../AI_CONTRACT.md).
+Local Skills usage policy and reporting rules remain in [`../AI_SKILLS.md`](../AI_SKILLS.md).
 For canonical doc navigation/read order, use [`README.md`](./README.md).
 
 ## 1. Setup

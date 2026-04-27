@@ -132,3 +132,11 @@ Decision: Adopt the following baseline transport-safety posture: refresh cookie 
 Alternatives considered: Leave cookie/CORS constraints as implementation-only details; require stricter defaults immediately without preserving current accepted baseline.
 Consequences: Canonical source-of-truth for accepted cookie/CORS safety constraints is preserved without supplementary baseline docs; stricter hardening options remain explicit future scope.
 Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md), [`specs/global-validationpipe-rollout-decision.md`](./specs/global-validationpipe-rollout-decision.md)
+
+## 2026-04-27 - Add AI_SKILLS.md as canonical local Skills workflow artifact
+Status: Accepted
+Context: Local Skills policy/reporting and inventory handling were spread across multiple artifacts, making discovery and consistent application harder in AI-assisted sessions.
+Decision: Adopt [`AI_SKILLS.md`](./AI_SKILLS.md) as the canonical artifact for local Skills usage policy (inspection, use, reporting, inventory, and conflict handling). Local Skills remain subordinate to accepted project artifacts/specs/decisions for repo-specific authority.
+Alternatives considered: Keep local Skills policy only in [`AI_CONTRACT.md`](./AI_CONTRACT.md) and distributed references across docs/specs.
+Consequences: Skills workflow expectations are easier to discover and apply consistently; cross-doc references should point to `AI_SKILLS.md` instead of duplicating long policy text; accepted project artifacts/specs/decisions remain the authority for architecture, behavior, commands, gates, and scope.
+Related docs/specs: [`AI_SKILLS.md`](./AI_SKILLS.md), [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`docs/README.md`](./docs/README.md), [`projectmap.md`](./projectmap.md), [`specs/_template.md`](./specs/_template.md), [`docs/commands-reference.md`](./docs/commands-reference.md)

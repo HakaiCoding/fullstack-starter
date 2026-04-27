@@ -38,6 +38,7 @@
 - where logic should not live
 
 ## Relevant Local Skills
+- policy authority: [`../AI_SKILLS.md`](../AI_SKILLS.md)
 - skills inspected:
 - skills used:
 - why each skill is relevant:

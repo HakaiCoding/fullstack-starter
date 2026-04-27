@@ -170,8 +170,9 @@ This file is architectural and placement-focused.
 Use other docs for non-architectural detail:
 - run commands and gate profiles: [`docs/commands-reference.md`](./docs/commands-reference.md)
 - AI workflow/policy rules: [`AI_CONTRACT.md`](./AI_CONTRACT.md)
+- local Skills usage policy and inventory handling: [`AI_SKILLS.md`](./AI_SKILLS.md)
 - design decision log: [`DECISIONS.md`](./DECISIONS.md)
 - concise project map artifact: [`projectmap.md`](./projectmap.md)
 - auth/security behavior contracts and deferred scope: relevant files in [`specs/`](./specs/)
 - supplementary documentation lives under `docs/*`.
-- technology/framework implementation practices should use relevant local skills in `C:\Users\Development\.agents\skills\` as the preferred modern-practice reference.
+- technology/framework implementation practices should use relevant local Skills as preferred modern-practice reference, following [`AI_SKILLS.md`](./AI_SKILLS.md).

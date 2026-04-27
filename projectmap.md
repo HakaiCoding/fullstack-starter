@@ -49,6 +49,7 @@ Full-stack starter monorepo for small/medium applications with:
 ## Checks and Gates
 - Command and gate authority: [`docs/commands-reference.md`](./docs/commands-reference.md).
 - Tiering and workflow policy: [`AI_CONTRACT.md`](./AI_CONTRACT.md).
+- Local Skills usage policy: [`AI_SKILLS.md`](./AI_SKILLS.md).
 - Tier model remains:
   - `tiny/local`
   - `normal implementation`
@@ -57,5 +58,6 @@ Full-stack starter monorepo for small/medium applications with:
 ## Detailed References
 - Detailed architecture and placement: [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 - Workflow policy and completion checks: [`AI_CONTRACT.md`](./AI_CONTRACT.md)
+- Local Skills policy, reporting, and inventory handling: [`AI_SKILLS.md`](./AI_SKILLS.md)
 - Decision log: [`DECISIONS.md`](./DECISIONS.md)
 - Spec template and specs: [`specs/_template.md`](./specs/_template.md), `specs/*`
