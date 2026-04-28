@@ -140,3 +140,16 @@ Decision: Adopt [`AI_SKILLS.md`](./AI_SKILLS.md) as the canonical artifact for l
 Alternatives considered: Keep local Skills policy only in [`AI_CONTRACT.md`](./AI_CONTRACT.md) and distributed references across docs/specs.
 Consequences: Skills workflow expectations are easier to discover and apply consistently; cross-doc references should point to `AI_SKILLS.md` instead of duplicating long policy text; accepted project artifacts/specs/decisions remain the authority for architecture, behavior, commands, gates, and scope.
 Related docs/specs: [`AI_SKILLS.md`](./AI_SKILLS.md), [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`docs/README.md`](./docs/README.md), [`projectmap.md`](./projectmap.md), [`specs/_template.md`](./specs/_template.md), [`docs/commands-reference.md`](./docs/commands-reference.md)
+
+## 2026-04-28 - Accept global ValidationPipe rollout policy profile
+Status: Accepted
+Context: DTO/class-validator transport validation baseline is accepted, but runtime validation scope is still route-local on login. The project needed an accepted global policy profile for rollout consistency before runtime activation.
+Decision: Accept the global ValidationPipe rollout target profile:
+- `transform: true`
+- `whitelist: true`
+- `forbidNonWhitelisted: true`
+- `transformOptions.enableImplicitConversion: true`
+Accept the DTO-bound unknown-field contract that extra unknown fields return `400`, while keeping framework-default error-body details non-stable unless separately accepted. Keep malformed JSON parser-layer behavior out of this decision scope. Runtime activation remains deferred to a later implementation slice.
+Alternatives considered: Keep route-local validation only; defer strict unknown-field policy; accept transform-only profile first.
+Consequences: The project now has accepted policy authority for global ValidationPipe rollout behavior and compatibility constraints without claiming runtime activation. Later implementation must preserve accepted auth/RBAC status behavior (`400` malformed semantic login payload, `401` invalid credentials, `401/403` protected-route semantics), add unknown-field rejection tests, and add DTO-specific numeric/boolean implicit-conversion tests when such fields are introduced.
+Related docs/specs: [`specs/global-validationpipe-rollout-decision.md`](./specs/global-validationpipe-rollout-decision.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`docs/commands-reference.md`](./docs/commands-reference.md)
