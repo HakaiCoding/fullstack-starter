@@ -4,6 +4,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router } from '@angular/router';
@@ -21,6 +22,7 @@ const GENERIC_LOGIN_ERROR_MESSAGE =
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressBarModule,
   ],
@@ -35,6 +37,7 @@ export class LoginPage {
   private readonly router = inject(Router);
 
   readonly isSubmitting = signal(false);
+  readonly isPasswordHidden = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly loginForm = this.formBuilder.group({
     email: this.formBuilder.control('', [Validators.required, Validators.email]),
@@ -43,6 +46,10 @@ export class LoginPage {
 
   readonly emailControl = this.loginForm.controls.email;
   readonly passwordControl = this.loginForm.controls.password;
+
+  togglePasswordVisibility(): void {
+    this.isPasswordHidden.update((value) => !value);
+  }
 
   onSubmit(): void {
     if (this.loginForm.invalid || this.isSubmitting()) {

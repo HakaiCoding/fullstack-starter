@@ -1,18 +1,17 @@
 <main class="login-page" aria-labelledby="login-title">
-  <section class="login-layout">
-    <header class="login-intro">
-      <p class="login-eyebrow">Secure Access</p>
-      <h1 id="login-title" class="login-title">Login</h1>
-      <p class="login-subtitle">Sign in to continue with your account credentials.</p>
-    </header>
-
-    <mat-card class="login-card">
+  <section class="login-surface">
+    <mat-card appearance="outlined" class="login-card">
       <form
         class="login-form"
         [formGroup]="loginForm"
         (ngSubmit)="onSubmit()"
         novalidate
       >
+        <header class="login-form-header">
+          <h1 id="login-title" class="login-form-title">Login</h1>
+          <p class="login-form-subtitle">Use your account credentials to continue.</p>
+        </header>
+
         @if (isSubmitting()) {
           <mat-progress-bar mode="indeterminate" />
         }
@@ -38,11 +37,21 @@
           <mat-label>Password</mat-label>
           <input
             matInput
-            type="password"
+            [type]="isPasswordHidden() ? 'password' : 'text'"
             formControlName="password"
             autocomplete="current-password"
             required
           />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            [attr.aria-label]="isPasswordHidden() ? 'Show password' : 'Hide password'"
+            [attr.aria-pressed]="!isPasswordHidden()"
+            (click)="togglePasswordVisibility()"
+          >
+            <mat-icon>{{ isPasswordHidden() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
           @if (passwordControl.touched && passwordControl.hasError('required')) {
             <mat-error>Password is required.</mat-error>
           }
@@ -68,6 +77,10 @@
         >
           {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
         </button>
+
+        <p class="login-help">
+          Need access? Contact an administrator.
+        </p>
       </form>
     </mat-card>
   </section>
