@@ -33,7 +33,7 @@
 - current accepted behavior posture:
   - stable contract is status-code level for auth invalid-input/error behavior.
   - framework-default `400/401/403` response body details are not a stable contract.
-  - malformed JSON parse behavior is not an accepted stable contract in current docs.
+  - malformed syntactic JSON for `POST /api/v1/auth/login` is accepted as stable `400` status behavior in auth baseline docs/decisions; response body remains non-stable.
 
 ## Status and Scope Distinctions
 - `Accepted` today:
@@ -43,7 +43,6 @@
   - invalid login credentials -> `401`.
   - protected-route auth/RBAC status semantics remain `401`/`403` as already accepted.
 - `Deferred`:
-  - any stable malformed-JSON contract.
   - any stable framework validation error-body contract.
 
 ## Non-Goals
@@ -108,7 +107,7 @@ new ValidationPipe({
 - mitigation: request DTOs remain app-local unless a separate spec/decision expands scope.
 
 ## Malformed JSON and Error-Body Boundaries
-- malformed JSON parser-layer behavior remains separate from this ValidationPipe decision.
+- malformed JSON parser-layer behavior remains separate from ValidationPipe policy; accepted auth baseline sets login malformed syntactic JSON status to `400` without stabilizing response body fields.
 - framework-default error response body details remain intentionally non-stable in this scope.
 - no stable custom `400` validation error-body contract is introduced by this spec.
 
@@ -140,7 +139,7 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
 - accepted target global ValidationPipe profile is explicitly documented.
 - unknown-field DTO-bound `400` behavior is explicitly documented as accepted contract.
 - accepted auth/RBAC status behavior is explicitly preserved.
-- malformed JSON remains out of scope for this decision.
+- malformed JSON contract remains documented in auth baseline/decisions (status-only for login), not as a ValidationPipe response-body contract.
 - framework error-body stability remains non-stable in this scope.
 - routes without DTO-bound inputs are not automatically considered validated.
 - future DTO-specific numeric/boolean implicit-conversion tests remain required as fields are introduced.

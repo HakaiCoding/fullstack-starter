@@ -292,6 +292,17 @@ describe('Auth flow e2e', () => {
     expectHttpErrorResponseShape(response);
   });
 
+  it('returns 400 for malformed syntactic json on login', async () => {
+    const response = await request('POST', '/api/v1/auth/login', {
+      data: '{"email":"broken@example.com","password":"S3curePassw0rd!"',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    expect(response.status).toBe(400);
+  });
+
   it('returns 401 for refresh request without refresh cookie', async () => {
     const response = await request('POST', '/api/v1/auth/refresh');
 

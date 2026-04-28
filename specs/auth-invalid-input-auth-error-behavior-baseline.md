@@ -25,7 +25,7 @@
 - no changes to the accepted global ValidationPipe profile in this pass.
 - no shared request-contract expansion (`LoginRequest` remains app-local in this pass).
 - no custom stable `400` error-body contract in this pass.
-- no malformed-JSON parsing contract acceptance in this pass.
+- no stable malformed-JSON response-body contract in this pass.
 
 ## Behavior Rules
 - DTO/class-validator is the accepted backend baseline for structured HTTP request validation.
@@ -39,13 +39,14 @@
 - no custom stable `400` error-body contract is introduced in this pass.
 - stable auth behavior in this pass:
   - malformed semantic login payloads return `400`.
+  - malformed syntactic JSON sent to `POST /api/v1/auth/login` returns `400`.
   - invalid credentials return `401`.
 
 ### Behavior Matrix (Current State)
 | Behavior | Endpoint / code path | Current status code | Body stability | Coverage | Evidence | State |
 | --- | --- | --- | --- | --- | --- | --- |
 | malformed login request body (semantic payload invalid for required string fields) | `POST /api/v1/auth/login` via `LoginRequestDto` + global `ValidationPipe` | `400` | not stable (framework ValidationPipe/BadRequest body) | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api/src/main.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| malformed login request body (syntactically malformed JSON before controller) | `POST /api/v1/auth/login` request parsing path | not explicitly documented in current accepted docs/specs; runtime expected to be framework-handled | not stable | missing dedicated unit/e2e coverage in current baseline | absence of explicit case in `apps/api-e2e/src/api/auth.spec.ts` and accepted docs/specs | unresolved |
+| malformed login request body (syntactically malformed JSON before controller) | `POST /api/v1/auth/login` request parsing path | `400` | not stable (framework parser/default error body) | e2e | `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
 | missing login email | `POST /api/v1/auth/login` (`email` missing) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
 | missing login password | `POST /api/v1/auth/login` (`password` missing) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
 | non-string login email/password | `POST /api/v1/auth/login` (`@IsString`) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
@@ -102,7 +103,7 @@
   - `jwt-security` prefers asymmetric signing in general; project accepted HS256 baseline remains unchanged in this pass.
 
 ## Edge Cases
-- malformed JSON before controller remains unresolved/non-stable in this pass.
+- malformed JSON before controller now has a stable status-level contract (`400`) for `POST /api/v1/auth/login`; response body remains non-stable in this pass.
 - no stable framework error-body field/message contract is introduced for `400/401/403`.
 - no email-format validation is added in this pass; only string/non-blank validation is required.
 
@@ -123,10 +124,11 @@
   - keep auth core/jwt strategy/roles guard tests unchanged.
 - integration/e2e tests:
   - preserve malformed-login `400` matrix in `apps/api-e2e/src/api/auth.spec.ts`.
+  - assert malformed syntactic JSON sent to `POST /api/v1/auth/login` returns status `400` only.
   - preserve invalid credentials `401`.
   - preserve login success, refresh/logout/auth-me, and users RBAC route behavior.
 - regression coverage:
-  - no malformed JSON parse tests are added in this pass.
+  - malformed JSON parse-path auth contract is covered by dedicated login e2e assertion (`400` status only).
 
 ## Required Gates
 Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
@@ -138,7 +140,7 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
 ## Acceptance Checks
 - DTO/class-validator baseline is explicitly accepted for structured backend request validation.
 - login route is first concrete implementation with app-local DTO scope.
-- malformed semantic login payloads return `400`; invalid credentials return `401`.
+- malformed semantic login payloads return `400`; malformed syntactic JSON for login returns `400`; invalid credentials return `401`.
 - no custom stable `400` error-body contract is introduced.
 - framework-default error body remains non-stable unless explicitly documented.
 - no JWT/session/RBAC/persistence/shared-contract-scope drift is introduced.
@@ -146,12 +148,10 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
 ## Documentation Updates Needed
 - docs to update:
   - `DECISIONS.md`
-  - `ARCHITECTURE.md`
-  - `DECISIONS.md`
-  - `projectmap.md`
+  - `specs/global-validationpipe-rollout-decision.md` (consistency wording only)
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
   - required and completed in this pass.
-  - entry: `2026-04-27 - Adopt DTO/class-validator as backend structured request-validation baseline`.
+  - entry: `2026-04-28 - Stabilize malformed syntactic login JSON status contract`.
 
