@@ -1,9 +1,6 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap');
 
 *,
 *:before,
@@ -13,11 +10,167 @@
 
 html {
   height: 100%;
-  @include mat.theme((color: (primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: Roboto,
-      density: 0,
+  color-scheme: light dark;
+  @include mat.theme((color: mat.$violet-palette,
+      typography: (plain-family: 'Inter',
+        brand-family: 'Plus Jakarta Sans',
+        bold-weight: 700,
+        medium-weight: 500,
+        regular-weight: 400),
+      density: -1));
+
+  @include mat.theme-overrides((primary: light-dark(#1a696b, #9bd0d1),
+      'on-primary': light-dark(#e0ffff, #0c4849),
+      'primary-container': light-dark(#a8eff0, #255a5b),
+      'on-primary-container': light-dark(#005b5d, #b8edee),
+      secondary: light-dark(#4a6464, #b0cccc),
+      'on-secondary': light-dark(#e2fefe, #2b4445),
+      'secondary-container': light-dark(#cce8e8, #274040),
+      'on-secondary-container': light-dark(#3d5656, #a9c4c4),
+      tertiary: light-dark(#3b637d, #d3ebff),
+      'on-tertiary': light-dark(#f5f9ff, #305973),
+      'tertiary-container': light-dark(#b6dffe, #b6dffe),
+      'on-tertiary-container': light-dark(#27516a, #27516a),
+      error: light-dark(#a83836, #fa746f),
+      'on-error': light-dark(#fff7f6, #490006),
+      'error-container': light-dark(#fa746f, #871f21),
+      'on-error-container': light-dark(#6e0a12, #ff9993),
+      surface: light-dark(#f6fafa, #0a0f0f),
+      'on-surface': light-dark(#2a3434, #dce8e7),
+      'on-surface-variant': light-dark(#566161, #a2adad),
+      'surface-container': light-dark(#e7efef, #131b1b),
+      'surface-container-high': light-dark(#e1eae9, #192121),
+      'surface-container-highest': light-dark(#d9e5e4, #1d2828),
+      'surface-container-low': light-dark(#eef5f4, #0e1515),
+      'surface-container-lowest': light-dark(#ffffff, #000000),
+      'surface-bright': light-dark(#f6fafa, #242e2e),
+      'surface-dim': light-dark(#d1dcdc, #0a0f0f),
+      'surface-variant': light-dark(#d9e5e4, #1d2828),
+      'surface-tint': light-dark(#1a696b, #9bd0d1),
+      'inverse-surface': light-dark(#0a0f0f, #f6fafa),
+      'inverse-on-surface': light-dark(#999e9d, #515656),
+      'inverse-primary': light-dark(#b3fbfc, #336768),
+      outline: light-dark(#727d7d, #6d7877),
+      'outline-variant': light-dark(#a9b4b4, #3f4a4a),
+      background: light-dark(#f6fafa, #0a0f0f),
+      'on-background': light-dark(#2a3434, #dce8e7),
+      scrim: light-dark(#000000, #000000),
+      shadow: light-dark(#000000, #000000),
+    ));
+
+  @include mat.autocomplete-overrides(('container-elevation-shadow': none,
+    ));
+
+  @include mat.badge-overrides(('container-shape': 4px,
+      'text-weight': 700,
+      'text-font': 'Inter',
+    ));
+
+  @include mat.bottom-sheet-overrides(('container-text-font': 'Inter',
+      'container-shape': 6px,
+    ));
+
+  @include mat.button-overrides(('filled-container-shape': 4px,
+      'outlined-container-shape': 4px,
+      'outlined-label-text-font': 'Inter',
+      'protected-container-shape': 4px,
+      'tonal-container-shape': 4px,
+      'protected-label-text-font': 'Inter',
+      'tonal-label-text-font': 'Inter',
+      'text-container-shape': 4px,
+      'text-label-text-font': 'Inter',
+      'filled-label-text-font': 'Inter',
+    ));
+
+  @include mat.button-toggle-overrides((shape: 4px,
+      'legacy-shape': 4px,
+      'legacy-label-text-font': 'Inter',
+      'label-text-font': 'Inter',
+    ));
+
+  @include mat.card-overrides(('filled-container-shape': 4px,
+      'elevated-container-shape': 4px,
+      'outlined-container-shape': 4px,
+      'outlined-outline-width': 1px,
+      'subtitle-text-font': 'Inter',
+      'title-text-font': 'Inter',
+    ));
+
+  @include mat.checkbox-overrides(('label-text-font': 'Inter',
+    ));
+
+  @include mat.chips-overrides(('label-text-font': 'Inter',
+    ));
+
+  @include mat.datepicker-overrides(('calendar-text-font': 'Inter',
+    ));
+
+  @include mat.dialog-overrides(('subhead-font': 'Inter',
+      'container-shape': 4px,
+      'supporting-text-font': 'Inter',
+    ));
+
+  @include mat.expansion-overrides(('container-shape': 4px,
+      'container-text-font': 'Inter',
+      'header-text-font': 'Inter',
+    ));
+
+  @include mat.fab-overrides(('container-shape': 4px,
+      'extended-container-shape': 4px,
+      'small-container-shape': 4px,
+      'extended-label-text-font': 'Inter',
+    ));
+
+  @include mat.form-field-overrides(('filled-label-text-font': 'Inter',
+      'outlined-label-text-font': 'Inter',
+      'subscript-text-font': 'Inter',
+      'container-text-font': 'Inter',
+    ));
+
+  @include mat.list-overrides(('list-item-label-text-font': 'Inter',
+      'list-item-supporting-text-font': 'Inter',
+      'list-item-trailing-supporting-text-font': 'Inter',
+    ));
+
+  @include mat.menu-overrides(('item-label-text-font': 'Inter',
+    ));
+
+  @include mat.paginator-overrides(('container-text-font': 'Inter',
+      'container-size': 48px,
+    ));
+
+  @include mat.radio-overrides(('label-text-font': 'Inter',
+    ));
+
+  @include mat.select-overrides(('trigger-text-font': 'Inter',
+    ));
+
+  @include mat.slider-overrides(('label-label-text-font': 'Inter',
+    ));
+
+  @include mat.slide-toggle-overrides(('label-text-font': 'Inter',
+    ));
+
+  @include mat.snack-bar-overrides(('supporting-text-font': 'Inter',
+    ));
+
+  @include mat.stepper-overrides(('header-label-text-font': 'Inter',
+      'container-text-font': 'Inter',
+    ));
+
+  @include mat.table-overrides(('row-item-label-text-font': 'Inter',
+      'header-headline-font': 'Inter',
+      'footer-supporting-text-font': 'Inter',
+    ));
+
+  @include mat.tabs-overrides(('label-text-font': 'Inter',
+    ));
+
+  @include mat.toolbar-overrides(('title-text-font': 'Plus Jakarta Sans',
+      'standard-height': 52px,
+    ));
+
+  @include mat.tooltip-overrides(('supporting-text-font': 'Inter',
     ));
 }
 
@@ -25,7 +178,7 @@ body {
   // Default the application to a light color theme. This can be changed to
   // `dark` to enable the dark color theme, or to `light dark` to defer to the
   // user's system settings.
-  color-scheme: light;
+  color-scheme: light dark;
 
   // Set a default background, font and text colors for the application using
   // Angular Material's system-level CSS variables. Learn more about these
