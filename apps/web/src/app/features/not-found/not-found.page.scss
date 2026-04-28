@@ -1,0 +1,53 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.not-found-page {
+  min-height: 100%;
+  padding: clamp(20px, 3vw, 40px);
+  display: grid;
+  place-items: center;
+}
+
+.not-found-card {
+  width: min(100%, 520px);
+  padding: clamp(24px, 3.6vw, 40px);
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-low);
+  text-align: center;
+}
+
+.not-found-code {
+  margin: 0;
+  font: var(--mat-sys-display-small);
+  color: var(--mat-sys-primary);
+}
+
+h1 {
+  margin: 8px 0 0;
+  font: var(--mat-sys-headline-medium);
+}
+
+.not-found-message {
+  margin: 12px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.not-found-link {
+  margin-top: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: var(--mat-sys-on-primary);
+  background: var(--mat-sys-primary);
+  text-decoration: none;
+}
+
+.not-found-link:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
