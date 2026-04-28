@@ -9,6 +9,9 @@ Angular frontend application.
 ## UI Baseline
 - UI component library: Angular Material (`@angular/material`) with CDK (`@angular/cdk`)
 - Theme baseline: Material 3 theme configured in `src/styles.scss` via `mat.theme(...)`
+- Styling authority: global Material theme in `src/styles.scss` is the default styling source for Angular Material components
+- Override boundary: avoid local Material restyling/one-off overrides unless there is an explicit, documented feature-specific exception
+- Policy reference: see `2026-04-28 - Treat global Material theme as styling authority for Material components` in [`../../DECISIONS.md`](../../DECISIONS.md)
 - Animations baseline: `provideAnimationsAsync()` in `src/app/app.config.ts`
 - Typography/icons baseline: Roboto + Material Icons loaded in `src/index.html`
 
