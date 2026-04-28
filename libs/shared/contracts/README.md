@@ -4,7 +4,7 @@ Shared cross-app contracts and types.
 
 ## Public Import Path
 ```ts
-import { contracts } from '@fullstack-starter/contracts';
+import type { AuthMeResponse } from '@fullstack-starter/contracts';
 ```
 
 ## Responsibility
