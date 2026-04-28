@@ -8,8 +8,6 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import type {
   AccessTokenResponse,
@@ -35,11 +33,6 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  @UsePipes(
-    new ValidationPipe({
-      transform: true,
-    }),
-  )
   async login(
     @Body() body: LoginRequestDto,
     @Res({ passthrough: true }) response: Response,

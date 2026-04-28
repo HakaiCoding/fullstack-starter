@@ -38,6 +38,11 @@ function createResponseMock(): Pick<Response, 'cookie' | 'clearCookie'> {
 
 const loginValidationPipe = new ValidationPipe({
   transform: true,
+  whitelist: true,
+  forbidNonWhitelisted: true,
+  transformOptions: {
+    enableImplicitConversion: true,
+  },
 });
 
 const loginBodyMetadata: ArgumentMetadata = {
@@ -134,6 +139,11 @@ describe('AuthController', () => {
       {
         email: 'admin@example.com',
         password: '   ',
+      },
+      {
+        email: 'admin@example.com',
+        password: 'pw',
+        extra: 'unexpected',
       },
     ];
 

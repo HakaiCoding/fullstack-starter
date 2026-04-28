@@ -3,7 +3,7 @@
  * This is only a minimal backend to get started.
  */
 
-import { Logger, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
@@ -16,6 +16,17 @@ async function bootstrap() {
   const corsConfiguration = configService.getOrThrow<CorsConfig>('cors');
   const dbConfig = configService.getOrThrow<DatabaseConfig>('database');
   const allowedOrigins = new Set(corsConfiguration.allowedOrigins);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   app.enableCors({
     credentials: corsConfiguration.credentials,

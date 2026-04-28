@@ -279,6 +279,19 @@ describe('Auth flow e2e', () => {
     expectHttpErrorResponseShape(response);
   });
 
+  it('returns 400 for login payload with unknown extra field', async () => {
+    const response = await request('POST', '/api/v1/auth/login', {
+      data: {
+        email: 'extra-field@example.com',
+        password: 'S3curePassw0rd!',
+        extra: 'unexpected',
+      },
+    });
+
+    expect(response.status).toBe(400);
+    expectHttpErrorResponseShape(response);
+  });
+
   it('returns 401 for refresh request without refresh cookie', async () => {
     const response = await request('POST', '/api/v1/auth/refresh');
 
