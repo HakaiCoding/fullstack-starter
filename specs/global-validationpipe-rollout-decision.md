@@ -11,20 +11,24 @@
 - lifecycle note:
   - dedicated follow-up spec for broader/global `ValidationPipe` rollout policy.
   - preferred target rollout policy is accepted in project documentation.
-  - runtime rollout remains deferred to a later implementation slice.
+  - runtime rollout is now implemented in API bootstrap using the accepted profile.
 
 ## Problem
-- DTO/class-validator is accepted as backend structured request-validation baseline, but only `POST /api/v1/auth/login` currently applies route-level `ValidationPipe`.
+- DTO/class-validator is accepted as backend structured request-validation baseline; before rollout implementation, only `POST /api/v1/auth/login` had route-level `ValidationPipe`.
 - consistent global transport-validation policy was needed to avoid endpoint-by-endpoint drift.
-- accepted policy was needed without conflating decision acceptance with immediate runtime activation.
+- accepted policy needed to be documented first, and then activated in a separate implementation slice with regression coverage.
 
-## Current Baseline (Verified)
+## Current Runtime State (Verified)
 - accepted baseline from docs/decisions:
   - DTO/class-validator is accepted for structured request validation at API transport layer.
-  - first concrete implementation scope is `POST /api/v1/auth/login` only.
+  - first concrete implementation scope started at `POST /api/v1/auth/login`; rollout is now globally activated.
 - current code state:
-  - `apps/api/src/main.ts` does **not** register `app.useGlobalPipes(...)`.
-  - `apps/api/src/app/features/auth/auth.controller.ts` applies route-level `@UsePipes(new ValidationPipe({ transform: true }))` on `POST /auth/login`.
+  - `apps/api/src/main.ts` registers `app.useGlobalPipes(new ValidationPipe(...))` with:
+    - `transform: true`
+    - `whitelist: true`
+    - `forbidNonWhitelisted: true`
+    - `transformOptions.enableImplicitConversion: true`
+  - `apps/api/src/app/features/auth/auth.controller.ts` no longer duplicates login route-local `ValidationPipe`.
   - `apps/api/src/app/features/auth/dto/login-request.dto.ts` validates and trims `email`/`password` with class-validator/class-transformer.
 - current accepted behavior posture:
   - stable contract is status-code level for auth invalid-input/error behavior.
@@ -34,23 +38,21 @@
 ## Status and Scope Distinctions
 - `Accepted` today:
   - global ValidationPipe target policy in this spec and `DECISIONS.md`.
+  - runtime activation of global pipe is implemented in API bootstrap.
   - login malformed semantic payload -> `400`.
   - invalid login credentials -> `401`.
   - protected-route auth/RBAC status semantics remain `401`/`403` as already accepted.
 - `Deferred`:
-  - runtime activation of global pipe.
   - any stable malformed-JSON contract.
   - any stable framework validation error-body contract.
 
 ## Non-Goals
-- do not implement global `ValidationPipe` in this pass.
-- do not edit runtime code, DTOs, controllers, bootstrap, tests, auth flow, RBAC, persistence, or shared contracts.
-- do not claim global validation is currently active.
+- do not change the accepted global ValidationPipe profile without an explicit follow-up spec/decision.
 - do not claim all API inputs are currently validated.
 - do not introduce a stable custom `400` error-body contract unless separately accepted.
 - do not treat malformed-JSON parser behavior as part of this decision.
 
-## Preferred Target Policy (Accepted, Not Yet Implemented)
+## Accepted Runtime Policy (Implemented)
 ```ts
 new ValidationPipe({
   transform: true,
@@ -73,7 +75,7 @@ new ValidationPipe({
 | --- | --- | --- | --- | --- | --- |
 | `GET /api/v1` | none | none | n/a | none | none |
 | `GET /api/v1/health/db` | none | none | n/a | none | none |
-| `POST /api/v1/auth/login` | JSON body (`email`, `password`) | public | **yes** (`LoginRequestDto`) | route-level `ValidationPipe({ transform: true })` | **high** |
+| `POST /api/v1/auth/login` | JSON body (`email`, `password`) | public | **yes** (`LoginRequestDto`) | global `ValidationPipe` + DTO validation | **high** |
 | `POST /api/v1/auth/refresh` | cookie header only | public | none | manual cookie extraction + auth service checks | low now; medium if DTO input added later |
 | `POST /api/v1/auth/logout` | cookie header only | public | none | manual cookie extraction + auth service checks | low now; medium if DTO input added later |
 | `GET /api/v1/auth/me` | bearer token header only | `JwtAccessAuthGuard` | none | guard + strategy | low now; medium if DTO query/params added later |
@@ -110,41 +112,38 @@ new ValidationPipe({
 - framework-default error response body details remain intentionally non-stable in this scope.
 - no stable custom `400` validation error-body contract is introduced by this spec.
 
-## Implementation Prerequisites (Future Runtime Pass)
-- unit:
-  - update/add login tests for unknown-field rejection (`400`) on DTO-bound payloads.
-  - verify malformed semantic login payload behavior remains `400`.
-  - verify invalid credentials remain `401`.
-  - preserve guard/strategy behavior checks for `401`/`403` semantics.
-- e2e:
-  - retain existing auth/users status assertions.
-  - add targeted e2e for login unknown-field rejection status (`400`).
-  - verify protected-route `401`/`403` behavior remains unchanged.
-  - for future DTO fields using numeric/boolean primitives, add DTO-specific conversion/rejection tests.
-- regression:
-  - verify auth refresh/logout/me and users RBAC flows remain unchanged.
+## Implementation and Regression Checks
+- completed in rollout implementation slice:
+  - global ValidationPipe activated in `apps/api/src/main.ts` using the accepted profile.
+  - login route-local pipe duplication removed after global activation.
+  - login unknown-field rejection (`400`) added in unit/e2e coverage.
+  - malformed semantic login payload behavior preserved (`400`).
+  - invalid credentials behavior preserved (`401`).
+  - protected-route `401`/`403` behavior preserved.
+- still required for future DTO fields:
+  - add DTO-specific numeric/boolean implicit-conversion tests when such fields are introduced.
 
-## Later Implementation Boundary (Post-Approval Only)
-1. apply global pipe in API bootstrap (`apps/api/src/main.ts`) only in a later implementation slice.
+## Post-Implementation Boundary (Still Enforced)
+1. keep global pipe policy consistent with the accepted profile unless a follow-up spec/decision changes it.
 2. no DTO/shared-contract expansion unless separately required by accepted scope.
-3. no auth/RBAC behavior changes as part of the rollout.
+3. no auth/RBAC behavior changes as part of validation rollout maintenance.
 
 ## Required Gates
 Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
-- this documentation/design pass:
-  - docs-only (`tiny/local`) change; no doc-specific automated gate is currently documented.
-  - per docs, runtime gates may be skipped with explicit reporting.
-- future implementation pass:
+- rollout implementation slice:
   - core + auth/security + e2e-relevant gates per `docs/commands-reference.md` sections `8.3`, `8.4`, and `8.6`.
+- this docs-only reconciliation pass:
+  - per `docs/commands-reference.md` section `8.1`, runtime gates may be skipped with explicit reporting.
 
 ## Acceptance Checks
-- spec is clearly marked `Accepted` while runtime remains deferred.
+- spec remains `Accepted` and runtime activation is implemented.
 - accepted target global ValidationPipe profile is explicitly documented.
 - unknown-field DTO-bound `400` behavior is explicitly documented as accepted contract.
 - accepted auth/RBAC status behavior is explicitly preserved.
 - malformed JSON remains out of scope for this decision.
 - framework error-body stability remains non-stable in this scope.
-- no runtime behavior is changed in this pass.
+- routes without DTO-bound inputs are not automatically considered validated.
+- future DTO-specific numeric/boolean implicit-conversion tests remain required as fields are introduced.
 
 ## Safety Rule for Missing Details
 - "Inspect the relevant docs/spec/code. If the requirement is already documented, follow it. If it is not documented, report the gap and either propose a minimal safe option for approval or update the spec only if the project workflow allows that. Do not implement the unresolved detail as though it were already decided."
@@ -162,16 +161,16 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
   - none blocking in this pass.
   - skills remain guidance only; accepted project docs/specs/decisions remain authoritative.
 - project-compatible decision:
-  - keep runtime implementation blocked until a later implementation slice applies this accepted policy.
+  - keep runtime behavior aligned to accepted policy and maintain documented boundaries after activation.
 
 ## Documentation Updates Needed
 - docs updated in this pass:
-  - `specs/global-validationpipe-rollout-decision.md` (status/provenance aligned to accepted policy)
-  - `DECISIONS.md` (accepted rollout-policy decision entry added)
+  - `specs/global-validationpipe-rollout-decision.md` (runtime activation status reconciled with implemented code)
+  - `DECISIONS.md` (implementation-status wording reconciled for accepted rollout policy)
 - docs intentionally not updated in this pass:
-  - `specs/auth-invalid-input-auth-error-behavior-baseline.md` (accepted baseline remains unchanged in this docs-only update)
+  - none
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
-  - required and completed in this pass.
-  - added accepted rollout-policy entry for global ValidationPipe configuration and deferred runtime activation boundary.
+  - update required and completed in this pass.
+  - existing accepted rollout-policy entry wording reconciled from deferred status to implemented status.

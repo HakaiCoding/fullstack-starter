@@ -11,6 +11,7 @@
 - lifecycle note:
   - this spec originally documented status-code behavior before DTO validation rollout.
   - this pass updates policy + implementation baseline so DTO/class-validator is accepted and first applied to `POST /api/v1/auth/login`.
+  - global ValidationPipe rollout with the accepted profile is now implemented in follow-up runtime code, while this spec remains the status-code behavior baseline.
 
 ## Problem
 - auth invalid-input/error behavior needed a stable status-code contract that survives validation implementation updates.
@@ -21,7 +22,7 @@
 - no RBAC scope expansion or role-policy changes.
 - no new routes.
 - no TypeORM entity, migration, repository, or persistence behavior changes.
-- no global ValidationPipe rollout that could change unrelated endpoint behavior in this pass.
+- no changes to the accepted global ValidationPipe profile in this pass.
 - no shared request-contract expansion (`LoginRequest` remains app-local in this pass).
 - no custom stable `400` error-body contract in this pass.
 - no malformed-JSON parsing contract acceptance in this pass.
@@ -31,7 +32,7 @@
 - DTOs are transport-layer request validation objects.
 - DTOs do not replace TypeORM entities, DB constraints, guards, services, or domain/auth rules.
 - DTOs should live near the owning API feature/module unless docs/specs define another convention.
-- this pass applies the baseline first to `POST /api/v1/auth/login` using app-local DTO + route-level `ValidationPipe`.
+- baseline started at `POST /api/v1/auth/login`; current runtime applies the accepted ValidationPipe profile globally in API bootstrap, with login remaining the first concretely covered surface.
 - future endpoints with structured request body/query params should follow this baseline unless a spec documents an exception.
 - request contracts are not automatically added to `libs/shared/contracts`; `LoginRequest` remains app-local in this pass.
 - error-status behavior is the stable contract in this scope; framework-default error-body details remain non-stable unless explicitly documented.
@@ -43,7 +44,7 @@
 ### Behavior Matrix (Current State)
 | Behavior | Endpoint / code path | Current status code | Body stability | Coverage | Evidence | State |
 | --- | --- | --- | --- | --- | --- | --- |
-| malformed login request body (semantic payload invalid for required string fields) | `POST /api/v1/auth/login` via `LoginRequestDto` + route-level `ValidationPipe` | `400` | not stable (framework ValidationPipe/BadRequest body) | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| malformed login request body (semantic payload invalid for required string fields) | `POST /api/v1/auth/login` via `LoginRequestDto` + global `ValidationPipe` | `400` | not stable (framework ValidationPipe/BadRequest body) | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api/src/main.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
 | malformed login request body (syntactically malformed JSON before controller) | `POST /api/v1/auth/login` request parsing path | not explicitly documented in current accepted docs/specs; runtime expected to be framework-handled | not stable | missing dedicated unit/e2e coverage in current baseline | absence of explicit case in `apps/api-e2e/src/api/auth.spec.ts` and accepted docs/specs | unresolved |
 | missing login email | `POST /api/v1/auth/login` (`email` missing) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
 | missing login password | `POST /api/v1/auth/login` (`password` missing) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
@@ -62,7 +63,7 @@
 - treating framework-default error-body fields/messages as stable API contract when docs/tests do not lock them.
 - changing auth status-code semantics (`400/401/403`) while implementing DTO validation.
 - widening shared contracts with login request internals in this pass.
-- implementing global validation rollout in this pass without explicit spec/decision scope.
+- changing accepted global validation rollout behavior without explicit spec/decision scope.
 - introducing email-format validation in this pass without explicit accepted behavior update.
 
 ## Affected Domains/Modules
@@ -108,7 +109,7 @@
 ## Risks
 - risk 1 and mitigation:
   - risk: accidental behavior drift on non-login endpoints.
-  - mitigation: apply route-level validation to login only; no global rollout in this pass.
+  - mitigation: keep accepted global rollout profile active and continue asserting unchanged auth status semantics on affected flows.
 - risk 2 and mitigation:
   - risk: accidental contract-locking on framework error-body details.
   - mitigation: keep status-code-level contract only for error behavior unless explicitly documented.
@@ -118,7 +119,7 @@
 
 ## Test Plan
 - unit tests:
-  - update auth controller unit tests for DTO + route-level validation behavior (missing/non-string/blank + trim behavior).
+  - update auth controller unit tests for DTO + accepted global validation behavior (missing/non-string/blank/unknown + trim behavior).
   - keep auth core/jwt strategy/roles guard tests unchanged.
 - integration/e2e tests:
   - preserve malformed-login `400` matrix in `apps/api-e2e/src/api/auth.spec.ts`.
