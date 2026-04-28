@@ -3,28 +3,77 @@
 }
 
 .login-page {
-  display: grid;
-  place-items: center;
+  position: relative;
   min-height: 100%;
-  padding: 24px 16px;
+  padding: clamp(24px, 6vw, 56px) 16px;
+  overflow: hidden;
 }
 
-.login-card {
-  width: min(420px, 100%);
+.login-page::before,
+.login-page::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.login-page::before {
+  width: 360px;
+  height: 360px;
+  top: -120px;
+  right: -120px;
+  background: radial-gradient(circle at center, var(--mat-sys-primary-container), transparent 70%);
+}
+
+.login-page::after {
+  width: 280px;
+  height: 280px;
+  left: -120px;
+  bottom: -140px;
+  background: radial-gradient(circle at center, var(--mat-sys-tertiary-container), transparent 70%);
+}
+
+.login-layout {
+  position: relative;
+  z-index: 1;
+  width: min(940px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(20px, 4vw, 40px);
+  align-items: center;
+}
+
+.login-intro {
+  max-width: 44ch;
+}
+
+.login-eyebrow {
+  margin: 0 0 8px;
+  font: var(--mat-sys-title-small);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mat-sys-primary);
 }
 
 .login-title {
-  margin: 0 0 8px;
+  margin: 0;
+  font: var(--mat-sys-headline-large);
 }
 
 .login-subtitle {
-  margin: 0 0 24px;
+  margin: 12px 0 0;
   color: var(--mat-sys-on-surface-variant);
 }
 
+.login-card {
+  width: 100%;
+  max-width: 430px;
+  justify-self: center;
+}
+
 .login-form {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 16px;
 }
 
@@ -34,9 +83,30 @@ mat-form-field {
 
 .login-error {
   margin: 0;
-  color: var(--mat-sys-error);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-error-container);
+  background: var(--mat-sys-error-container);
 }
 
 .login-submit {
   width: 100%;
+}
+
+@media (min-width: 900px) {
+  .login-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+  }
+
+  .login-card {
+    justify-self: end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-page::before,
+  .login-page::after {
+    opacity: 0.35;
+  }
 }
