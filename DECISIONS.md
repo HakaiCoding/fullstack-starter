@@ -114,7 +114,7 @@ Status: Accepted
 Context: Auth invalid-input handling was manually validated in controller code and docs still described DTO/class-validator request validation as optional future hardening.
 Decision: DTO/class-validator is the accepted backend baseline for structured HTTP request validation at the API transport layer (request body/query/params). DTOs are transport request-validation objects and do not replace TypeORM entities, DB constraints, guards, services, or domain/auth rules. DTOs should live near their owning API feature/module unless another convention is documented. This pass applies the baseline first to `POST /api/v1/auth/login` with an app-local login request DTO.
 Alternatives considered: Keep manual controller validation per endpoint; defer DTO/class-validator baseline; roll out global ValidationPipe in this pass.
-Consequences: Malformed semantic login payloads continue to return `400` and invalid credentials continue to return `401`, while framework-default error body details remain non-stable unless explicitly documented. Future endpoints with structured request bodies/query params are expected to follow this baseline unless a spec documents an exception. Request contracts are not auto-promoted into `libs/shared/contracts`, and `LoginRequest` remains app-local in this pass.
+Consequences: Malformed semantic login payloads continue to return `400` and invalid credentials continue to return `401`, while framework-default error body details remained non-stable at the time of this decision. Future endpoints with structured request bodies/query params are expected to follow this baseline unless a spec documents an exception. Request contracts are not auto-promoted into `libs/shared/contracts`, and `LoginRequest` remains app-local in this pass. Covered baseline `400/401/403` body-envelope/code stability is later defined by `2026-04-29 - Stabilize baseline API error response envelope for current 400/401/403 auth-validation-rbac cases`.
 Related docs/specs: [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)
 
 ## 2026-04-27 - Define auth account and authorization baseline model
@@ -149,7 +149,7 @@ Decision: Accept the global ValidationPipe rollout target profile:
 - `whitelist: true`
 - `forbidNonWhitelisted: true`
 - `transformOptions.enableImplicitConversion: true`
-Activate this profile globally in API bootstrap. Keep the DTO-bound unknown-field contract that extra unknown fields return `400`, keep framework-default error-body details non-stable unless separately accepted, and keep malformed JSON parser-layer behavior out of this decision scope.
+Activate this profile globally in API bootstrap. Keep the DTO-bound unknown-field contract that extra unknown fields return `400`, keep framework-default error-body details non-stable unless separately accepted, and keep malformed JSON parser-layer behavior out of this decision scope. Covered baseline `400/401/403` body-envelope/code stability is later defined by `2026-04-29 - Stabilize baseline API error response envelope for current 400/401/403 auth-validation-rbac cases`.
 Alternatives considered: Keep route-local validation only; defer strict unknown-field policy; accept transform-only profile first.
 Consequences: Global DTO/class-validator transport validation is now active for DTO-bound request surfaces under the accepted profile. Accepted auth/RBAC status behavior remains preserved (`400` malformed semantic login payload, `401` invalid credentials, `401/403` protected-route semantics), unknown-field rejection is covered, routes without DTO-bound inputs are not automatically validated, and DTO-specific numeric/boolean implicit-conversion tests remain required when such fields are introduced.
 Related docs/specs: [`specs/global-validationpipe-rollout-decision.md`](./specs/global-validationpipe-rollout-decision.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`docs/commands-reference.md`](./docs/commands-reference.md)
@@ -157,9 +157,9 @@ Related docs/specs: [`specs/global-validationpipe-rollout-decision.md`](./specs/
 ## 2026-04-28 - Stabilize malformed syntactic login JSON status contract
 Status: Accepted
 Context: Accepted auth invalid-input behavior covered malformed semantic payloads (`400`) and invalid credentials (`401`), but malformed syntactic JSON for `POST /api/v1/auth/login` had remained unresolved and untested as a contract.
-Decision: Accept malformed syntactic JSON sent to `POST /api/v1/auth/login` as stable status-level behavior returning `400`. Keep malformed semantic login payloads at stable `400` and invalid credentials at stable `401`. Do not stabilize malformed-JSON response-body fields/messages; framework/default body details remain non-stable unless explicitly accepted later.
+Decision: Accept malformed syntactic JSON sent to `POST /api/v1/auth/login` as stable status-level behavior returning `400`. Keep malformed semantic login payloads at stable `400` and invalid credentials at stable `401`. Do not stabilize malformed-JSON response-body fields/messages in this decision; framework/default body details remained non-stable here unless explicitly accepted later.
 Alternatives considered: Keep malformed syntactic JSON non-contract/framework-default; defer until a broader API/global error-contract policy decision.
-Consequences: Auth login invalid-input/error behavior now has explicit status-level coverage for syntactic malformed JSON without promoting framework parser error body shape into stable API contract. ValidationPipe rollout policy scope remains unchanged.
+Consequences: Auth login invalid-input/error behavior now has explicit status-level coverage for syntactic malformed JSON without promoting framework parser error body shape into stable API contract. ValidationPipe rollout policy scope remains unchanged. Covered baseline `400/401/403` body-envelope/code stability is later defined by `2026-04-29 - Stabilize baseline API error response envelope for current 400/401/403 auth-validation-rbac cases`.
 Related docs/specs: [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md), [`specs/global-validationpipe-rollout-decision.md`](./specs/global-validationpipe-rollout-decision.md), [`docs/commands-reference.md`](./docs/commands-reference.md)
 
 ## 2026-04-28 - Treat global Material theme as styling authority for Material components
@@ -169,3 +169,22 @@ Decision: For `apps/web`, Angular Material remains the default UI component libr
 Alternatives considered: Keep this as an informal convention only; allow local per-component Material restyling by default.
 Consequences: Material styling decisions become more consistent and reviewable across sessions, with clearer guardrails against style drift and wrong-layer visual patches. Legitimate exceptions remain possible but must be explicit and narrowly scoped.
 Related docs/specs: [`apps/web/README.md`](./apps/web/README.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`AI_SKILLS.md`](./AI_SKILLS.md)
+
+## 2026-04-29 - Stabilize baseline API error response envelope for current 400/401/403 auth-validation-rbac cases
+Status: Accepted
+Context: Existing accepted auth/validation/RBAC docs stabilized status-code behavior for baseline error paths but left error response bodies intentionally non-stable and framework-default. That created contract drift risk for API clients and tests.
+Decision: Introduce a stable public error envelope for covered baseline error cases:
+- shape: `{ statusCode, error: { code, message, details? } }`
+- covered statuses in this first slice: `400`, `401`, `403`
+- stable first-slice codes:
+  - `REQUEST_VALIDATION_FAILED`
+  - `REQUEST_UNKNOWN_FIELD`
+  - `REQUEST_MALFORMED_JSON`
+  - `AUTH_UNAUTHENTICATED`
+  - `AUTH_INVALID_CREDENTIALS`
+  - `AUTH_INVALID_OR_EXPIRED_TOKEN`
+  - `AUTH_FORBIDDEN`
+Keep existing baseline status semantics unchanged and keep non-covered statuses/error families out of scope in this slice. Public error response types are part of shared external contracts, while API-internal exception/filter/validation implementation details remain app-local.
+Alternatives considered: Continue framework-default/non-stable error bodies; stabilize only status-level behavior; defer malformed-JSON body normalization.
+Consequences: Covered baseline API errors now have a deterministic response body contract without changing auth/session/RBAC semantics. Existing "non-stable body" assumptions for these covered baseline cases are superseded by this decision and its spec.
+Related docs/specs: [`specs/stable-api-error-response-contract-baseline.md`](./specs/stable-api-error-response-contract-baseline.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md), [`specs/global-validationpipe-rollout-decision.md`](./specs/global-validationpipe-rollout-decision.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)

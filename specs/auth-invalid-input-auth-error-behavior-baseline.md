@@ -12,6 +12,7 @@
   - this spec originally documented status-code behavior before DTO validation rollout.
   - this pass updates policy + implementation baseline so DTO/class-validator is accepted and first applied to `POST /api/v1/auth/login`.
   - global ValidationPipe rollout with the accepted profile is now implemented in follow-up runtime code, while this spec remains the status-code behavior baseline.
+  - covered baseline `400/401/403` error-body stability is now defined by [`stable-api-error-response-contract-baseline.md`](./stable-api-error-response-contract-baseline.md).
 
 ## Problem
 - auth invalid-input/error behavior needed a stable status-code contract that survives validation implementation updates.
@@ -24,8 +25,8 @@
 - no TypeORM entity, migration, repository, or persistence behavior changes.
 - no changes to the accepted global ValidationPipe profile in this pass.
 - no shared request-contract expansion (`LoginRequest` remains app-local in this pass).
-- no custom stable `400` error-body contract in this pass.
-- no stable malformed-JSON response-body contract in this pass.
+- no endpoint-specific error-body variants.
+- no claim that `error.details` semantics are stable for covered cases.
 
 ## Behavior Rules
 - DTO/class-validator is the accepted backend baseline for structured HTTP request validation.
@@ -35,8 +36,7 @@
 - baseline started at `POST /api/v1/auth/login`; current runtime applies the accepted ValidationPipe profile globally in API bootstrap, with login remaining the first concretely covered surface.
 - future endpoints with structured request body/query params should follow this baseline unless a spec documents an exception.
 - request contracts are not automatically added to `libs/shared/contracts`; `LoginRequest` remains app-local in this pass.
-- error-status behavior is the stable contract in this scope; framework-default error-body details remain non-stable unless explicitly documented.
-- no custom stable `400` error-body contract is introduced in this pass.
+- status-code behavior remains stable in this scope; covered baseline `400/401/403` error-body envelope/code stability is defined in [`stable-api-error-response-contract-baseline.md`](./stable-api-error-response-contract-baseline.md).
 - stable auth behavior in this pass:
   - malformed semantic login payloads return `400`.
   - malformed syntactic JSON sent to `POST /api/v1/auth/login` returns `400`.
@@ -45,18 +45,18 @@
 ### Behavior Matrix (Current State)
 | Behavior | Endpoint / code path | Current status code | Body stability | Coverage | Evidence | State |
 | --- | --- | --- | --- | --- | --- | --- |
-| malformed login request body (semantic payload invalid for required string fields) | `POST /api/v1/auth/login` via `LoginRequestDto` + global `ValidationPipe` | `400` | not stable (framework ValidationPipe/BadRequest body) | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api/src/main.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| malformed login request body (syntactically malformed JSON before controller) | `POST /api/v1/auth/login` request parsing path | `400` | not stable (framework parser/default error body) | e2e | `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| missing login email | `POST /api/v1/auth/login` (`email` missing) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| missing login password | `POST /api/v1/auth/login` (`password` missing) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| non-string login email/password | `POST /api/v1/auth/login` (`@IsString`) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| blank login email/password | `POST /api/v1/auth/login` (`trim` transform + `@IsNotEmpty`) | `400` | not stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| invalid credentials | `POST /api/v1/auth/login` via `AuthCoreService.issueTokenPairForCredentials(...)` | `401` | not stable | unit + e2e | `apps/api/src/app/features/auth/auth-core.service.ts`, `apps/api/src/app/features/auth/auth-core.service.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| missing refresh cookie | `POST /api/v1/auth/refresh` (`Missing refresh token.`) | `401` | not stable | unit + e2e | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| invalid/rotated refresh token | `POST /api/v1/auth/refresh` via `verifyRefreshToken(...)` and rotation checks | `401` | not stable | unit + e2e | `apps/api/src/app/features/auth/auth-core.service.ts`, `apps/api/src/app/features/auth/auth-core.service.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| accessing protected auth endpoint without access token | `GET /api/v1/auth/me` with `JwtAccessAuthGuard` and JWT strategy | `401` | not stable | e2e | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/jwt-access-auth.guard.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
-| accessing RBAC-protected users endpoint without token | `GET /api/v1/users` with `JwtAccessAuthGuard` + `RolesGuard` | `401` | intentionally not stable body for `401`/`403`; status is stable | unit + e2e | `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
-| accessing RBAC-protected users endpoint with insufficient role | `GET /api/v1/users` with role check (`user` vs required `admin`) | `403` | intentionally not stable body for `401`/`403`; status is stable | unit + e2e | `apps/api/src/app/features/auth/roles.guard.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
+| malformed login request body (semantic payload invalid for required string fields) | `POST /api/v1/auth/login` via `LoginRequestDto` + global `ValidationPipe` | `400` | stable envelope+code; details remain non-stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api/src/main.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| malformed login request body (syntactically malformed JSON before controller) | `POST /api/v1/auth/login` request parsing path | `400` | stable envelope+code; details remain non-stable | e2e | `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| missing login email | `POST /api/v1/auth/login` (`email` missing) | `400` | stable envelope+code; details remain non-stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| missing login password | `POST /api/v1/auth/login` (`password` missing) | `400` | stable envelope+code; details remain non-stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| non-string login email/password | `POST /api/v1/auth/login` (`@IsString`) | `400` | stable envelope+code; details remain non-stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| blank login email/password | `POST /api/v1/auth/login` (`trim` transform + `@IsNotEmpty`) | `400` | stable envelope+code; details remain non-stable | unit + e2e | `apps/api/src/app/features/auth/dto/login-request.dto.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| invalid credentials | `POST /api/v1/auth/login` via `AuthCoreService.issueTokenPairForCredentials(...)` | `401` | stable envelope+code | unit + e2e | `apps/api/src/app/features/auth/auth-core.service.ts`, `apps/api/src/app/features/auth/auth-core.service.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| missing refresh cookie | `POST /api/v1/auth/refresh` (`Missing refresh token.`) | `401` | stable envelope+code | unit + e2e | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/auth.controller.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| invalid/rotated refresh token | `POST /api/v1/auth/refresh` via `verifyRefreshToken(...)` and rotation checks | `401` | stable envelope+code | unit + e2e | `apps/api/src/app/features/auth/auth-core.service.ts`, `apps/api/src/app/features/auth/auth-core.service.spec.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| accessing protected auth endpoint without access token | `GET /api/v1/auth/me` with `JwtAccessAuthGuard` and JWT strategy | `401` | stable envelope+code | e2e | `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api/src/app/features/auth/jwt-access-auth.guard.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
+| accessing RBAC-protected users endpoint without token | `GET /api/v1/users` with `JwtAccessAuthGuard` + `RolesGuard` | `401` | stable envelope+code | unit + e2e | `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
+| accessing RBAC-protected users endpoint with insufficient role | `GET /api/v1/users` with role check (`user` vs required `admin`) | `403` | stable envelope+code | unit + e2e | `apps/api/src/app/features/auth/roles.guard.ts`, `apps/api/src/app/features/auth/roles.guard.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
 | successful authorized access (contrast): authenticated profile | `GET /api/v1/auth/me` with valid bearer token | `200` | stable shape (shared `AuthMeResponse`) | e2e | `libs/shared/contracts/src/lib/contracts.ts`, `apps/api/src/app/features/auth/auth.controller.ts`, `apps/api-e2e/src/api/auth.spec.ts` | accepted current behavior |
 | successful authorized access (contrast): admin users list | `GET /api/v1/users` as `admin` | `200` | stable shape (shared `UsersListResponse`) | unit + e2e | `libs/shared/contracts/src/lib/contracts.ts`, `apps/api/src/app/features/users/users.controller.ts`, `apps/api/src/app/features/users/users.service.spec.ts`, `apps/api-e2e/src/api/users.spec.ts`, `specs/first-meaningful-rbac-protected-route-decision.md` | accepted current behavior |
 
@@ -103,8 +103,8 @@
   - `jwt-security` prefers asymmetric signing in general; project accepted HS256 baseline remains unchanged in this pass.
 
 ## Edge Cases
-- malformed JSON before controller now has a stable status-level contract (`400`) for `POST /api/v1/auth/login`; response body remains non-stable in this pass.
-- no stable framework error-body field/message contract is introduced for `400/401/403`.
+- malformed JSON before controller now has stable status + envelope contract (`400` + code) for `POST /api/v1/auth/login`.
+- `error.details` content remains intentionally non-stable for covered cases.
 - no email-format validation is added in this pass; only string/non-blank validation is required.
 
 ## Risks
@@ -128,7 +128,7 @@
   - preserve invalid credentials `401`.
   - preserve login success, refresh/logout/auth-me, and users RBAC route behavior.
 - regression coverage:
-  - malformed JSON parse-path auth contract is covered by dedicated login e2e assertion (`400` status only).
+  - malformed JSON parse-path auth contract is covered by dedicated login e2e assertion (`400` + stable envelope/code for the covered baseline case).
 
 ## Required Gates
 Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
@@ -141,8 +141,7 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
 - DTO/class-validator baseline is explicitly accepted for structured backend request validation.
 - login route is first concrete implementation with app-local DTO scope.
 - malformed semantic login payloads return `400`; malformed syntactic JSON for login returns `400`; invalid credentials return `401`.
-- no custom stable `400` error-body contract is introduced.
-- framework-default error body remains non-stable unless explicitly documented.
+- stable baseline error envelope/code is documented in [`stable-api-error-response-contract-baseline.md`](./stable-api-error-response-contract-baseline.md); only `error.details` content remains intentionally non-stable.
 - no JWT/session/RBAC/persistence/shared-contract-scope drift is introduced.
 
 ## Documentation Updates Needed

@@ -1,5 +1,7 @@
 import type {
   AccessTokenResponse,
+  ApiErrorCode,
+  ApiErrorResponse,
   AuthMeResponse,
   AuthRole,
   LogoutResponse,
@@ -41,5 +43,19 @@ describe('contracts', () => {
 
     expect(usersListResponse.users).toHaveLength(1);
     expect(usersListResponse.users[0].role).toBe('user');
+  });
+
+  it('should type api error response contracts', () => {
+    const code: ApiErrorCode = 'AUTH_UNAUTHENTICATED';
+    const errorResponse: ApiErrorResponse = {
+      statusCode: 401,
+      error: {
+        code,
+        message: 'Authentication is required.',
+      },
+    };
+
+    expect(errorResponse.statusCode).toBe(401);
+    expect(errorResponse.error.code).toBe('AUTH_UNAUTHENTICATED');
   });
 });

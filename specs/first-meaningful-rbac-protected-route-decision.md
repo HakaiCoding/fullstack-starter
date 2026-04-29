@@ -11,6 +11,7 @@
 - lifecycle note:
   - this spec records both the accepted route decision and the implemented baseline behavior on `GET /api/v1/users`.
   - accepted decision is logged in [`../DECISIONS.md`](../DECISIONS.md) (`2026-04-25 - Use GET /api/v1/users as first live RBAC route`).
+  - covered `401/403` error-envelope stability is now defined globally by [`stable-api-error-response-contract-baseline.md`](./stable-api-error-response-contract-baseline.md).
 
 ## Problem
 - before this slice, RBAC existed as primitives but lacked one real protected endpoint with end-to-end allow/deny verification.
@@ -52,7 +53,7 @@
   - ordering is deterministic (`createdAt DESC`, `id ASC` tie-breaker).
 - error response contract:
   - status codes `401` and `403` are the required public contract.
-  - response body for `401`/`403` remains framework-default and is not a stable API contract in this slice.
+  - response body for covered baseline `401`/`403` cases follows the stable global error envelope contract.
 
 ## Forbidden Behavior
 - demo-only or fake protected endpoints unrelated to this approved route.
@@ -172,7 +173,7 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
 - `200` response shape is `{ users: UserListItem[] }` with `UserListItem = { id, email, displayName, role }`.
 - deterministic ordering is enforced (`createdAt DESC`, `id ASC` tie-break).
 - sensitive fields are excluded from response.
-- `401`/`403` behavior contract remains status-code based (no strict custom body contract).
+- `401`/`403` status behavior remains unchanged and response bodies now follow the stable global error envelope contract.
 - behavior tests prove general rules rather than single examples.
 - no example-specific patches, hardcoded special cases, or wrong-layer business-rule placement introduced.
 

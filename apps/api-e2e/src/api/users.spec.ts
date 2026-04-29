@@ -4,6 +4,8 @@ import { promisify } from 'node:util';
 import { Client } from 'pg';
 import type {
   AccessTokenResponse,
+  ApiErrorCode,
+  ApiErrorResponse,
   AuthRole,
   UsersListResponse,
 } from '@fullstack-starter/contracts';
@@ -92,6 +94,25 @@ async function request<T>(
   });
 }
 
+function expectApiErrorResponse(params: {
+  response: AxiosResponse;
+  statusCode: ApiErrorResponse['statusCode'];
+  code: ApiErrorCode;
+}): void {
+  const { response, statusCode, code } = params;
+  expect(response.status).toBe(statusCode);
+  expect(response.data).toEqual(
+    expect.objectContaining({
+      statusCode,
+      error: expect.objectContaining({
+        code,
+        message: expect.any(String),
+      }),
+    }),
+  );
+  expect(Object.keys(response.data).sort()).toEqual(['error', 'statusCode']);
+}
+
 describe('Users RBAC e2e', () => {
   const createdUserIds: string[] = [];
   const testPrefix = `users-e2e-${Date.now()}`;
@@ -168,7 +189,25 @@ describe('Users RBAC e2e', () => {
 
   it('returns 401 for unauthenticated requests', async () => {
     const response = await request('GET', '/api/v1/users');
-    expect(response.status).toBe(401);
+    expectApiErrorResponse({
+      response,
+      statusCode: 401,
+      code: 'AUTH_UNAUTHENTICATED',
+    });
+  });
+
+  it('returns 401 for requests with invalid bearer token', async () => {
+    const response = await request('GET', '/api/v1/users', {
+      headers: {
+        Authorization: 'Bearer invalid-token',
+      },
+    });
+
+    expectApiErrorResponse({
+      response,
+      statusCode: 401,
+      code: 'AUTH_INVALID_OR_EXPIRED_TOKEN',
+    });
   });
 
   it('returns 403 for authenticated non-admin requests', async () => {
@@ -186,7 +225,11 @@ describe('Users RBAC e2e', () => {
       },
     });
 
-    expect(response.status).toBe(403);
+    expectApiErrorResponse({
+      response,
+      statusCode: 403,
+      code: 'AUTH_FORBIDDEN',
+    });
   });
 
   it('returns 200 for admin with expected payload shape and no sensitive fields', async () => {

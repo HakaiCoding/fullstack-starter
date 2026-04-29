@@ -15,7 +15,7 @@ Full-stack starter monorepo for small/medium applications with:
 - Authentication and sessions:
   - API: `apps/api/src/app/features/auth/*`
   - Web: `apps/web/src/app/core/auth/*`
-  - Policy/spec references: [`DECISIONS.md`](./DECISIONS.md), [`specs/role-persistence-jwt-claim-rbac-baseline.md`](./specs/role-persistence-jwt-claim-rbac-baseline.md), [`specs/first-meaningful-rbac-protected-route-decision.md`](./specs/first-meaningful-rbac-protected-route-decision.md)
+  - Policy/spec references: [`DECISIONS.md`](./DECISIONS.md), [`specs/role-persistence-jwt-claim-rbac-baseline.md`](./specs/role-persistence-jwt-claim-rbac-baseline.md), [`specs/first-meaningful-rbac-protected-route-decision.md`](./specs/first-meaningful-rbac-protected-route-decision.md), [`specs/stable-api-error-response-contract-baseline.md`](./specs/stable-api-error-response-contract-baseline.md)
 - Persistence and schema:
   - `apps/api/src/db/entities/*`
   - `apps/api/src/db/migrations/*`

@@ -54,6 +54,7 @@ Request flow (baseline):
   - [`specs/first-meaningful-rbac-protected-route-decision.md`](./specs/first-meaningful-rbac-protected-route-decision.md)
   - [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)
   - [`specs/global-validationpipe-rollout-decision.md`](./specs/global-validationpipe-rollout-decision.md)
+  - [`specs/stable-api-error-response-contract-baseline.md`](./specs/stable-api-error-response-contract-baseline.md)
 
 ### 4.2 Persistence and Schema
 - Ownership:
@@ -87,6 +88,7 @@ Request flow (baseline):
 - Runtime safety and transport policy references:
   - [`DECISIONS.md`](./DECISIONS.md)
   - [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md)
+  - [`specs/stable-api-error-response-contract-baseline.md`](./specs/stable-api-error-response-contract-baseline.md)
 
 ## 5. Ownership Boundaries by Layer
 ### 5.1 UI Layer (`apps/web`)

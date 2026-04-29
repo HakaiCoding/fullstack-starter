@@ -5,10 +5,11 @@
 
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { type CorsConfig } from './app/config/cors.config';
 import { type DatabaseConfig } from './app/config/database.config';
+import { ApiErrorResponseFilter } from './app/system/api-error-response.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,7 @@ async function bootstrap() {
   const corsConfiguration = configService.getOrThrow<CorsConfig>('cors');
   const dbConfig = configService.getOrThrow<DatabaseConfig>('database');
   const allowedOrigins = new Set(corsConfiguration.allowedOrigins);
+  const httpAdapterHost = app.get(HttpAdapterHost);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -27,6 +29,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.useGlobalFilters(new ApiErrorResponseFilter(httpAdapterHost));
 
   app.enableCors({
     credentials: corsConfiguration.credentials,

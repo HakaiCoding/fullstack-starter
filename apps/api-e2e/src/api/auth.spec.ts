@@ -4,6 +4,8 @@ import { promisify } from 'node:util';
 import { Client } from 'pg';
 import type {
   AccessTokenResponse,
+  ApiErrorCode,
+  ApiErrorResponse,
   AuthMeResponse,
   AuthRole,
   LogoutResponse,
@@ -112,8 +114,37 @@ async function request<T>(
   });
 }
 
-function expectHttpErrorResponseShape(response: AxiosResponse): void {
-  expect(response.data).toEqual(expect.any(Object));
+function expectApiErrorResponse(params: {
+  response: AxiosResponse;
+  statusCode: ApiErrorResponse['statusCode'];
+  code: ApiErrorCode;
+  expectDetails?: boolean;
+}): void {
+  const { response, statusCode, code, expectDetails = false } = params;
+  expect(response.status).toBe(statusCode);
+  expect(response.data).toEqual(
+    expect.objectContaining({
+      statusCode,
+      error: expect.objectContaining({
+        code,
+        message: expect.any(String),
+      }),
+    }),
+  );
+  expect(Object.keys(response.data).sort()).toEqual(['error', 'statusCode']);
+  expect(
+    Object.keys(response.data.error).every((key) =>
+      ['code', 'details', 'message'].includes(key),
+    ),
+  ).toBe(true);
+
+  if (expectDetails) {
+    expect(Array.isArray(response.data.error.details)).toBe(true);
+    expect((response.data.error.details as unknown[]).length).toBeGreaterThan(0);
+    return;
+  }
+
+  expect(response.data.error.details).toBeUndefined();
 }
 
 describe('Auth flow e2e', () => {
@@ -205,8 +236,11 @@ describe('Auth flow e2e', () => {
       },
     });
 
-    expect(failure.status).toBe(401);
-    expectHttpErrorResponseShape(failure);
+    expectApiErrorResponse({
+      response: failure,
+      statusCode: 401,
+      code: 'AUTH_INVALID_CREDENTIALS',
+    });
   });
 
   it('returns 400 for login payload missing password', async () => {
@@ -216,8 +250,12 @@ describe('Auth flow e2e', () => {
       },
     });
 
-    expect(response.status).toBe(400);
-    expectHttpErrorResponseShape(response);
+    expectApiErrorResponse({
+      response,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+      expectDetails: true,
+    });
   });
 
   it('returns 400 for login payload missing email', async () => {
@@ -227,8 +265,12 @@ describe('Auth flow e2e', () => {
       },
     });
 
-    expect(response.status).toBe(400);
-    expectHttpErrorResponseShape(response);
+    expectApiErrorResponse({
+      response,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+      expectDetails: true,
+    });
   });
 
   it('returns 400 for login payload with non-string email', async () => {
@@ -239,8 +281,12 @@ describe('Auth flow e2e', () => {
       },
     });
 
-    expect(response.status).toBe(400);
-    expectHttpErrorResponseShape(response);
+    expectApiErrorResponse({
+      response,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+      expectDetails: true,
+    });
   });
 
   it('returns 400 for login payload with non-string password', async () => {
@@ -251,8 +297,12 @@ describe('Auth flow e2e', () => {
       },
     });
 
-    expect(response.status).toBe(400);
-    expectHttpErrorResponseShape(response);
+    expectApiErrorResponse({
+      response,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+      expectDetails: true,
+    });
   });
 
   it('returns 400 for login payload with blank email', async () => {
@@ -263,8 +313,12 @@ describe('Auth flow e2e', () => {
       },
     });
 
-    expect(response.status).toBe(400);
-    expectHttpErrorResponseShape(response);
+    expectApiErrorResponse({
+      response,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+      expectDetails: true,
+    });
   });
 
   it('returns 400 for login payload with blank password', async () => {
@@ -275,8 +329,12 @@ describe('Auth flow e2e', () => {
       },
     });
 
-    expect(response.status).toBe(400);
-    expectHttpErrorResponseShape(response);
+    expectApiErrorResponse({
+      response,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+      expectDetails: true,
+    });
   });
 
   it('returns 400 for login payload with unknown extra field', async () => {
@@ -288,8 +346,12 @@ describe('Auth flow e2e', () => {
       },
     });
 
-    expect(response.status).toBe(400);
-    expectHttpErrorResponseShape(response);
+    expectApiErrorResponse({
+      response,
+      statusCode: 400,
+      code: 'REQUEST_UNKNOWN_FIELD',
+      expectDetails: true,
+    });
   });
 
   it('returns 400 for malformed syntactic json on login', async () => {
@@ -300,14 +362,21 @@ describe('Auth flow e2e', () => {
       },
     });
 
-    expect(response.status).toBe(400);
+    expectApiErrorResponse({
+      response,
+      statusCode: 400,
+      code: 'REQUEST_MALFORMED_JSON',
+    });
   });
 
   it('returns 401 for refresh request without refresh cookie', async () => {
     const response = await request('POST', '/api/v1/auth/refresh');
 
-    expect(response.status).toBe(401);
-    expectHttpErrorResponseShape(response);
+    expectApiErrorResponse({
+      response,
+      statusCode: 401,
+      code: 'AUTH_UNAUTHENTICATED',
+    });
   });
 
   it('refresh succeeds, rotates token, and rejects old refresh token', async () => {
@@ -364,7 +433,11 @@ describe('Auth flow e2e', () => {
         Cookie: buildCookieHeader(refreshCookieName, String(initialRefreshToken)),
       },
     });
-    expect(oldRefreshAttempt.status).toBe(401);
+    expectApiErrorResponse({
+      response: oldRefreshAttempt,
+      statusCode: 401,
+      code: 'AUTH_INVALID_OR_EXPIRED_TOKEN',
+    });
   });
 
   it('protects /auth/me and allows access with valid bearer token', async () => {
@@ -372,7 +445,22 @@ describe('Auth flow e2e', () => {
     const user = await createUser(plainPassword);
 
     const denied = await request('GET', '/api/v1/auth/me');
-    expect(denied.status).toBe(401);
+    expectApiErrorResponse({
+      response: denied,
+      statusCode: 401,
+      code: 'AUTH_UNAUTHENTICATED',
+    });
+
+    const invalidTokenDenied = await request('GET', '/api/v1/auth/me', {
+      headers: {
+        Authorization: 'Bearer invalid-token',
+      },
+    });
+    expectApiErrorResponse({
+      response: invalidTokenDenied,
+      statusCode: 401,
+      code: 'AUTH_INVALID_OR_EXPIRED_TOKEN',
+    });
 
     const login = await request<AccessTokenResponse>('POST', '/api/v1/auth/login', {
       data: {
@@ -381,6 +469,23 @@ describe('Auth flow e2e', () => {
       },
     });
     expect(login.status).toBe(201);
+
+    const refreshCookieOnly = getCookieValueFromSetCookie(
+      getSetCookieHeaders(login),
+      refreshCookieName,
+    );
+    expect(refreshCookieOnly).toEqual(expect.any(String));
+
+    const refreshCookieOnlyDenied = await request('GET', '/api/v1/auth/me', {
+      headers: {
+        Cookie: buildCookieHeader(refreshCookieName, String(refreshCookieOnly)),
+      },
+    });
+    expectApiErrorResponse({
+      response: refreshCookieOnlyDenied,
+      statusCode: 401,
+      code: 'AUTH_UNAUTHENTICATED',
+    });
 
     const allowed = await request<AuthMeResponse>('GET', '/api/v1/auth/me', {
       headers: {
@@ -482,7 +587,11 @@ describe('Auth flow e2e', () => {
         Cookie: buildCookieHeader(refreshCookieName, String(refreshToken)),
       },
     });
-    expect(refreshAfterLogout.status).toBe(401);
+    expectApiErrorResponse({
+      response: refreshAfterLogout,
+      statusCode: 401,
+      code: 'AUTH_INVALID_OR_EXPIRED_TOKEN',
+    });
   });
 
   it('replaces previous session when logging in again (single-session policy)', async () => {
@@ -521,7 +630,11 @@ describe('Auth flow e2e', () => {
         Cookie: buildCookieHeader(refreshCookieName, String(firstRefreshToken)),
       },
     });
-    expect(refreshWithOldSession.status).toBe(401);
+    expectApiErrorResponse({
+      response: refreshWithOldSession,
+      statusCode: 401,
+      code: 'AUTH_INVALID_OR_EXPIRED_TOKEN',
+    });
 
     const refreshWithCurrentSession = await request('POST', '/api/v1/auth/refresh', {
       headers: {

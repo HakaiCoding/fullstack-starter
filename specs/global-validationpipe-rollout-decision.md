@@ -31,9 +31,9 @@
   - `apps/api/src/app/features/auth/auth.controller.ts` no longer duplicates login route-local `ValidationPipe`.
   - `apps/api/src/app/features/auth/dto/login-request.dto.ts` validates and trims `email`/`password` with class-validator/class-transformer.
 - current accepted behavior posture:
-  - stable contract is status-code level for auth invalid-input/error behavior.
-  - framework-default `400/401/403` response body details are not a stable contract.
-  - malformed syntactic JSON for `POST /api/v1/auth/login` is accepted as stable `400` status behavior in auth baseline docs/decisions; response body remains non-stable.
+  - status-code behavior remains stable for auth invalid-input/error behavior.
+  - covered baseline `400/401/403` envelope/code stability is defined by `stable-api-error-response-contract-baseline.md`.
+  - malformed syntactic JSON for `POST /api/v1/auth/login` is covered by the stable baseline error-envelope spec.
 
 ## Status and Scope Distinctions
 - `Accepted` today:
@@ -43,12 +43,12 @@
   - invalid login credentials -> `401`.
   - protected-route auth/RBAC status semantics remain `401`/`403` as already accepted.
 - `Deferred`:
-  - any stable framework validation error-body contract.
+  - detailed field-level validation metadata stability beyond the accepted envelope/code (`error.details` remains intentionally non-stable).
 
 ## Non-Goals
 - do not change the accepted global ValidationPipe profile without an explicit follow-up spec/decision.
 - do not claim all API inputs are currently validated.
-- do not introduce a stable custom `400` error-body contract unless separately accepted.
+- do not change the accepted stable baseline error envelope/code mapping without explicit follow-up spec/decision.
 - do not treat malformed-JSON parser behavior as part of this decision.
 
 ## Accepted Runtime Policy (Implemented)
@@ -83,7 +83,7 @@ new ValidationPipe({
 ## Unknown-Field Contract (Accepted Policy)
 - DTO-bound requests with extra unknown fields should return `400` under accepted target policy (`whitelist: true` + `forbidNonWhitelisted: true`).
 - login is the first concrete surface where this behavior must be verified in implementation.
-- tests should assert status (`400`) unless a separate accepted decision later stabilizes validation error-body shape.
+- tests should assert accepted stable status + error envelope/code for covered baseline cases.
 
 ## Compatibility and Risk Analysis
 ### 1) `enableImplicitConversion: true`
@@ -108,8 +108,8 @@ new ValidationPipe({
 
 ## Malformed JSON and Error-Body Boundaries
 - malformed JSON parser-layer behavior remains separate from ValidationPipe policy; accepted auth baseline sets login malformed syntactic JSON status to `400` without stabilizing response body fields.
-- framework-default error response body details remain intentionally non-stable in this scope.
-- no stable custom `400` validation error-body contract is introduced by this spec.
+- framework-default response details are normalized by the accepted baseline error-envelope contract for covered `400/401/403` cases.
+- this spec still does not stabilize detailed `error.details` content semantics.
 
 ## Implementation and Regression Checks
 - completed in rollout implementation slice:
@@ -139,8 +139,8 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
 - accepted target global ValidationPipe profile is explicitly documented.
 - unknown-field DTO-bound `400` behavior is explicitly documented as accepted contract.
 - accepted auth/RBAC status behavior is explicitly preserved.
-- malformed JSON contract remains documented in auth baseline/decisions (status-only for login), not as a ValidationPipe response-body contract.
-- framework error-body stability remains non-stable in this scope.
+- malformed JSON contract is documented in auth baseline/decisions and stabilized via the accepted baseline error-envelope spec.
+- for this ValidationPipe spec, `error.details` content remains intentionally non-stable.
 - routes without DTO-bound inputs are not automatically considered validated.
 - future DTO-specific numeric/boolean implicit-conversion tests remain required as fields are introduced.
 
