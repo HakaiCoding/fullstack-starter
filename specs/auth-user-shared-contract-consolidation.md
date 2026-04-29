@@ -51,11 +51,11 @@
   - persistence/entity role types (for example `UserRole` from DB entity)
   - guards/decorators/strategy internals
   - controller-only validation internals (for example `LoginRequestBody`)
-- accepted route contracts remain unchanged, including:
+- current accepted route contracts include:
   - `POST /api/v1/auth/login` -> `{ accessToken: string }`
   - `POST /api/v1/auth/logout` -> `{ success: true }`
   - `GET /api/v1/auth/me` -> `{ id, email, displayName, role }`
-  - `GET /api/v1/users` -> `{ users: UserListItem[] }`
+  - `GET /api/v1/users` -> `{ users: UserListItem[], pagination: UsersListPagination }`
 
 ## Forbidden Behavior
 - changing route payload shapes or status semantics while "consolidating types."
