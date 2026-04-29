@@ -7,10 +7,13 @@ export type ApiErrorCode =
   | 'AUTH_UNAUTHENTICATED'
   | 'AUTH_INVALID_CREDENTIALS'
   | 'AUTH_INVALID_OR_EXPIRED_TOKEN'
-  | 'AUTH_FORBIDDEN';
+  | 'AUTH_FORBIDDEN'
+  | 'RESOURCE_NOT_FOUND'
+  | 'RESOURCE_CONFLICT'
+  | 'INTERNAL_SERVER_ERROR';
 
 export interface ApiErrorResponse {
-  statusCode: 400 | 401 | 403;
+  statusCode: 400 | 401 | 403 | 404 | 409 | 500;
   error: {
     code: ApiErrorCode;
     message: string;

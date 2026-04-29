@@ -85,4 +85,35 @@ describe('contracts', () => {
     expect(errorResponse.statusCode).toBe(401);
     expect(errorResponse.error.code).toBe('AUTH_UNAUTHENTICATED');
   });
+
+  it('should include expanded stable error status/code coverage', () => {
+    const notFoundCode: ApiErrorCode = 'RESOURCE_NOT_FOUND';
+    const conflictCode: ApiErrorCode = 'RESOURCE_CONFLICT';
+    const internalServerCode: ApiErrorCode = 'INTERNAL_SERVER_ERROR';
+    const notFoundResponse: ApiErrorResponse = {
+      statusCode: 404,
+      error: {
+        code: notFoundCode,
+        message: 'Resource not found.',
+      },
+    };
+    const conflictResponse: ApiErrorResponse = {
+      statusCode: 409,
+      error: {
+        code: conflictCode,
+        message: 'Request could not be completed due to a conflict.',
+      },
+    };
+    const fallbackResponse: ApiErrorResponse = {
+      statusCode: 500,
+      error: {
+        code: internalServerCode,
+        message: 'An unexpected error occurred.',
+      },
+    };
+
+    expect(notFoundResponse.statusCode).toBe(404);
+    expect(conflictResponse.error.code).toBe('RESOURCE_CONFLICT');
+    expect(fallbackResponse.statusCode).toBe(500);
+  });
 });

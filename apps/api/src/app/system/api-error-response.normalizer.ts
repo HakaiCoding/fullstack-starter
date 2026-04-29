@@ -33,7 +33,10 @@ export function normalizeApiErrorResponse(params: {
   if (
     exceptionMetadata.statusCode !== 400 &&
     exceptionMetadata.statusCode !== 401 &&
-    exceptionMetadata.statusCode !== 403
+    exceptionMetadata.statusCode !== 403 &&
+    exceptionMetadata.statusCode !== 404 &&
+    exceptionMetadata.statusCode !== 409 &&
+    exceptionMetadata.statusCode !== 500
   ) {
     return null;
   }
@@ -65,13 +68,52 @@ export function normalizeApiErrorResponse(params: {
     };
   }
 
-  return {
-    statusCode: 403,
-    body: {
+  if (exceptionMetadata.statusCode === 403) {
+    return {
       statusCode: 403,
+      body: {
+        statusCode: 403,
+        error: {
+          code: 'AUTH_FORBIDDEN',
+          message: 'Insufficient permissions.',
+        },
+      },
+    };
+  }
+
+  if (exceptionMetadata.statusCode === 404) {
+    return {
+      statusCode: 404,
+      body: {
+        statusCode: 404,
+        error: {
+          code: 'RESOURCE_NOT_FOUND',
+          message: 'Resource not found.',
+        },
+      },
+    };
+  }
+
+  if (exceptionMetadata.statusCode === 409) {
+    return {
+      statusCode: 409,
+      body: {
+        statusCode: 409,
+        error: {
+          code: 'RESOURCE_CONFLICT',
+          message: 'Request could not be completed due to a conflict.',
+        },
+      },
+    };
+  }
+
+  return {
+    statusCode: 500,
+    body: {
+      statusCode: 500,
       error: {
-        code: 'AUTH_FORBIDDEN',
-        message: 'Insufficient permissions.',
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'An unexpected error occurred.',
       },
     },
   };
@@ -103,7 +145,12 @@ function extractExceptionMetadata(exception: unknown): {
     };
   }
 
-  return null;
+  return {
+    statusCode: 500,
+    responseBody: null,
+    fallbackMessage: '',
+    isBodyParserMalformedJson: false,
+  };
 }
 
 function mapBadRequestError(params: {

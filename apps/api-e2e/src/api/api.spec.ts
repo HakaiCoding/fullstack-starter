@@ -1,4 +1,5 @@
-import axios from 'axios';
+import axios, { type AxiosResponse } from 'axios';
+import type { ApiErrorCode, ApiErrorResponse } from '@fullstack-starter/contracts';
 import { Client } from 'pg';
 
 const TRUE_VALUES = new Set(['1', 'true', 'yes', 'on']);
@@ -43,6 +44,24 @@ function createDatabaseClient(): Client {
   });
 }
 
+function expectApiErrorResponse(params: {
+  response: AxiosResponse;
+  statusCode: ApiErrorResponse['statusCode'];
+  code: ApiErrorCode;
+}) {
+  const { response, statusCode, code } = params;
+  expect(response.status).toBe(statusCode);
+  expect(response.data).toEqual({
+    statusCode,
+    error: {
+      code,
+      message: expect.any(String),
+    },
+  });
+  expect(Object.keys(response.data).sort()).toEqual(['error', 'statusCode']);
+  expect(response.data.error).not.toHaveProperty('details');
+}
+
 describe('API DB foundation', () => {
   it('boots and serves API responses', async () => {
     const res = await axios.get(`/api/v1`);
@@ -63,6 +82,19 @@ describe('API DB foundation', () => {
     expect(new Date(String(res.data.checkedAt)).toString()).not.toBe(
       'Invalid Date',
     );
+  });
+
+  it('returns stable 404 envelope for unknown api routes', async () => {
+    const response = await axios.get('/api/v1/route-that-does-not-exist', {
+      validateStatus: () => true,
+    });
+
+    expectApiErrorResponse({
+      response,
+      statusCode: 404,
+      code: 'RESOURCE_NOT_FOUND',
+    });
+    expect(response.data.error.message).toBe('Resource not found.');
   });
 
   it('reaches migration-backed schema', async () => {

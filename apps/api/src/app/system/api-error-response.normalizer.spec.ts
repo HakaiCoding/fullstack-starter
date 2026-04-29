@@ -1,7 +1,10 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
+  InternalServerErrorException,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
@@ -191,9 +194,96 @@ describe('normalizeApiErrorResponse', () => {
     });
   });
 
-  it('returns null for statuses outside first-slice contract', () => {
+  it('maps not found errors to RESOURCE_NOT_FOUND', () => {
     const normalized = normalizeApiErrorResponse({
       exception: new NotFoundException('Not found.'),
+      request: createRequest(),
+    });
+
+    expect(normalized).toEqual({
+      statusCode: 404,
+      body: {
+        statusCode: 404,
+        error: {
+          code: 'RESOURCE_NOT_FOUND',
+          message: 'Resource not found.',
+        },
+      },
+    });
+  });
+
+  it('maps conflict errors to RESOURCE_CONFLICT', () => {
+    const normalized = normalizeApiErrorResponse({
+      exception: new ConflictException('Duplicate resource.'),
+      request: createRequest(),
+    });
+
+    expect(normalized).toEqual({
+      statusCode: 409,
+      body: {
+        statusCode: 409,
+        error: {
+          code: 'RESOURCE_CONFLICT',
+          message: 'Request could not be completed due to a conflict.',
+        },
+      },
+    });
+  });
+
+  it('maps 500 HttpExceptions to a sanitized INTERNAL_SERVER_ERROR fallback', () => {
+    const normalized = normalizeApiErrorResponse({
+      exception: new InternalServerErrorException(
+        'SQLSTATE[23505] duplicate key in C:\\repo\\apps\\api\\service.ts at AuthService.handle()',
+      ),
+      request: createRequest(),
+    });
+
+    expect(normalized).toEqual({
+      statusCode: 500,
+      body: {
+        statusCode: 500,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'An unexpected error occurred.',
+        },
+      },
+    });
+    expect(normalized?.body.error).not.toHaveProperty('details');
+  });
+
+  it('maps non-HttpException errors to a sanitized INTERNAL_SERVER_ERROR fallback', () => {
+    const error = new Error(
+      'SequelizeDatabaseError: duplicate key value violates unique constraint "UQ_users_email" at C:\\Users\\Development\\Desktop\\git\\fullstack-starter\\apps\\api\\src\\db\\repo.ts',
+    );
+    error.stack = 'Error: stack trace should not leak';
+
+    const normalized = normalizeApiErrorResponse({
+      exception: error,
+      request: createRequest(),
+    });
+
+    expect(normalized).toEqual({
+      statusCode: 500,
+      body: {
+        statusCode: 500,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'An unexpected error occurred.',
+        },
+      },
+    });
+
+    const serializedBody = JSON.stringify(normalized?.body ?? {});
+    expect(serializedBody.toLowerCase()).not.toContain('sqlstate');
+    expect(serializedBody.toLowerCase()).not.toContain('duplicate key');
+    expect(serializedBody.toLowerCase()).not.toContain('stack trace');
+    expect(serializedBody.toLowerCase()).not.toContain('authservice');
+    expect(serializedBody.toLowerCase()).not.toContain('c:\\users\\development');
+  });
+
+  it('returns null for statuses outside covered contract set', () => {
+    const normalized = normalizeApiErrorResponse({
+      exception: new ServiceUnavailableException('Service unavailable.'),
       request: createRequest(),
     });
 
