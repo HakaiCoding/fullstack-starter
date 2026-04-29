@@ -29,22 +29,42 @@ describe('AppController', () => {
   });
 
   describe('getData', () => {
-    it('should return "Hello API"', () => {
+    it('should return stable API root payload', () => {
       const appController = app.get<AppController>(AppController);
-      expect(appController.getData()).toEqual({ message: 'Hello API' });
+      expect(appController.getData()).toEqual({
+        name: 'Fullstack Starter API',
+        version: 'v1',
+        status: 'ok',
+      });
+    });
+  });
+
+  describe('getHealth', () => {
+    it('should return stable API liveness payload', () => {
+      const appController = app.get<AppController>(AppController);
+      expect(appController.getHealth()).toEqual({
+        status: 'ok',
+        checks: {
+          api: 'ok',
+        },
+      });
     });
   });
 
   describe('getDatabaseReadiness', () => {
-    it('should return healthy status when DB is available', async () => {
+    it('should return stable DB readiness success payload when DB is available', async () => {
       const appController = app.get<AppController>(AppController);
       const readiness = await appController.getDatabaseReadiness();
 
-      expect(readiness.status).toBe('healthy');
-      expect(readiness.checkedAt).toEqual(expect.any(String));
+      expect(readiness).toEqual({
+        status: 'ok',
+        checks: {
+          database: 'ok',
+        },
+      });
     });
 
-    it('should throw ServiceUnavailableException when DB is unavailable', async () => {
+    it('should throw ServiceUnavailableException with generic message when DB is unavailable', async () => {
       const appController = app.get<AppController>(AppController);
       databaseReadinessServiceMock.getReadiness = jest.fn().mockResolvedValue({
         status: 'unhealthy',
@@ -54,6 +74,9 @@ describe('AppController', () => {
 
       await expect(appController.getDatabaseReadiness()).rejects.toMatchObject({
         status: 503,
+        response: {
+          message: 'Service unavailable.',
+        },
       });
     });
   });

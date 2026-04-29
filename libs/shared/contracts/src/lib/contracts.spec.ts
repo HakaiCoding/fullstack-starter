@@ -89,6 +89,7 @@ describe('contracts', () => {
   it('should include expanded stable error status/code coverage', () => {
     const notFoundCode: ApiErrorCode = 'RESOURCE_NOT_FOUND';
     const conflictCode: ApiErrorCode = 'RESOURCE_CONFLICT';
+    const serviceUnavailableCode: ApiErrorCode = 'SERVICE_UNAVAILABLE';
     const internalServerCode: ApiErrorCode = 'INTERNAL_SERVER_ERROR';
     const notFoundResponse: ApiErrorResponse = {
       statusCode: 404,
@@ -111,9 +112,17 @@ describe('contracts', () => {
         message: 'An unexpected error occurred.',
       },
     };
+    const serviceUnavailableResponse: ApiErrorResponse = {
+      statusCode: 503,
+      error: {
+        code: serviceUnavailableCode,
+        message: 'Service unavailable.',
+      },
+    };
 
     expect(notFoundResponse.statusCode).toBe(404);
     expect(conflictResponse.error.code).toBe('RESOURCE_CONFLICT');
     expect(fallbackResponse.statusCode).toBe(500);
+    expect(serviceUnavailableResponse.statusCode).toBe(503);
   });
 });

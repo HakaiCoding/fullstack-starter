@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  GatewayTimeoutException,
   InternalServerErrorException,
   NotFoundException,
   ServiceUnavailableException,
@@ -230,6 +231,27 @@ describe('normalizeApiErrorResponse', () => {
     });
   });
 
+  it('maps service unavailable errors to SERVICE_UNAVAILABLE', () => {
+    const normalized = normalizeApiErrorResponse({
+      exception: new ServiceUnavailableException(
+        'Database query failed: connect ECONNREFUSED postgres://localhost:5432',
+      ),
+      request: createRequest(),
+    });
+
+    expect(normalized).toEqual({
+      statusCode: 503,
+      body: {
+        statusCode: 503,
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Service unavailable.',
+        },
+      },
+    });
+    expect(normalized?.body.error).not.toHaveProperty('details');
+  });
+
   it('maps 500 HttpExceptions to a sanitized INTERNAL_SERVER_ERROR fallback', () => {
     const normalized = normalizeApiErrorResponse({
       exception: new InternalServerErrorException(
@@ -283,7 +305,7 @@ describe('normalizeApiErrorResponse', () => {
 
   it('returns null for statuses outside covered contract set', () => {
     const normalized = normalizeApiErrorResponse({
-      exception: new ServiceUnavailableException('Service unavailable.'),
+      exception: new GatewayTimeoutException('Gateway timeout.'),
       request: createRequest(),
     });
 

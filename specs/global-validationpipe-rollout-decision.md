@@ -73,6 +73,7 @@ new ValidationPipe({
 | Endpoint | Input surface now | Guard/Auth dependency | DTO coverage now | Current validation mechanism | Global rollout sensitivity |
 | --- | --- | --- | --- | --- | --- |
 | `GET /api/v1` | none | none | n/a | none | none |
+| `GET /api/v1/health` | none | none | n/a | none | none |
 | `GET /api/v1/health/db` | none | none | n/a | none | none |
 | `POST /api/v1/auth/login` | JSON body (`email`, `password`) | public | **yes** (`LoginRequestDto`) | global `ValidationPipe` + DTO validation | **high** |
 | `POST /api/v1/auth/refresh` | cookie header only | public | none | manual cookie extraction + auth service checks | low now; medium if DTO input added later |

@@ -63,25 +63,39 @@ function expectApiErrorResponse(params: {
 }
 
 describe('API DB foundation', () => {
-  it('boots and serves API responses', async () => {
+  it('returns the stable API root payload', async () => {
     const res = await axios.get(`/api/v1`);
 
     expect(res.status).toBe(200);
-    expect(res.data).toEqual({ message: 'Hello API' });
+    expect(res.data).toEqual({
+      name: 'Fullstack Starter API',
+      version: 'v1',
+      status: 'ok',
+    });
   });
 
-  it('returns healthy DB readiness when database is reachable', async () => {
+  it('returns stable API liveness payload', async () => {
+    const res = await axios.get(`/api/v1/health`);
+
+    expect(res.status).toBe(200);
+    expect(res.data).toEqual({
+      status: 'ok',
+      checks: {
+        api: 'ok',
+      },
+    });
+  });
+
+  it('returns stable DB readiness payload when database is reachable', async () => {
     const res = await axios.get('/api/v1/health/db');
 
     expect(res.status).toBe(200);
-    expect(res.data).toEqual(
-      expect.objectContaining({
-        status: 'healthy',
-      }),
-    );
-    expect(new Date(String(res.data.checkedAt)).toString()).not.toBe(
-      'Invalid Date',
-    );
+    expect(res.data).toEqual({
+      status: 'ok',
+      checks: {
+        database: 'ok',
+      },
+    });
   });
 
   it('returns stable 404 envelope for unknown api routes', async () => {

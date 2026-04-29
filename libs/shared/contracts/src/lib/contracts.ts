@@ -10,10 +10,11 @@ export type ApiErrorCode =
   | 'AUTH_FORBIDDEN'
   | 'RESOURCE_NOT_FOUND'
   | 'RESOURCE_CONFLICT'
+  | 'SERVICE_UNAVAILABLE'
   | 'INTERNAL_SERVER_ERROR';
 
 export interface ApiErrorResponse {
-  statusCode: 400 | 401 | 403 | 404 | 409 | 500;
+  statusCode: 400 | 401 | 403 | 404 | 409 | 500 | 503;
   error: {
     code: ApiErrorCode;
     message: string;

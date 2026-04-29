@@ -212,3 +212,16 @@ Decision: Preserve the accepted envelope shape `{ statusCode, error: { code, mes
 Alternatives considered: Keep `404/409/500` as framework-default response bodies; introduce a broad generic domain-error framework in this slice; add new product behavior purely to produce a real `409` endpoint conflict.
 Consequences: Covered API error families now have deterministic envelope/code behavior across auth/validation/RBAC and route-level not-found paths plus server-error fallback, while existing baseline `400/401/403` behavior remains stable. Where no real current route-level product conflict source exists, `409` contract coverage is provided by focused normalizer tests without inventing new product endpoints.
 Related docs/specs: [`specs/stable-api-error-response-contract-baseline.md`](./specs/stable-api-error-response-contract-baseline.md), [`specs/auth-invalid-input-auth-error-behavior-baseline.md`](./specs/auth-invalid-input-auth-error-behavior-baseline.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+
+## 2026-04-29 - Accept API root/liveness/readiness baseline and stable 503 readiness-failure envelope
+Status: Accepted
+Context: API root and DB-readiness behavior existed as implementation details but lacked a clearly accepted stable baseline contract for reusable starter usage. Liveness endpoint behavior was missing, and DB-readiness `503` failure did not have stable envelope coverage.
+Decision: Accept the following public contracts:
+- `GET /api/v1` -> `{ name: "Fullstack Starter API", version: "v1", status: "ok" }`
+- `GET /api/v1/health` -> `{ status: "ok", checks: { api: "ok" } }`
+- `GET /api/v1/health/db` success -> `{ status: "ok", checks: { database: "ok" } }`
+- `GET /api/v1/health/db` failure -> stable error envelope with `503` mapped to `{ statusCode: 503, error: { code: "SERVICE_UNAVAILABLE", message: "Service unavailable." } }`
+Also preserve liveness/readiness separation: root and liveness endpoints do not perform DB checks; DB readiness check is isolated to `GET /api/v1/health/db`.
+Alternatives considered: Keep legacy root payload (`{ message: "Hello API" }`); keep no dedicated liveness endpoint; keep readiness `503` body non-stable/framework-default; introduce dependency-specific readiness error codes.
+Consequences: Starter baseline now has explicit, test-backed system endpoint contracts with minimal scope and stable `503` error-envelope coverage for readiness failure using existing normalizer/filter architecture.
+Related docs/specs: [`specs/api-root-health-readiness-baseline.md`](./specs/api-root-health-readiness-baseline.md), [`specs/stable-api-error-response-contract-baseline.md`](./specs/stable-api-error-response-contract-baseline.md), [`apps/api/README.md`](./apps/api/README.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)

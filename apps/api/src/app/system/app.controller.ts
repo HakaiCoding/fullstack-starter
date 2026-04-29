@@ -14,14 +14,19 @@ export class AppController {
     return this.appService.getData();
   }
 
+  @Get('health')
+  getHealth() {
+    return this.appService.getHealth();
+  }
+
   @Get('health/db')
   async getDatabaseReadiness() {
     const readiness = await this.databaseReadinessService.getReadiness();
 
     if (readiness.status === 'unhealthy') {
-      throw new ServiceUnavailableException(readiness);
+      throw new ServiceUnavailableException('Service unavailable.');
     }
 
-    return readiness;
+    return this.appService.getDatabaseHealth();
   }
 }

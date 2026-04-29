@@ -1,7 +1,7 @@
 # Feature Spec (Core Change)
 
 ## Feature/Change Name
-- name: Stable API error response envelope baseline expansion (400/401/403/404/409/500)
+- name: Stable API error response envelope baseline expansion (400/401/403/404/409/500/503)
 
 ## Date
 - yyyy-mm-dd: 2026-04-29
@@ -11,10 +11,12 @@
 - lifecycle note:
   - initial accepted slice stabilized `400/401/403` envelope/codes for auth-validation-RBAC baseline behavior.
   - this accepted expansion adds stable envelope/codes for `404` and `409`, plus a sanitized stable fallback contract for `500` unexpected/unhandled server errors.
+  - follow-up accepted slice adds stable envelope/code coverage for `503` readiness failure.
 
 ## Problem
 - baseline API error envelope/codes were accepted only for `400/401/403`.
 - `404`, `409`, and `500` were either framework-default, partially handled, or non-contract, which risks client/test drift and leakage on server failures.
+- `503` readiness failures needed explicit stable envelope coverage to avoid framework-default body drift.
 - a narrow hardening slice is needed without introducing unrelated product scope or broad domain-error frameworks.
 
 ## Non-Goals
@@ -25,7 +27,7 @@
 - no RBAC policy expansion beyond current baseline route coverage.
 - no localization/i18n error-message policy.
 - no endpoint-specific one-off error body shapes.
-- no stable contract expansion beyond `400/401/403/404/409/500` in this slice.
+- no stable contract expansion beyond `400/401/403/404/409/500/503` in this slice.
 - no logging/observability overhaul.
 
 ## Behavior Rules
@@ -57,6 +59,7 @@
   - `AUTH_FORBIDDEN`
   - `RESOURCE_NOT_FOUND`
   - `RESOURCE_CONFLICT`
+  - `SERVICE_UNAVAILABLE`
   - `INTERNAL_SERVER_ERROR`
 - intentionally non-stable in this slice:
   - `error.details` content wording/order for validation paths.
@@ -75,6 +78,7 @@
 | authenticated but unauthorized RBAC access | `GET /api/v1/users` as `user` role (admin required) | `403` | `AUTH_FORBIDDEN` |
 | not found route/resource | unknown API route or `NotFoundException` path | `404` | `RESOURCE_NOT_FOUND` |
 | request conflict | `ConflictException` / `409` path | `409` | `RESOURCE_CONFLICT` |
+| service unavailable | `ServiceUnavailableException` path (for example DB-readiness failure) | `503` | `SERVICE_UNAVAILABLE` |
 | unexpected/unhandled server error fallback | unhandled errors and `500` server exceptions | `500` | `INTERNAL_SERVER_ERROR` |
 
 - current implementation-scope note for `409`:
@@ -141,6 +145,7 @@
 - mixed validation failures (non-whitelist + other constraints) use `REQUEST_VALIDATION_FAILED` unless the failure is purely unknown-field.
 - stale/rotated refresh token failures stay `401` and are mapped to `AUTH_INVALID_OR_EXPIRED_TOKEN`.
 - `404` mapping must not leak implementation details from framework route resolution.
+- `503` mapping stays generic and does not expose dependency internals.
 - `500` mapping must sanitize both `HttpException(500)` payloads and non-`HttpException` thrown errors.
 
 ## Risks
@@ -157,7 +162,7 @@
 ## Test Plan
 - unit tests:
   - preserve existing `400/401/403` normalizer mapping tests.
-  - add normalizer tests for `404`, `409`, and sanitized `500` mappings.
+  - add normalizer tests for `404`, `409`, `503`, and sanitized `500` mappings.
   - add `500` sanitization leakage-defense tests (stack/raw message/SQL/path/internal token patterns not surfaced).
   - update shared contract type tests for expanded status/code unions.
 - integration/e2e tests:
@@ -189,9 +194,10 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
   - explicitly report any skipped gates.
 
 ## Acceptance Checks
-- stable envelope exists for covered `400/401/403/404/409/500` contract cases with stable `statusCode`, `error.code`, and `error.message`.
+- stable envelope exists for covered `400/401/403/404/409/500/503` contract cases with stable `statusCode`, `error.code`, and `error.message`.
 - stable code mapping for covered cases matches this spec.
 - covered auth/validation/RBAC status semantics remain unchanged.
+- covered `503` readiness-failure semantics are stable (`SERVICE_UNAVAILABLE` + generic message).
 - `500` fallback is sanitized and does not leak internal implementation details.
 - public error response types are available from `libs/shared/contracts`.
 - API-internal normalization/filter/exception details remain app-local.
@@ -206,4 +212,4 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
-  - required: add accepted decision entry for stable baseline API error envelope expansion to include `404`, `409`, and sanitized `500` fallback.
+  - completed: accepted decision entries now include stable baseline API error-envelope expansion coverage, including `503` service-unavailable mapping.

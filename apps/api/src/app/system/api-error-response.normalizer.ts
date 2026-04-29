@@ -36,7 +36,8 @@ export function normalizeApiErrorResponse(params: {
     exceptionMetadata.statusCode !== 403 &&
     exceptionMetadata.statusCode !== 404 &&
     exceptionMetadata.statusCode !== 409 &&
-    exceptionMetadata.statusCode !== 500
+    exceptionMetadata.statusCode !== 500 &&
+    exceptionMetadata.statusCode !== 503
   ) {
     return null;
   }
@@ -102,6 +103,19 @@ export function normalizeApiErrorResponse(params: {
         error: {
           code: 'RESOURCE_CONFLICT',
           message: 'Request could not be completed due to a conflict.',
+        },
+      },
+    };
+  }
+
+  if (exceptionMetadata.statusCode === 503) {
+    return {
+      statusCode: 503,
+      body: {
+        statusCode: 503,
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Service unavailable.',
         },
       },
     };

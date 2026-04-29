@@ -5,7 +5,14 @@ NestJS backend application.
 ## Runtime Contract
 - Base path: `/api/v1`
 - Local URL: `http://localhost:3000/api/v1`
-- Current sample endpoint: `GET /api/v1` -> `{ "message": "Hello API" }`
+- Stable root/smoke endpoint:
+  - `GET /api/v1` -> `{ "name": "Fullstack Starter API", "version": "v1", "status": "ok" }`
+- Stable liveness endpoint:
+  - `GET /api/v1/health` -> `{ "status": "ok", "checks": { "api": "ok" } }`
+- Stable database readiness endpoint:
+  - `GET /api/v1/health/db` success -> `{ "status": "ok", "checks": { "database": "ok" } }`
+  - `GET /api/v1/health/db` failure -> stable API error envelope with `503`:
+    - `{ "statusCode": 503, "error": { "code": "SERVICE_UNAVAILABLE", "message": "Service unavailable." } }`
 
 ## Database Environment Contract
 - `POSTGRES_HOST` (required)

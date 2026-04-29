@@ -43,14 +43,22 @@ describe('API CORS e2e', () => {
   const disallowedOrigin = 'https://not-allowed.example.com';
 
   it('returns CORS allow-origin and credentials headers for allowlisted origin', async () => {
-    const response = await request<{ message: string }>('GET', '/api/v1', {
+    const response = await request<{
+      name: string;
+      version: string;
+      status: 'ok';
+    }>('GET', '/api/v1', {
       headers: {
         Origin: allowedOrigin,
       },
     });
 
     expect(response.status).toBe(200);
-    expect(response.data).toEqual({ message: 'Hello API' });
+    expect(response.data).toEqual({
+      name: 'Fullstack Starter API',
+      version: 'v1',
+      status: 'ok',
+    });
     expect(response.headers['access-control-allow-origin']).toBe(allowedOrigin);
     expect(response.headers['access-control-allow-credentials']).toBe('true');
   });
