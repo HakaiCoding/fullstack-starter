@@ -48,6 +48,8 @@ export interface UsersListQuery {
   pageSize?: number;
   sortBy?: UsersListSortBy;
   sortDir?: UsersListSortDir;
+  role?: AuthRole;
+  email?: string;
 }
 
 export interface UsersListPagination {

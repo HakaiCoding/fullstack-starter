@@ -40,6 +40,8 @@ describe('contracts', () => {
       pageSize: 25,
       sortBy,
       sortDir,
+      role: 'user',
+      email: 'example.com',
     };
     const usersListResponse: UsersListResponse = {
       users: [
@@ -63,6 +65,8 @@ describe('contracts', () => {
     };
 
     expect(query.sortBy).toBe('createdAt');
+    expect(query.role).toBe('user');
+    expect(query.email).toBe('example.com');
     expect(usersListResponse.users).toHaveLength(1);
     expect(usersListResponse.users[0].role).toBe('user');
     expect(usersListResponse.pagination.totalPages).toBe(1);

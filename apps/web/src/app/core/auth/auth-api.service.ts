@@ -66,6 +66,12 @@ export class AuthApiService {
     if (query?.sortDir !== undefined) {
       params = params.set('sortDir', query.sortDir);
     }
+    if (query?.role !== undefined) {
+      params = params.set('role', query.role);
+    }
+    if (query?.email !== undefined) {
+      params = params.set('email', query.email);
+    }
 
     return this.http.get<UsersListResponse>('/api/v1/users', {
       params,

@@ -1,44 +1,53 @@
 # Feature Spec (Core Change)
 
 ## Feature/Change Name
-- name: Users list filtering baseline (design and contract proposal)
+- name: Users list filtering baseline (role + email)
 
 ## Date
 - yyyy-mm-dd: 2026-04-29
 
 ## Status
-- Proposed
+- Accepted
 - lifecycle note:
-  - this is a design/specification pass only.
-  - runtime/API/web/contracts/tests are intentionally not implemented in this pass.
+  - this spec captures accepted filtering contract details and implementation for the first narrow filtering slice.
+  - scope stays intentionally narrow to role/email filtering only.
 
 ## Problem
-- `GET /api/v1/users` currently has accepted+implemented RBAC, pagination, sorting, and paginated-envelope behavior, but filtering remains explicitly deferred.
-- without an accepted filtering contract, implementation details (filter fields, semantics, validation policy, and query shape) remain unresolved and risk cross-app/API-contract drift.
+- `GET /api/v1/users` had accepted+implemented RBAC, pagination, sorting, and paginated-envelope behavior, while filtering was deferred.
+- without a narrow accepted filtering contract, API/web contract drift risk remained for users-list search behavior.
 
 ## Non-Goals
-- no implementation changes in API/web/shared contracts/tests.
 - no auth/session/RBAC semantic changes.
-- no pagination/sort baseline expansion beyond already accepted behavior.
-- no user-management scope expansion (create/update/delete, ownership, IAM matrix).
-- no schema migration in this design pass.
+- no pagination/sort baseline expansion.
+- no users-management product expansion (CRUD, ownership, IAM matrix).
+- no database migration, index, or schema change in this slice.
+- no web filtering page or visible filtering controls.
 
 ## Behavior Rules
-- accepted current behavior (implemented, unchanged in this pass):
+- accepted baseline behavior retained:
   - route remains `GET /api/v1/users`, admin-only (`401`/`403` unchanged).
-  - current accepted query params are only `page`, `pageSize`, `sortBy`, `sortDir`.
-  - unknown query params currently return `400` with `REQUEST_UNKNOWN_FIELD`, including filter-like params.
-  - success envelope remains `{ users, pagination }` with existing pagination/sort semantics.
-- proposed filtering slice objective (not yet accepted):
-  - add a minimal, explicit filtering contract for `GET /api/v1/users` without changing existing auth, pagination, sorting, or envelope baselines.
-  - preserve deterministic behavior when filtering is active (pagination and sorting still apply after filtering).
+  - success envelope remains `{ users, pagination }`.
+  - existing pagination/sort defaults/bounds/tie-break remain unchanged.
+- accepted filtering contract:
+  - flat optional query params only:
+    - `role=<value>`
+    - `email=<value>`
+  - `role` filter: exact match against accepted role values (`admin | user`).
+  - `email` filter: case-insensitive partial match.
+  - when both filters are provided, semantics are logical AND.
+- validation behavior:
+  - unknown query params remain rejected with existing unknown-field behavior (`400 REQUEST_UNKNOWN_FIELD`).
+  - invalid filter values return existing stable validation envelope behavior (`400 REQUEST_VALIDATION_FAILED`).
+  - empty filter values for `role` and `email` are invalid in this slice.
+- scope constraints:
+  - no additional filter fields or nested filter syntax.
+  - no generic filtering framework.
 
 ## Forbidden Behavior
-- implementing filtering before unresolved contract details are accepted.
-- changing accepted pagination/sort defaults or RBAC semantics as part of filtering.
-- silently accepting undeclared filter params.
-- placing durable filtering policy in web-only code.
-- adding schema/index changes without an explicit accepted migration decision.
+- adding filters beyond `role` and `email` in this slice.
+- changing accepted auth/RBAC, pagination, sorting, or envelope contracts.
+- introducing migration/index/schema work in this slice.
+- placing durable filtering policy in web UI or unrelated utilities.
 
 ## Affected Domains/Modules
 - domains:
@@ -46,27 +55,23 @@
   - users service/domain filtering orchestration.
   - shared API/web external users-list query contract.
   - web users API client query construction.
-- modules/files likely affected in later implementation:
+- implemented files:
   - `apps/api/src/app/features/users/dto/list-users-query.dto.ts`
   - `apps/api/src/app/features/users/users.service.ts`
-  - `apps/api/src/app/features/users/users.controller.ts`
-  - `apps/api/src/db/entities/user.entity.ts` (read-only design impact in this pass; potential index follow-up only if accepted)
   - `libs/shared/contracts/src/lib/contracts.ts`
   - `apps/web/src/app/core/auth/auth-api.service.ts`
-  - `apps/api/src/app/features/users/*.spec.ts`
-  - `apps/api-e2e/src/api/users.spec.ts`
-  - `apps/web/src/app/core/auth/auth-api.service.spec.ts`
+  - users/shared/web test files and `apps/api-e2e/src/api/users.spec.ts`
 
 ## Design Placement Summary
 - where logic should live and why:
-  - query shape/default/bounds/enum validation: users feature query DTO (API transport layer).
-  - filtering business/query composition: users service/domain layer using repository query criteria.
-  - external query contract types reused by API/web: `libs/shared/contracts`.
-  - web request param wiring: auth API service client layer only.
+  - query validation for filter params in users feature DTO (API transport layer).
+  - filtering query composition in users service (domain/data-access orchestration).
+  - shared external query contract fields in `libs/shared/contracts`.
+  - web query-param wiring in existing API client service.
 - where logic should not live:
-  - filtering policy in controllers beyond DTO binding.
-  - filtering semantics in web components/UI state as source-of-truth.
-  - API-internal DTO/class-validator details promoted into shared contracts.
+  - filtering policy in controller/business-unrelated layers.
+  - API-internal DTO/class-validator details in shared contracts.
+  - UI feature scope beyond API client wiring.
 
 ## Relevant Local Skills
 - policy authority: [`../AI_SKILLS.md`](../AI_SKILLS.md)
@@ -75,99 +80,51 @@
   - `typeorm`
   - `postgresql-table-design`
   - `nx-workspace-patterns`
+  - `angular-http`
+  - `typescript-advanced-types`
 - skills used:
   - `nestjs-best-practices`
   - `typeorm`
-  - `postgresql-table-design`
   - `nx-workspace-patterns`
+  - `angular-http`
 - why each skill is relevant:
-  - `nestjs-best-practices`: DTO validation and controller/service boundary discipline.
-  - `typeorm`: repository/query-builder filtering composition patterns.
-  - `postgresql-table-design`: filter-field/index implications and migration caution.
-  - `nx-workspace-patterns`: cross-project implementation/testing gate discipline.
+  - DTO/service boundary and transport validation placement.
+  - TypeORM filtering composition (`ILike`) while preserving existing paging/sorting.
+  - cross-project gate discipline for Nx workspace.
+  - Angular API client query wiring patterns.
 - conflicts/tensions with project docs/spec:
-  - none unresolved in this proposal stage.
+  - none unresolved; project-approved scope takes priority.
 - project-compatible decision:
-  - keep filtering unresolved where not already accepted; propose minimal options for approval.
-
-## Unresolved Questions
-- each item below is unresolved unless already accepted elsewhere; recommended option is a proposal for approval, not an implemented decision.
-- allowed filter fields:
-  - option A (recommended): `role`, `email`, `displayName`.
-  - option B: `role` only in first slice.
-  - option C: `role` + `email` only.
-- query parameter shape:
-  - option A (recommended): flat optional query params (`?role=...&email=...&displayName=...`).
-  - option B: nested `filter[...]` shape.
-- email filtering semantics:
-  - option A (recommended): case-insensitive partial match (`contains`) on normalized email text.
-  - option B: exact case-insensitive match only.
-- displayName filtering semantics:
-  - option A (recommended): case-insensitive partial match on non-null display names.
-  - option B: exact case-insensitive match only.
-  - unresolved: whether blank-string input should be rejected or treated as absent.
-- role filtering semantics:
-  - option A (recommended): exact enum match (`admin | user`) using existing role domain.
-  - option B: defer role filtering from first filtering slice.
-- combination semantics for multiple filters:
-  - option A (recommended): logical AND across provided filters.
-  - option B: mixed/OR semantics (not recommended for first slice due to complexity).
-- case sensitivity:
-  - option A (recommended): case-insensitive for text filters; exact enum for role.
-  - option B: case-sensitive text matching.
-- pagination/sort interaction with active filters:
-  - option A (recommended): apply filters first, then existing sort/tie-break, then pagination.
-  - option B: any alternative ordering (not recommended; risks baseline drift).
-- invalid filter behavior:
-  - unresolved: whether invalid value should map to existing `REQUEST_VALIDATION_FAILED` only, and which constraints apply (min/max length, allowed charset, trimmed-empty handling).
-- unknown filter behavior:
-  - option A (recommended): preserve existing unknown-field `400 REQUEST_UNKNOWN_FIELD`.
-  - option B: ignore unknown fields (not recommended; conflicts with current baseline).
-- empty-result behavior:
-  - option A (recommended): preserve current `200` envelope with `users: []` and consistent pagination metadata.
-  - option B: any non-`200` behavior (not recommended).
-- database/indexing implications:
-  - unresolved: whether first slice ships with no new indexes, with follow-up measurement, or includes targeted indexes in same slice.
-  - recommended minimal policy: no index migration unless benchmark evidence shows clear regression; otherwise create a dedicated follow-up migration spec/decision.
-- shared contract change scope:
-  - option A (recommended): extend `UsersListQuery` only with accepted filter params.
-  - option B: keep filter params API-local initially and delay shared contract update (not recommended due API/web drift risk).
-- web client/query builder behavior:
-  - option A (recommended): pass through accepted optional filter params only; no UI rollout required in same slice.
-  - option B: couple API filtering with immediate UX feature scope (not recommended for first slice).
-- web e2e requirement:
-  - unresolved: whether web e2e is required if only API client service wiring changes without new UI.
-  - recommended minimal policy: API e2e required; web e2e optional unless UI behavior changes.
+  - keep filtering narrow (role/email only), no schema/index work, no UI expansion.
 
 ## Edge Cases
-- deferred/unknown filter-like query keys should continue returning `400 REQUEST_UNKNOWN_FIELD` until filter keys are explicitly accepted.
-- null/empty display names must have deterministic behavior when displayName filter is introduced (currently unresolved).
-- combined filters with out-of-range page should preserve accepted out-of-range-page baseline unless separately changed by accepted decision.
+- `role=` and `email=` empty values are invalid.
+- unknown query keys (including deferred filter-like keys) remain rejected.
+- filtered empty result sets still return `200` with `users: []` and consistent pagination metadata.
+- filtered requests preserve accepted out-of-range page behavior.
 
 ## Risks
 - risk 1 and mitigation:
-  - risk: hidden scope creep from filtering into broader user management.
-  - mitigation: strict non-goals and unresolved-question gating before implementation.
+  - risk: scope creep into broader users management.
+  - mitigation: strict non-goals and explicit forbidden behavior.
 - risk 2 and mitigation:
-  - risk: API/web contract drift if query fields are added app-locally only.
-  - mitigation: require explicit shared contract decision for accepted filter params.
+  - risk: contract drift between API and web.
+  - mitigation: shared `UsersListQuery` update and client wiring in same slice.
 - risk 3 and mitigation:
-  - risk: premature indexing decisions without workload evidence.
-  - mitigation: document index decision as unresolved and require explicit measurement/acceptance.
+  - risk: performance assumptions driving premature indexing changes.
+  - mitigation: no migration/index changes in this slice.
 
 ## Test Plan
-- unit tests (later implementation prompt):
-  - DTO validation for accepted filter params, invalid values, and unknown-field rejection.
-  - users service filtering composition (single and combined filters), preserving deterministic sort/tie-break.
-- integration/e2e tests (later implementation prompt):
-  - admin `200` filtered results and metadata consistency.
+- unit tests:
+  - DTO validation for `role`/`email`, invalid values, empty values, unknown-field rejection.
+  - users service query composition for role exact, email partial CI, AND semantics.
+- integration/e2e tests:
+  - filtered users list behavior for role/email/combined filters.
   - unchanged `401`/`403` behavior.
-  - invalid filter value `400 REQUEST_VALIDATION_FAILED`.
-  - unknown query key `400 REQUEST_UNKNOWN_FIELD`.
-  - empty-result filtered queries return `200` with `users: []` + pagination metadata.
+  - unchanged pagination/sort/envelope behavior with filters active.
+  - invalid/unknown filter behavior with existing stable error envelope/codes.
 - regression coverage:
-  - existing pagination/sort baseline and out-of-range page behavior remain unchanged.
-  - existing auth flows remain unchanged.
+  - existing users-list baseline behavior remains unchanged beyond approved filtering.
 - anti-hack coverage for behavior changes (general rule coverage, not only the shown example):
   - reject example-specific patches
   - reject hardcoded special cases when the real rule is broader
@@ -176,39 +133,35 @@
 ## Required Gates
 Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
 - tiny/local gates (if applicable):
-  - this spec-only pass may skip runtime gates per section `8.1`.
+  - n/a.
 - normal implementation gates (if applicable):
-  - n/a for this proposal-only pass.
-- core gates (for later implementation slice):
+  - n/a.
+- core gates:
   - `npx nx run-many -t lint,test,build --all`
   - `npx nx e2e api-e2e`
-  - `npx nx e2e web-e2e` (if web behavior/contracts/UI are affected in that implementation)
+  - `npx nx e2e web-e2e` only if visible web behavior/UI changes.
 - additional domain gates (if applicable):
-  - auth/security overlay (`8.4`) if route-auth behavior is touched.
-  - e2e-relevant overlay (`8.6`) because API contract behavior changes.
-  - database/migration overlay (`8.5`) only if index/schema changes are accepted into scope.
+  - `8.6` e2e-relevant overlay applies (API contract behavior changed).
+  - `8.5` database/migration overlay does not apply (no schema/index changes).
 - manual/proposed checks:
-  - confirm unresolved detail choices are explicitly approved before implementation.
-  - confirm no filtering behavior is implemented in this design pass.
+  - confirm no schema/index/migration changes were introduced.
+  - confirm no UI filtering controls were introduced.
 
 ## Acceptance Checks
-- for this proposal pass:
-  - current accepted users-list behavior is documented distinctly from filtering proposal scope.
-  - unresolved filtering details are explicit and not silently decided.
-  - minimal recommended options are listed for approval.
-  - implementation boundaries and affected modules are documented for next slice.
-- before implementation starts:
-  - unresolved detail set is resolved or narrowed by explicit approval.
-  - shared contract strategy and index strategy are explicitly confirmed.
+- role and email filters are supported with approved semantics.
+- unknown query keys remain rejected.
+- invalid and empty filter values return existing stable validation behavior.
+- auth/RBAC, pagination, sorting, and paginated envelope baselines remain unchanged.
+- no schema/index/migration and no UI filtering rollout in this slice.
 
 ## Documentation Updates Needed
 - docs to update:
-  - add this proposed filtering spec as canonical design artifact for the next users-list filtering slice.
+  - this spec status moved to accepted and implementation-aligned.
+  - related decision log updated for accepted filtering baseline.
 - guidance:
-  - keep current accepted docs stating filtering is deferred until this proposal is accepted and implemented.
-  - once implemented, reconcile deferred wording in relevant accepted docs/specs/decisions.
+  - preserve deferred status for any filtering behavior beyond role/email.
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
-  - not required in this proposal-only pass.
-  - required when filtering contract choices are accepted as a long-lived project decision.
+  - required and completed in this pass for accepted filtering baseline.
+

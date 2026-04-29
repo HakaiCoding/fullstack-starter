@@ -23,6 +23,7 @@ interface CreateUserInput {
   displayName: string | null;
   createdAt?: Date;
   explicitId?: string;
+  explicitEmail?: string;
 }
 
 interface CreatedUser {
@@ -153,7 +154,9 @@ describe('Users RBAC e2e', () => {
 
   async function createUser(input: CreateUserInput): Promise<CreatedUser> {
     const id = input.explicitId ?? randomUUID();
-    const email = `${testPrefix}-${randomBytes(6).toString('hex')}@example.com`;
+    const email =
+      input.explicitEmail ??
+      `${testPrefix}-${randomBytes(6).toString('hex')}@example.com`;
     const createdAt = input.createdAt ?? new Date();
     const inserted = await dbClient.query<CreatedUser>(
       `
@@ -572,9 +575,195 @@ describe('Users RBAC e2e', () => {
       statusCode: 400,
       code: 'REQUEST_VALIDATION_FAILED',
     });
+
+    const invalidRoleResponse = await request(
+      'GET',
+      buildUsersUrl({ role: 'owner' }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    expectApiErrorResponse({
+      response: invalidRoleResponse,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+    });
   });
 
-  it('returns 400 REQUEST_UNKNOWN_FIELD for unknown or deferred filter-like query params', async () => {
+  it('returns 400 REQUEST_VALIDATION_FAILED for empty role/email filters', async () => {
+    const adminPassword = 'EmptyFilterUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Empty Filter Admin',
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const emptyRoleResponse = await request(
+      'GET',
+      buildUsersUrl({ role: '' }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    expectApiErrorResponse({
+      response: emptyRoleResponse,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+    });
+
+    const emptyEmailResponse = await request(
+      'GET',
+      buildUsersUrl({ email: '   ' }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    expectApiErrorResponse({
+      response: emptyEmailResponse,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+    });
+  });
+
+  it('filters by role with exact match semantics', async () => {
+    const adminPassword = 'RoleFilterUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Role Filter Admin',
+    });
+    const matchedUser = await createUser({
+      passwordHash: null,
+      role: 'user',
+      displayName: 'Role Match User',
+    });
+    await createUser({
+      passwordHash: null,
+      role: 'admin',
+      displayName: 'Role Non Match Admin',
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const response = await request<UsersListResponse>(
+      'GET',
+      buildUsersUrl({ role: 'user' }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.pagination).toEqual(
+      expect.objectContaining({
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      }),
+    );
+    expect(response.data.users.every((user) => user.role === 'user')).toBe(true);
+    expect(response.data.users.some((user) => user.id === matchedUser.id)).toBe(true);
+    expect(response.data.users.some((user) => user.id === adminUser.id)).toBe(false);
+  });
+
+  it('filters by email with case-insensitive partial match semantics', async () => {
+    const adminPassword = 'EmailFilterUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Email Filter Admin',
+    });
+    const matchedUser = await createUser({
+      passwordHash: null,
+      role: 'user',
+      displayName: 'Email Match User',
+      explicitEmail: `${testPrefix}-Filter-Match-User@Example.COM`,
+    });
+    const nonMatchedUser = await createUser({
+      passwordHash: null,
+      role: 'user',
+      displayName: 'Email Non Match User',
+      explicitEmail: `${testPrefix}-not-related-user@example.com`,
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const response = await request<UsersListResponse>(
+      'GET',
+      buildUsersUrl({ email: 'match-user@example' }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.users.some((user) => user.id === matchedUser.id)).toBe(true);
+    expect(response.data.users.some((user) => user.id === nonMatchedUser.id)).toBe(false);
+  });
+
+  it('combines role and email filters with AND semantics', async () => {
+    const adminPassword = 'CombinedFilterUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Combined Filter Admin',
+    });
+    const matchingUser = await createUser({
+      passwordHash: null,
+      role: 'user',
+      displayName: 'Combined Match User',
+      explicitEmail: `${testPrefix}-combined-target@example.com`,
+    });
+    await createUser({
+      passwordHash: null,
+      role: 'admin',
+      displayName: 'Combined Email Match Admin',
+      explicitEmail: `${testPrefix}-combined-target-admin@example.com`,
+    });
+    await createUser({
+      passwordHash: null,
+      role: 'user',
+      displayName: 'Combined Role Match User',
+      explicitEmail: `${testPrefix}-other-user@example.com`,
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const response = await request<UsersListResponse>(
+      'GET',
+      buildUsersUrl({ role: 'user', email: 'combined-target' }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.users).toEqual([
+      expect.objectContaining({
+        id: matchingUser.id,
+        role: 'user',
+      }),
+    ]);
+    expect(response.data.pagination).toEqual(
+      expect.objectContaining({
+        page: 1,
+        pageSize: 25,
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      }),
+    );
+  });
+
+  it('returns 400 REQUEST_UNKNOWN_FIELD for unknown query params', async () => {
     const adminPassword = 'UnknownFieldUsersRoutePassw0rd!';
     const adminUser = await createUser({
       passwordHash: await hashPassword(adminPassword),
@@ -585,7 +774,7 @@ describe('Users RBAC e2e', () => {
 
     const response = await request(
       'GET',
-      buildUsersUrl({ role: 'admin' }),
+      buildUsersUrl({ displayName: 'admin' }),
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,

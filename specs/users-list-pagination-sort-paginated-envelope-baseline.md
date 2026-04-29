@@ -11,6 +11,7 @@
 - lifecycle note:
   - accepted contract baseline and implementation status are both established.
   - repo evidence confirms implemented behavior in API/users route+service, shared contracts, API e2e coverage, and web client contract usage.
+  - filtering was initially deferred in this baseline and later partially closed by accepted first narrow filtering support (`role` exact + `email` case-insensitive partial) in [`users-list-filtering-baseline.md`](./users-list-filtering-baseline.md).
 
 ## Problem
 - accepted docs previously deferred pagination/filter/sort query contracts and paginated envelope/meta contract for `GET /api/v1/users`.
@@ -39,8 +40,8 @@
   - primary sort key is `createdAt` with caller-selected direction (`asc` or `desc`).
   - deterministic tie-break remains `id ASC` regardless of `sortDir`.
 - accepted filtering policy for this baseline:
-  - filtering is explicitly deferred.
-  - no filter fields/operators are accepted in this slice.
+  - filtering was explicitly deferred in this baseline slice.
+  - accepted follow-up now supports `role` and `email` filters only; broader filtering scope remains deferred.
 - accepted paginated response envelope contract for successful admin requests:
 
 ```json
@@ -71,7 +72,7 @@
   - syntactically valid but out-of-range page numbers (for example `page` greater than `totalPages` when `totalPages > 0`) return `200` with empty `users` and consistent `pagination` metadata.
 - validation and error behavior:
   - query validation uses DTO/class-validator transport validation per accepted global ValidationPipe baseline.
-  - unknown query params (including deferred filter params) return `400` with stable code `REQUEST_UNKNOWN_FIELD`.
+  - unknown query params (including unsupported filter params) return `400` with stable code `REQUEST_UNKNOWN_FIELD`.
   - invalid query param values (type/range/enum violations) return `400` with stable code `REQUEST_VALIDATION_FAILED`.
   - existing `401`/`403` behavior and stable error-envelope/code policy remain unchanged for auth/RBAC failures.
 - shared-contract placement expectations:
@@ -133,7 +134,7 @@
 ## Edge Cases
 - `pageSize` greater than `100` returns `400` (`REQUEST_VALIDATION_FAILED`).
 - `page`, `pageSize`, `sortBy`, or `sortDir` with invalid type/value returns `400` (`REQUEST_VALIDATION_FAILED`).
-- unknown query keys (including deferred filter keys) return `400` (`REQUEST_UNKNOWN_FIELD`).
+- unknown query keys (including unsupported filter keys beyond accepted scope) return `400` (`REQUEST_UNKNOWN_FIELD`).
 - empty users dataset returns `200` with `users: []` and `pagination.totalItems = 0`, `pagination.totalPages = 0`.
 - out-of-range but syntactically valid `page` returns `200` with empty `users` and consistent metadata.
 
@@ -192,7 +193,7 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
   - accepted paginated success envelope shape is implemented with top-level `users` preserved.
   - validation/error behavior is implemented and aligned to existing accepted error-envelope/code policy.
   - shared-contract and placement boundaries are implemented as documented.
-  - filtering remains explicitly deferred and unknown/deferred filter-like query keys remain rejected (`REQUEST_UNKNOWN_FIELD`).
+  - broader filtering scope remains deferred and unknown/unsupported filter-like query keys remain rejected (`REQUEST_UNKNOWN_FIELD`).
 - unresolved follow-up checks (remain deferred/unresolved):
   - behavior tests prove general rules for defaults/bounds/sorting/pagination metadata.
   - existing `401`/`403` semantics remain unchanged.

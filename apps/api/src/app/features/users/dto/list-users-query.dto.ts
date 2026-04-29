@@ -1,9 +1,14 @@
-import { Type } from 'class-transformer';
-import { IsIn, IsInt, Min, Max } from 'class-validator';
-import { type UsersListSortBy, type UsersListSortDir } from '../users.types';
+import { Transform, Type } from 'class-transformer';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
+import {
+  type UsersListQuery,
+  type UsersListSortBy,
+  type UsersListSortDir,
+} from '../users.types';
 
 const USERS_LIST_SORT_BY_VALUES: UsersListSortBy[] = ['createdAt'];
 const USERS_LIST_SORT_DIR_VALUES: UsersListSortDir[] = ['asc', 'desc'];
+const USERS_LIST_ROLE_VALUES: NonNullable<UsersListQuery['role']>[] = ['admin', 'user'];
 
 export class ListUsersQueryDto {
   @Type(() => Number)
@@ -22,4 +27,14 @@ export class ListUsersQueryDto {
 
   @IsIn(USERS_LIST_SORT_DIR_VALUES)
   sortDir: UsersListSortDir = 'desc';
+
+  @IsOptional()
+  @IsIn(USERS_LIST_ROLE_VALUES)
+  role?: NonNullable<UsersListQuery['role']>;
+
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString()
+  @MinLength(1)
+  email?: string;
 }

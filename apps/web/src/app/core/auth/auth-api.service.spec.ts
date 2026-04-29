@@ -210,4 +210,36 @@ describe('AuthApiService', () => {
       },
     });
   });
+
+  it('requests users list with accepted filtering query parameters', () => {
+    authState.setAccessToken('admin-access-token');
+
+    service
+      .getUsers({
+        role: 'user',
+        email: 'example.com',
+      })
+      .subscribe();
+
+    const request = httpController.expectOne(
+      (value) => value.url === '/api/v1/users',
+    );
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.get('role')).toBe('user');
+    expect(request.request.params.get('email')).toBe('example.com');
+
+    request.flush({
+      users: [],
+      pagination: {
+        page: 1,
+        pageSize: 25,
+        totalItems: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      },
+    });
+  });
 });

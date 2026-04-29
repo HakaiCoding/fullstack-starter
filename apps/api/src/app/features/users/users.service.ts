@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, type FindOptionsWhere, Repository } from 'typeorm';
 import { UserEntity } from '../../../db/entities/user.entity';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import {
@@ -19,6 +19,15 @@ export class UsersService {
   async listUsers(query: ListUsersQueryDto): Promise<UsersListResponse> {
     const skip = (query.page - 1) * query.pageSize;
     const createdAtSortDirection = query.sortDir === 'asc' ? 'ASC' : 'DESC';
+    const where: FindOptionsWhere<UserEntity> = {};
+
+    if (query.role !== undefined) {
+      where.role = query.role;
+    }
+
+    if (query.email !== undefined) {
+      where.email = ILike(`%${query.email}%`);
+    }
 
     const [users, totalItems] = await this.usersRepository.findAndCount({
       select: {
@@ -32,6 +41,7 @@ export class UsersService {
         createdAt: createdAtSortDirection,
         id: 'ASC',
       },
+      where: Object.keys(where).length > 0 ? where : undefined,
       skip,
       take: query.pageSize,
     });

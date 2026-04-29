@@ -1,6 +1,6 @@
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, type TestingModule } from '@nestjs/testing';
-import { type Repository } from 'typeorm';
+import { type FindOperator, type Repository } from 'typeorm';
 import { UserEntity } from '../../../db/entities/user.entity';
 import { type ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UsersService } from './users.service';
@@ -90,7 +90,95 @@ describe('UsersService', () => {
       },
       skip: 0,
       take: 25,
+      where: undefined,
     });
+  });
+
+  it('applies exact role filtering while preserving baseline pagination/sort options', async () => {
+    usersRepositoryMock.findAndCount = jest.fn().mockResolvedValue([[], 0]);
+
+    await usersService.listUsers({
+      ...defaultQuery,
+      role: 'admin',
+    });
+
+    expect(usersRepositoryMock.findAndCount).toHaveBeenCalledWith({
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        role: true,
+        createdAt: true,
+      },
+      order: {
+        createdAt: 'DESC',
+        id: 'ASC',
+      },
+      where: {
+        role: 'admin',
+      },
+      skip: 0,
+      take: 25,
+    });
+  });
+
+  it('applies case-insensitive partial email filtering', async () => {
+    usersRepositoryMock.findAndCount = jest.fn().mockResolvedValue([[], 0]);
+
+    await usersService.listUsers({
+      ...defaultQuery,
+      email: 'ADMIN@EXAMPLE',
+    });
+
+    const findCall = (usersRepositoryMock.findAndCount as jest.Mock).mock.calls[0]?.[0] as
+      | {
+          where?: {
+            email?: FindOperator<string>;
+          };
+        }
+      | undefined;
+    const emailFilter = findCall?.where?.email;
+    const normalizedType =
+      (emailFilter as unknown as { _type?: string; type?: string })?._type ??
+      (emailFilter as unknown as { _type?: string; type?: string })?.type;
+    const normalizedValue =
+      (emailFilter as unknown as { _value?: string; value?: string })?._value ??
+      (emailFilter as unknown as { _value?: string; value?: string })?.value;
+
+    expect(emailFilter).toBeDefined();
+    expect(normalizedType).toBe('ilike');
+    expect(normalizedValue).toBe('%ADMIN@EXAMPLE%');
+  });
+
+  it('combines role and email filters with AND semantics', async () => {
+    usersRepositoryMock.findAndCount = jest.fn().mockResolvedValue([[], 0]);
+
+    await usersService.listUsers({
+      ...defaultQuery,
+      role: 'user',
+      email: 'listed',
+    });
+
+    const findCall = (usersRepositoryMock.findAndCount as jest.Mock).mock.calls[0]?.[0] as
+      | {
+          where?: {
+            role?: 'admin' | 'user';
+            email?: FindOperator<string>;
+          };
+        }
+      | undefined;
+    const where = findCall?.where;
+    const roleType =
+      (where?.email as unknown as { _type?: string; type?: string })?._type ??
+      (where?.email as unknown as { _type?: string; type?: string })?.type;
+    const roleValue =
+      (where?.email as unknown as { _value?: string; value?: string })?._value ??
+      (where?.email as unknown as { _value?: string; value?: string })?.value;
+
+    expect(where).toBeDefined();
+    expect(where?.role).toBe('user');
+    expect(roleType).toBe('ilike');
+    expect(roleValue).toBe('%listed%');
   });
 
   it('uses asc ordering while keeping id asc deterministic tie-break', async () => {

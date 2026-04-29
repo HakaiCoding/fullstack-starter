@@ -40,12 +40,16 @@ describe('ListUsersQueryDto', () => {
         pageSize: '100',
         sortBy: 'createdAt',
         sortDir: 'asc',
+        role: 'admin',
+        email: 'admin@example.com',
       }),
     ).resolves.toEqual({
       page: 2,
       pageSize: 100,
       sortBy: 'createdAt',
       sortDir: 'asc',
+      role: 'admin',
+      email: 'admin@example.com',
     });
   });
 
@@ -60,12 +64,33 @@ describe('ListUsersQueryDto', () => {
     await expect(validateQuery({ sortBy: 'email' })).rejects.toThrow(
       BadRequestException,
     );
+    await expect(validateQuery({ role: 'owner' })).rejects.toThrow(
+      BadRequestException,
+    );
+  });
+
+  it('rejects empty filter values', async () => {
+    await expect(
+      validateQuery({
+        role: '',
+      }),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      validateQuery({
+        email: '',
+      }),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      validateQuery({
+        email: '   ',
+      }),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('rejects unknown query fields', async () => {
     await expect(
       validateQuery({
-        role: 'admin',
+        status: 'active',
       }),
     ).rejects.toThrow(BadRequestException);
   });
