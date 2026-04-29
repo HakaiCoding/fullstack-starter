@@ -1,9 +1,10 @@
-import { HttpClient, HttpContext } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type {
   AccessTokenResponse,
   AuthMeResponse,
   LogoutResponse,
+  UsersListQuery,
   UsersListResponse,
 } from '@fullstack-starter/contracts';
 import { tap } from 'rxjs';
@@ -50,8 +51,25 @@ export class AuthApiService {
     return this.http.get<AuthMeResponse>('/api/v1/auth/me');
   }
 
-  getUsers() {
-    return this.http.get<UsersListResponse>('/api/v1/users');
+  getUsers(query?: UsersListQuery) {
+    let params = new HttpParams();
+
+    if (query?.page !== undefined) {
+      params = params.set('page', String(query.page));
+    }
+    if (query?.pageSize !== undefined) {
+      params = params.set('pageSize', String(query.pageSize));
+    }
+    if (query?.sortBy !== undefined) {
+      params = params.set('sortBy', query.sortBy);
+    }
+    if (query?.sortDir !== undefined) {
+      params = params.set('sortDir', query.sortDir);
+    }
+
+    return this.http.get<UsersListResponse>('/api/v1/users', {
+      params,
+    });
   }
 
   private buildSkipAuthInterceptorContext(): HttpContext {

@@ -94,6 +94,18 @@ async function request<T>(
   });
 }
 
+function buildUsersUrl(
+  query: Record<string, string | number> = {},
+): string {
+  const searchParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    searchParams.set(key, String(value));
+  }
+
+  const queryString = searchParams.toString();
+  return queryString === '' ? '/api/v1/users' : `/api/v1/users?${queryString}`;
+}
+
 function expectApiErrorResponse(params: {
   response: AxiosResponse;
   statusCode: ApiErrorResponse['statusCode'];
@@ -188,7 +200,7 @@ describe('Users RBAC e2e', () => {
   }
 
   it('returns 401 for unauthenticated requests', async () => {
-    const response = await request('GET', '/api/v1/users');
+    const response = await request('GET', buildUsersUrl());
     expectApiErrorResponse({
       response,
       statusCode: 401,
@@ -197,7 +209,7 @@ describe('Users RBAC e2e', () => {
   });
 
   it('returns 401 for requests with invalid bearer token', async () => {
-    const response = await request('GET', '/api/v1/users', {
+    const response = await request('GET', buildUsersUrl(), {
       headers: {
         Authorization: 'Bearer invalid-token',
       },
@@ -219,7 +231,7 @@ describe('Users RBAC e2e', () => {
     });
     const accessToken = await loginAndGetAccessToken(user.email, plainPassword);
 
-    const response = await request('GET', '/api/v1/users', {
+    const response = await request('GET', buildUsersUrl(), {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -246,7 +258,7 @@ describe('Users RBAC e2e', () => {
     });
     const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
 
-    const response = await request<UsersListResponse>('GET', '/api/v1/users', {
+    const response = await request<UsersListResponse>('GET', buildUsersUrl(), {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -256,8 +268,19 @@ describe('Users RBAC e2e', () => {
     expect(response.data).toEqual(
       expect.objectContaining({
         users: expect.any(Array),
+        pagination: expect.objectContaining({
+          page: 1,
+          pageSize: 25,
+          totalItems: expect.any(Number),
+          totalPages: expect.any(Number),
+          hasNextPage: expect.any(Boolean),
+          hasPreviousPage: expect.any(Boolean),
+          sortBy: 'createdAt',
+          sortDir: 'desc',
+        }),
       }),
     );
+    expect(Object.keys(response.data).sort()).toEqual(['pagination', 'users']);
 
     const returnedUser = response.data.users.find((user) => user.id === listedUser.id);
     expect(returnedUser).toBeDefined();
@@ -275,6 +298,114 @@ describe('Users RBAC e2e', () => {
     ]);
     expect(returnedUser).not.toHaveProperty('passwordHash');
     expect(returnedUser).not.toHaveProperty('password_hash');
+  });
+
+  it('returns 200 with pagination metadata and additive envelope fields', async () => {
+    const adminPassword = 'EmptyDatasetUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Empty Dataset Admin',
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const response = await request<UsersListResponse>('GET', buildUsersUrl(), {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    expect(response.status).toBe(200);
+    const returnedAdmin = response.data.users.find((user) => user.id === adminUser.id);
+    expect(returnedAdmin).toBeDefined();
+
+    const { pagination } = response.data;
+    const expectedTotalPages =
+      pagination.totalItems === 0
+        ? 0
+        : Math.ceil(pagination.totalItems / pagination.pageSize);
+    expect(pagination).toEqual(
+      expect.objectContaining({
+        page: 1,
+        pageSize: 25,
+        totalItems: expect.any(Number),
+        totalPages: expectedTotalPages,
+        hasNextPage: pagination.page < expectedTotalPages,
+        hasPreviousPage: false,
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      }),
+    );
+  });
+
+  it('returns 200 with empty users for syntactically valid out-of-range pages', async () => {
+    const adminPassword = 'OutOfRangeUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Out of Range Admin',
+    });
+    await createUser({
+      passwordHash: await hashPassword('OutOfRangeListedUsersRoutePassw0rd!'),
+      role: 'user',
+      displayName: 'Out of Range Listed User',
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const response = await request<UsersListResponse>(
+      'GET',
+      buildUsersUrl({ page: 999, pageSize: 25 }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.users).toEqual([]);
+    const { pagination } = response.data;
+    const expectedTotalPages =
+      pagination.totalItems === 0
+        ? 0
+        : Math.ceil(pagination.totalItems / pagination.pageSize);
+    expect(pagination).toEqual(
+      expect.objectContaining({
+        page: 999,
+        pageSize: 25,
+        totalItems: expect.any(Number),
+        totalPages: expectedTotalPages,
+        hasNextPage: false,
+        hasPreviousPage: true,
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      }),
+    );
+    expect(pagination.totalItems).toBeGreaterThanOrEqual(2);
+  });
+
+  it('supports max accepted pageSize', async () => {
+    const adminPassword = 'MaxPageSizeUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Max Page Size Admin',
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const response = await request<UsersListResponse>(
+      'GET',
+      buildUsersUrl({ pageSize: 100 }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.pagination.pageSize).toBe(100);
+    expect(response.data.users.length).toBeLessThanOrEqual(100);
   });
 
   it('returns users in deterministic order: createdAt DESC, id ASC tie-break', async () => {
@@ -309,11 +440,18 @@ describe('Users RBAC e2e', () => {
     });
     const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
 
-    const response = await request<UsersListResponse>('GET', '/api/v1/users', {
+    const response = await request<UsersListResponse>(
+      'GET',
+      buildUsersUrl({
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      }),
+      {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    });
+      },
+    );
 
     expect(response.status).toBe(200);
 
@@ -331,5 +469,134 @@ describe('Users RBAC e2e', () => {
       tieHigherIdUser.email,
       oldestUser.email,
     ]);
+  });
+
+  it('returns users in deterministic order: createdAt ASC, id ASC tie-break', async () => {
+    const adminPassword = 'OrderAscAdminUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Ordering Asc Admin',
+    });
+    const tieTimestamp = new Date('2026-01-20T10:00:00.000Z');
+    const oldestTimestamp = new Date('2026-01-10T10:00:00.000Z');
+    const oldestUser = await createUser({
+      explicitId: '00000000-0000-0000-0000-0000000000a2',
+      passwordHash: null,
+      role: 'user',
+      displayName: 'Oldest User Asc',
+      createdAt: oldestTimestamp,
+    });
+    const tieHigherIdUser = await createUser({
+      explicitId: '00000000-0000-0000-0000-0000000000f2',
+      passwordHash: null,
+      role: 'user',
+      displayName: 'Tie Higher Id User Asc',
+      createdAt: tieTimestamp,
+    });
+    const tieLowerIdUser = await createUser({
+      explicitId: '00000000-0000-0000-0000-0000000000b2',
+      passwordHash: null,
+      role: 'user',
+      displayName: 'Tie Lower Id User Asc',
+      createdAt: tieTimestamp,
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const response = await request<UsersListResponse>(
+      'GET',
+      buildUsersUrl({
+        sortBy: 'createdAt',
+        sortDir: 'asc',
+      }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+
+    const trackedEmails = new Set([
+      oldestUser.email,
+      tieLowerIdUser.email,
+      tieHigherIdUser.email,
+    ]);
+    const trackedOrdering = response.data.users
+      .filter((user) => trackedEmails.has(user.email))
+      .map((user) => user.email);
+
+    expect(trackedOrdering).toEqual([
+      oldestUser.email,
+      tieLowerIdUser.email,
+      tieHigherIdUser.email,
+    ]);
+  });
+
+  it('returns 400 REQUEST_VALIDATION_FAILED for invalid query values', async () => {
+    const adminPassword = 'InvalidQueryUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Invalid Query Admin',
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const invalidPageResponse = await request(
+      'GET',
+      buildUsersUrl({ page: 0 }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    expectApiErrorResponse({
+      response: invalidPageResponse,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+    });
+
+    const invalidSortDirResponse = await request(
+      'GET',
+      buildUsersUrl({ sortDir: 'descending' }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    expectApiErrorResponse({
+      response: invalidSortDirResponse,
+      statusCode: 400,
+      code: 'REQUEST_VALIDATION_FAILED',
+    });
+  });
+
+  it('returns 400 REQUEST_UNKNOWN_FIELD for unknown or deferred filter-like query params', async () => {
+    const adminPassword = 'UnknownFieldUsersRoutePassw0rd!';
+    const adminUser = await createUser({
+      passwordHash: await hashPassword(adminPassword),
+      role: 'admin',
+      displayName: 'Unknown Field Admin',
+    });
+    const accessToken = await loginAndGetAccessToken(adminUser.email, adminPassword);
+
+    const response = await request(
+      'GET',
+      buildUsersUrl({ role: 'admin' }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    expectApiErrorResponse({
+      response,
+      statusCode: 400,
+      code: 'REQUEST_UNKNOWN_FIELD',
+    });
   });
 });

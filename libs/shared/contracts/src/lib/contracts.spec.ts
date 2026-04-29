@@ -5,7 +5,10 @@ import type {
   AuthMeResponse,
   AuthRole,
   LogoutResponse,
+  UsersListQuery,
   UsersListResponse,
+  UsersListSortBy,
+  UsersListSortDir,
 } from './contracts';
 
 describe('contracts', () => {
@@ -30,6 +33,14 @@ describe('contracts', () => {
   });
 
   it('should type users list response contracts', () => {
+    const sortBy: UsersListSortBy = 'createdAt';
+    const sortDir: UsersListSortDir = 'desc';
+    const query: UsersListQuery = {
+      page: 1,
+      pageSize: 25,
+      sortBy,
+      sortDir,
+    };
     const usersListResponse: UsersListResponse = {
       users: [
         {
@@ -39,10 +50,22 @@ describe('contracts', () => {
           role: 'user',
         },
       ],
+      pagination: {
+        page: 1,
+        pageSize: 25,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        sortBy,
+        sortDir,
+      },
     };
 
+    expect(query.sortBy).toBe('createdAt');
     expect(usersListResponse.users).toHaveLength(1);
     expect(usersListResponse.users[0].role).toBe('user');
+    expect(usersListResponse.pagination.totalPages).toBe(1);
   });
 
   it('should type api error response contracts', () => {

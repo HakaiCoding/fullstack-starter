@@ -162,6 +162,52 @@ describe('AuthApiService', () => {
 
     request.flush({
       users: [],
+      pagination: {
+        page: 1,
+        pageSize: 25,
+        totalItems: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      },
+    });
+  });
+
+  it('requests users list with accepted pagination/sorting query parameters', () => {
+    authState.setAccessToken('admin-access-token');
+
+    service
+      .getUsers({
+        page: 2,
+        pageSize: 100,
+        sortBy: 'createdAt',
+        sortDir: 'asc',
+      })
+      .subscribe();
+
+    const request = httpController.expectOne(
+      (value) => value.url === '/api/v1/users',
+    );
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.get('page')).toBe('2');
+    expect(request.request.params.get('pageSize')).toBe('100');
+    expect(request.request.params.get('sortBy')).toBe('createdAt');
+    expect(request.request.params.get('sortDir')).toBe('asc');
+
+    request.flush({
+      users: [],
+      pagination: {
+        page: 2,
+        pageSize: 100,
+        totalItems: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: true,
+        sortBy: 'createdAt',
+        sortDir: 'asc',
+      },
     });
   });
 });

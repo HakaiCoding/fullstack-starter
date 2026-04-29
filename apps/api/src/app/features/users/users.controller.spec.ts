@@ -3,6 +3,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { AUTH_ROLES_KEY } from '../auth/roles.decorator';
 import { JwtAccessAuthGuard } from '../auth/jwt-access-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
+import { type ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -37,9 +38,25 @@ describe('UsersController', () => {
           role: 'admin',
         },
       ],
+      pagination: {
+        page: 1,
+        pageSize: 25,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      },
     });
 
-    await expect(usersController.listUsers()).resolves.toEqual({
+    const query: ListUsersQueryDto = {
+      page: 1,
+      pageSize: 25,
+      sortBy: 'createdAt',
+      sortDir: 'desc',
+    };
+    await expect(usersController.listUsers(query)).resolves.toEqual({
       users: [
         {
           id: '93388fcc-3ef6-4dfe-94ea-f03c803cc8c0',
@@ -48,7 +65,18 @@ describe('UsersController', () => {
           role: 'admin',
         },
       ],
+      pagination: {
+        page: 1,
+        pageSize: 25,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      },
     });
+    expect(usersServiceMock.listUsers).toHaveBeenCalledWith(query);
   });
 
   it('declares admin-only guard metadata on the controller', () => {

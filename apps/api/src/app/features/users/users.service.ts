@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../../../db/entities/user.entity';
-import { type UserListItem, type UsersListResponse } from './users.types';
+import { ListUsersQueryDto } from './dto/list-users-query.dto';
+import {
+  type UserListItem,
+  type UsersListPagination,
+  type UsersListResponse,
+} from './users.types';
 
 @Injectable()
 export class UsersService {
@@ -11,8 +16,11 @@ export class UsersService {
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
 
-  async listUsers(): Promise<UsersListResponse> {
-    const users = await this.usersRepository.find({
+  async listUsers(query: ListUsersQueryDto): Promise<UsersListResponse> {
+    const skip = (query.page - 1) * query.pageSize;
+    const createdAtSortDirection = query.sortDir === 'asc' ? 'ASC' : 'DESC';
+
+    const [users, totalItems] = await this.usersRepository.findAndCount({
       select: {
         id: true,
         email: true,
@@ -21,9 +29,11 @@ export class UsersService {
         createdAt: true,
       },
       order: {
-        createdAt: 'DESC',
+        createdAt: createdAtSortDirection,
         id: 'ASC',
       },
+      skip,
+      take: query.pageSize,
     });
 
     const responseItems: UserListItem[] = users.map((user) => ({
@@ -33,8 +43,22 @@ export class UsersService {
       role: user.role,
     }));
 
+    const totalPages =
+      totalItems === 0 ? 0 : Math.ceil(totalItems / query.pageSize);
+    const pagination: UsersListPagination = {
+      page: query.page,
+      pageSize: query.pageSize,
+      totalItems,
+      totalPages,
+      hasNextPage: query.page < totalPages,
+      hasPreviousPage: query.page > 1 && totalPages > 0,
+      sortBy: query.sortBy,
+      sortDir: query.sortDir,
+    };
+
     return {
       users: responseItems,
+      pagination,
     };
   }
 }

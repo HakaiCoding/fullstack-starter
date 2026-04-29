@@ -40,6 +40,28 @@ export interface UserListItem {
   role: AuthRole;
 }
 
+export type UsersListSortBy = 'createdAt';
+export type UsersListSortDir = 'asc' | 'desc';
+
+export interface UsersListQuery {
+  page?: number;
+  pageSize?: number;
+  sortBy?: UsersListSortBy;
+  sortDir?: UsersListSortDir;
+}
+
+export interface UsersListPagination {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  sortBy: UsersListSortBy;
+  sortDir: UsersListSortDir;
+}
+
 export interface UsersListResponse {
   users: UserListItem[];
+  pagination: UsersListPagination;
 }

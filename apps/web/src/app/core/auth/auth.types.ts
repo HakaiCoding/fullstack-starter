@@ -4,7 +4,10 @@ export type {
   AuthRole,
   LogoutResponse,
   UserListItem,
+  UsersListQuery,
   UsersListResponse,
+  UsersListSortBy,
+  UsersListSortDir,
 } from '@fullstack-starter/contracts';
 
 export interface LoginRequest {

@@ -1,1 +1,8 @@
-export type { UserListItem, UsersListResponse } from '@fullstack-starter/contracts';
+export type {
+  UserListItem,
+  UsersListPagination,
+  UsersListQuery,
+  UsersListResponse,
+  UsersListSortBy,
+  UsersListSortDir,
+} from '@fullstack-starter/contracts';
