@@ -9,16 +9,16 @@
 ## Status
 - Accepted
 - lifecycle note:
-  - this is a spec/update-only acceptance slice defining the contract baseline before implementation.
-  - implementation is intentionally deferred to a follow-up core implementation slice.
+  - accepted contract baseline and implementation status are both established.
+  - repo evidence confirms implemented behavior in API/users route+service, shared contracts, API e2e coverage, and web client contract usage.
 
 ## Problem
-- `GET /api/v1/users` currently has an accepted RBAC and payload baseline, but query semantics for pagination/sorting and a paginated response envelope are unresolved.
-- existing accepted docs explicitly deferred pagination/filter/sort query contracts and paginated envelope/meta contract for this route.
-- without an accepted query/envelope contract, implementation risks endpoint-by-endpoint drift and cross-app contract mismatch.
+- accepted docs previously deferred pagination/filter/sort query contracts and paginated envelope/meta contract for `GET /api/v1/users`.
+- this spec now records reconciliation of that prior deferred status against current repo implementation evidence.
+- objective is to keep status wording aligned with implemented baseline behavior without expanding scope.
 
 ## Non-Goals
-- no runtime/API implementation in this spec-only slice.
+- no runtime/API behavior expansion beyond the accepted baseline.
 - no user registration or admin provisioning scope.
 - no auth/session/JWT/RBAC semantic changes.
 - no persistence schema/entity/migration changes.
@@ -27,10 +27,10 @@
 - no new stable non-baseline error-status families (for example `404/409/422/500`) in this slice.
 
 ## Behavior Rules
-- current accepted baseline remains true until implementation:
-  - `GET /api/v1/users` is admin-only (`401` unauthenticated, `403` authenticated non-admin, `200` admin).
-  - response shape is currently `{ users: UserListItem[] }` with deterministic ordering `createdAt DESC`, tie-break `id ASC`.
-- accepted query contract for the implementation slice:
+- implemented baseline behavior:
+  - `GET /api/v1/users` remains admin-only (`401` unauthenticated, `403` authenticated non-admin, `200` admin).
+  - success envelope is `{ users: UserListItem[], pagination: UsersListPagination }`.
+- implemented query contract:
   - `page` (optional): integer, minimum `1`, default `1`.
   - `pageSize` (optional): integer, minimum `1`, maximum `100`, default `25`.
   - `sortBy` (optional): enum with accepted key set `createdAt` only for this baseline.
@@ -79,7 +79,6 @@
   - API request-validation DTOs remain app-local in `apps/api/src/app/features/users/*` and must not be moved into shared contracts.
 
 ## Forbidden Behavior
-- implementing this contract in this spec-only slice.
 - changing auth/session/RBAC semantics while adding pagination/sort contract behavior.
 - adding filter behavior under this contract without a follow-up accepted spec/decision.
 - introducing endpoint-specific one-off query behavior not captured by this spec.
@@ -91,7 +90,7 @@
   - API transport request validation (query params).
   - users list domain orchestration and data-access pagination/sort behavior.
   - shared API/web external contract typing.
-- modules/files likely affected in later implementation:
+- repo evidence (implemented):
   - `apps/api/src/app/features/users/users.controller.ts`
   - `apps/api/src/app/features/users/users.service.ts`
   - `apps/api/src/app/features/users/*dto*`
@@ -173,7 +172,7 @@
 ## Required Gates
 Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.md).
 - tiny/local gates (if applicable):
-  - for this spec-only doc update, runtime gates may be skipped per section `8.1`.
+  - docs-only reconciliation pass may skip runtime gates per section `8.1`.
 - normal implementation gates (if applicable):
   - n/a.
 - core gates (for later implementation slice):
@@ -188,26 +187,25 @@ Use commands from [`../docs/commands-reference.md`](../docs/commands-reference.m
   - confirm shared-contract boundaries remain architecture-compliant.
 
 ## Acceptance Checks
-- spec-only slice acceptance:
-  - accepted query contract for pagination/sorting on `GET /api/v1/users` is documented.
-  - filtering is explicitly deferred and rejection behavior documented.
-  - accepted paginated success envelope shape is documented with backward-compat strategy.
-  - validation/error behavior is aligned to existing accepted error-envelope/code policy.
-  - shared-contract and placement boundaries are explicit.
-  - no runtime implementation was performed in this slice.
-- implementation-slice readiness checks:
+- implemented baseline checks:
+  - accepted query contract for pagination/sorting on `GET /api/v1/users` is implemented.
+  - accepted paginated success envelope shape is implemented with top-level `users` preserved.
+  - validation/error behavior is implemented and aligned to existing accepted error-envelope/code policy.
+  - shared-contract and placement boundaries are implemented as documented.
+  - filtering remains explicitly deferred and unknown/deferred filter-like query keys remain rejected (`REQUEST_UNKNOWN_FIELD`).
+- unresolved follow-up checks (remain deferred/unresolved):
   - behavior tests prove general rules for defaults/bounds/sorting/pagination metadata.
   - existing `401`/`403` semantics remain unchanged.
   - no example-specific patches, hardcoded special cases, or wrong-layer business-rule placement introduced.
 
 ## Documentation Updates Needed
 - docs to update:
-  - add this spec as the accepted pre-implementation contract artifact for the users pagination/sort/envelope slice.
-  - update `DECISIONS.md` with the accepted contract policy decision for this slice.
+  - reconcile stale "deferred implementation" wording in this spec and `DECISIONS.md`.
 - guidance:
-  - this spec supersedes the prior "deferred" status for pagination/sort/paginated envelope planning only; runtime baseline remains unchanged until implementation lands.
+  - preserve the distinction that filtering remains deferred/out of scope.
+  - preserve unresolved follow-up questions without treating them as resolved.
 
 ## Decision Log Updates Needed
 - whether [`../DECISIONS.md`](../DECISIONS.md) requires a new/updated entry:
-  - required and completed in this pass.
-  - entry added for accepted users-list pagination/sort query and paginated envelope policy baseline.
+  - updated in this pass to reconcile accepted-vs-implemented status wording for this baseline.
+  - no new decision entry required for this docs-only reconciliation.
