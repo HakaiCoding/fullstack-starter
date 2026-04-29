@@ -1,6 +1,8 @@
 <div class="app-shell">
   <mat-toolbar class="app-toolbar">
-    {{ title }}
+    <span class="app-toolbar-title">{{ title }}</span>
+    <span class="app-toolbar-spacer"></span>
+    <app-user-menu />
   </mat-toolbar>
 
   <main class="app-main">

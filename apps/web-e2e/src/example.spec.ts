@@ -14,5 +14,7 @@ test('renders the login form at /login', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Login' })).toBeVisible();
   await expect(page.getByLabel('Email')).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Password' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
+  await expect(
+    page.getByLabel('Login').getByRole('button', { name: 'Sign in' }),
+  ).toBeVisible();
 });
