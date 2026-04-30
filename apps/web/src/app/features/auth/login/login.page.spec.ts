@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
+import { APP_ROUTE_METADATA } from '../../../app-route-metadata';
 import { AuthStateService } from '../../../core/auth/auth-state.service';
 import { LoginPage } from './login.page';
 
@@ -74,7 +75,7 @@ describe('LoginPage', () => {
       email: 'user@example.com',
       password: 'Password123!',
     });
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/');
+    expect(router.navigateByUrl).toHaveBeenCalledWith(APP_ROUTE_METADATA.home.path);
     expect(page.errorMessage()).toBeNull();
     expect(page.isSubmitting()).toBe(false);
   });

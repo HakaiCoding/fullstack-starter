@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
+import { APP_ROUTE_METADATA } from '../../../app-route-metadata';
 import { AuthStateService } from '../../../core/auth/auth-state.service';
 import { type LoginRequest } from '../../../core/auth/auth.types';
 
@@ -39,6 +40,7 @@ export class LoginPage {
   readonly isSubmitting = signal(false);
   readonly isPasswordHidden = signal(true);
   readonly errorMessage = signal<string | null>(null);
+  readonly pageTitle = APP_ROUTE_METADATA.login.title;
   readonly loginForm = this.formBuilder.group({
     email: this.formBuilder.control('', [Validators.required, Validators.email]),
     password: this.formBuilder.control('', [Validators.required]),
@@ -71,7 +73,7 @@ export class LoginPage {
       )
       .subscribe({
         next: () => {
-          void this.router.navigateByUrl('/');
+          void this.router.navigateByUrl(APP_ROUTE_METADATA.home.path);
         },
         error: () => {
           this.errorMessage.set(GENERIC_LOGIN_ERROR_MESSAGE);

@@ -1,11 +1,11 @@
 @if (!isAuthenticated()) {
   <button
     mat-button
-    [routerLink]="['/login']"
+    [routerLink]="[loginRoutePath]"
     data-testid="sign-in-button"
   >
-    <mat-icon>login</mat-icon>
-    <span>Sign in</span>
+    <mat-icon>{{ loginRouteIcon }}</mat-icon>
+    <span>{{ loginRouteLabel }}</span>
   </button>
 } @else {
   <button

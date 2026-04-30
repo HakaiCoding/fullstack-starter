@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router, RouterLink } from '@angular/router';
 import { distinctUntilChanged, finalize, switchMap } from 'rxjs';
+import { APP_ROUTE_METADATA } from '../../app-route-metadata';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 
 @Component({
@@ -29,6 +30,9 @@ export class UserMenuComponent {
   readonly currentUser = this.authState.currentUser;
   readonly isAuthenticated = this.authState.isAuthenticated;
   readonly isSigningOut = signal(false);
+  readonly loginRoutePath = APP_ROUTE_METADATA.login.path;
+  readonly loginRouteLabel = APP_ROUTE_METADATA.login.label;
+  readonly loginRouteIcon = APP_ROUTE_METADATA.login.icon ?? 'login';
   readonly userPrimaryLabel = computed(() => {
     const user = this.currentUser();
     if (!user) {
@@ -70,7 +74,7 @@ export class UserMenuComponent {
       )
       .subscribe({
         next: () => {
-          void this.router.navigateByUrl('/login');
+          void this.router.navigateByUrl(this.loginRoutePath);
         },
         error: () => {
           // Keep existing logout/auth-state semantics on error.

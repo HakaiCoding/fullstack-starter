@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
+import { APP_ROUTE_METADATA } from '../../app-route-metadata';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { UserMenuComponent } from './user-menu.component';
 
@@ -55,7 +56,7 @@ describe('UserMenuComponent', () => {
       '[data-testid="sign-in-button"]',
     ) as HTMLButtonElement | null;
     expect(signInButton).toBeTruthy();
-    expect(signInButton?.textContent).toContain('Sign in');
+    expect(signInButton?.textContent).toContain(APP_ROUTE_METADATA.login.label);
     expect(fixture.nativeElement.querySelector('[data-testid="user-menu-trigger"]')).toBeNull();
   });
 
@@ -101,7 +102,7 @@ describe('UserMenuComponent', () => {
 
     expect(authState.logout).toHaveBeenCalledTimes(1);
     expect(fixture.componentInstance.isSigningOut()).toBe(false);
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
+    expect(router.navigateByUrl).toHaveBeenCalledWith(APP_ROUTE_METADATA.login.path);
   });
 
   it('does not navigate when sign out fails', () => {
@@ -138,6 +139,6 @@ describe('UserMenuComponent', () => {
     logoutSubject.complete();
 
     expect(fixture.componentInstance.isSigningOut()).toBe(false);
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
+    expect(router.navigateByUrl).toHaveBeenCalledWith(APP_ROUTE_METADATA.login.path);
   });
 });

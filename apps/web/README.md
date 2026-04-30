@@ -72,3 +72,9 @@ Local Skill guidance reminders:
 - `src/app/layout/*`: shell/layout components
 - `src/app/features/*`: routed/user-facing features
 - keep root app bootstrap/wiring files in `src/app/` (`app.ts`, `app.config.ts`, `app.routes.ts`)
+
+## Route Metadata Baseline
+- Route-facing metadata lives in `src/app/app-route-metadata.ts`.
+- Keep route `pathSegment`/absolute `path` and route-facing UI values (for example `title`, `label`, `icon`) in that file.
+- `src/app/app.routes.ts` consumes this metadata and attaches it to route `data`.
+- Route-facing UI consumers (for example shell/menu/page link targets) should consume the same metadata instead of duplicating route strings.
