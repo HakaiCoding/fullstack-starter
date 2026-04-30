@@ -27,11 +27,16 @@ npx nx run web:lint
 Before implementing web changes, read:
 - [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
 - [`../../AI_CONTRACT.md`](../../AI_CONTRACT.md)
+- [`../../AI_SKILLS.md`](../../AI_SKILLS.md)
 
 Placement reminders:
 - UI/components handle rendering, interaction, and API call orchestration.
 - Business/domain rules should not be implemented in UI components.
 - Cross-app contracts should live in `libs/shared/contracts`.
+
+Local Skill guidance reminders:
+- For Angular async HTTP/state orchestration work, inspect relevant local Skills such as `angular-http`, `angular-signals`, and `angular-rxjs-patterns`.
+- Local Skills are guidance and do not override accepted project docs/specs/decisions.
 
 ## Frontend Service/Component Boundary Convention
 - Policy status: accepted frontend baseline.

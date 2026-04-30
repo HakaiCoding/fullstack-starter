@@ -118,6 +118,7 @@
 - skills inspected:
   - `angular-http`
   - `angular-signals`
+  - `angular-rxjs-patterns`
   - `angular-di`
   - `angular-routing`
   - `angular-best-practices`
@@ -126,6 +127,7 @@
 - skills used:
   - `angular-http` (HTTP call placement and interceptor patterns)
   - `angular-signals` (private writable + readonly public state patterns)
+  - `angular-rxjs-patterns` (operator selection, cancellation/retry patterns, and subscription lifecycle guidance for async frontend state flows)
   - `angular-di` (service DI/facade composition)
   - `angular-best-practices` (`input()/output()` and boundary guidance)
   - `jwt-security` (token storage/auth safety posture compatibility check)

@@ -56,7 +56,7 @@ Available Local Skills Inventory
 This inventory helps AI sessions discover relevant local Skills quickly. It is a discovery aid, not a substitute for inspecting the current Skills directory. Before relying on a Skill, Codex must verify that the Skill still exists and read the current Skill content.
 
 - Documented local Skills root path in current project workflow docs: `C:\Users\Development\.agents\skills\`
-- Verification date: `2026-04-27`
+- Verification date: `2026-05-01`
 - Inventory authority note: this inventory is a discovery aid, not permanent technical authority, and does not make any Skill guidance automatically accepted project policy.
 - Environment-specific system/runtime Skills (for example under `.codex` runtime/system directories) are excluded from this project local/user Skills inventory.
 - If a Skills directory is inaccessible, do not invent Skills, paths, or scopes.
@@ -75,6 +75,7 @@ This inventory helps AI sessions discover relevant local Skills quickly. It is a
 | angular-forms | `C:\Users\Development\.agents\skills\angular-forms` | Angular signal-based forms guidance. | Live directory and `SKILL.md` verified in session. |
 | angular-http | `C:\Users\Development\.agents\skills\angular-http` | Angular HTTP and resource/httpResource usage. | Live directory and `SKILL.md` verified in session. |
 | angular-routing | `C:\Users\Development\.agents\skills\angular-routing` | Angular routing with lazy loading, guards, and resolvers. | Live directory and `SKILL.md` verified in session. |
+| angular-rxjs-patterns | `C:\Users\Development\.agents\skills\angular-rxjs-patterns` | Angular RxJS async-stream/operator/error-handling/subscription patterns for service/component flows. | Live directory, global inventory entry, and `SKILL.md` verified in session. |
 | angular-signals | `C:\Users\Development\.agents\skills\angular-signals` | Angular signal-based state patterns. | Live directory and `SKILL.md` verified in session. |
 | caveman-commit | `C:\Users\Development\.agents\skills\caveman-commit` | Ultra-compressed Conventional Commits message generation. | Live directory and `SKILL.md` verified in session. |
 | docker-expert | `C:\Users\Development\.agents\skills\docker-expert` | Advanced Docker/containerization guidance. | Live directory and `SKILL.md` verified in session. |
