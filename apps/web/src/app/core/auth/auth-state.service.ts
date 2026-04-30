@@ -1,5 +1,5 @@
 import { Injectable, Injector, computed, inject, signal } from '@angular/core';
-import type { AuthMeResponse } from '@fullstack-starter/contracts';
+import type { AuthMeResponse, LogoutResponse } from '@fullstack-starter/contracts';
 import { Observable, catchError, of, tap } from 'rxjs';
 import { AuthApiService } from './auth-api.service';
 
@@ -40,6 +40,10 @@ export class AuthStateService {
           return of<AuthMeResponse | null>(null);
         }),
       );
+  }
+
+  logout(): Observable<LogoutResponse> {
+    return this.getAuthApiService().logout();
   }
 
   clearCurrentUser(): void {

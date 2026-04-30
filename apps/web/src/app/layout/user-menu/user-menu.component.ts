@@ -13,7 +13,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router, RouterLink } from '@angular/router';
 import { distinctUntilChanged, finalize, switchMap } from 'rxjs';
-import { AuthApiService } from '../../core/auth/auth-api.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 
 @Component({
@@ -23,7 +22,6 @@ import { AuthStateService } from '../../core/auth/auth-state.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserMenuComponent {
-  private readonly authApi = inject(AuthApiService);
   private readonly authState = inject(AuthStateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
@@ -62,7 +60,7 @@ export class UserMenuComponent {
 
     this.isSigningOut.set(true);
 
-    this.authApi
+    this.authState
       .logout()
       .pipe(
         takeUntilDestroyed(this.destroyRef),

@@ -1,4 +1,4 @@
-import type { AuthMeResponse } from '@fullstack-starter/contracts';
+import type { AuthMeResponse, LogoutResponse } from '@fullstack-starter/contracts';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
@@ -14,11 +14,12 @@ describe('AuthStateService', () => {
   };
 
   let service: AuthStateService;
-  let authApi: { getMe: ReturnType<typeof vi.fn> };
+  let authApi: { getMe: ReturnType<typeof vi.fn>; logout: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     authApi = {
       getMe: vi.fn().mockReturnValue(of(currentUserResponse)),
+      logout: vi.fn().mockReturnValue(of<LogoutResponse>({ success: true })),
     };
 
     TestBed.configureTestingModule({
@@ -27,6 +28,10 @@ describe('AuthStateService', () => {
       ],
     });
     service = TestBed.inject(AuthStateService);
+    authApi.logout.mockImplementation(() => {
+      service.clear();
+      return of<LogoutResponse>({ success: true });
+    });
   });
 
   it('starts with no access token, no current user, and unauthenticated state', () => {
@@ -109,6 +114,45 @@ describe('AuthStateService', () => {
 
     expect(refreshedUser).toBeNull();
     expect(service.currentUser()).toBeNull();
+  });
+
+  it('delegates logout to AuthApiService and preserves existing success behavior', () => {
+    service.setAccessToken('active-access-token');
+    service.refreshCurrentUser().subscribe();
+    expect(service.currentUser()).toEqual(currentUserResponse);
+
+    let response: LogoutResponse | null = null;
+    service.logout().subscribe((value) => {
+      response = value;
+    });
+
+    expect(authApi.logout).toHaveBeenCalledTimes(1);
+    expect(response).toEqual({ success: true });
+    expect(service.accessToken()).toBeNull();
+    expect(service.currentUser()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+  });
+
+  it('does not clear auth state when delegated logout fails', () => {
+    service.setAccessToken('active-access-token');
+    authApi.getMe.mockReturnValueOnce(of(currentUserResponse));
+    service.refreshCurrentUser().subscribe();
+    expect(service.currentUser()).toEqual(currentUserResponse);
+
+    authApi.logout.mockReturnValueOnce(throwError(() => new Error('Logout failed')));
+    let receivedError: Error | null = null;
+
+    service.logout().subscribe({
+      error: (error) => {
+        receivedError = error as Error;
+      },
+    });
+
+    expect(authApi.logout).toHaveBeenCalledTimes(1);
+    expect(receivedError).toBeInstanceOf(Error);
+    expect(service.accessToken()).toBe('active-access-token');
+    expect(service.currentUser()).toEqual(currentUserResponse);
+    expect(service.isAuthenticated()).toBe(true);
   });
 
   it('keeps token and current-user state in memory only across service instances', () => {

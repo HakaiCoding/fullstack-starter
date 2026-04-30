@@ -1,7 +1,7 @@
 import type { AuthMeResponse } from '@fullstack-starter/contracts';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthApiService } from '../../core/auth/auth-api.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
@@ -93,6 +93,7 @@ describe('UserMenuComponent', () => {
 
   it('calls logout and navigates to login on sign out success', () => {
     authState.setAccessToken('active-access-token');
+    const logoutSpy = vi.spyOn(authState, 'logout');
 
     const fixture = TestBed.createComponent(UserMenuComponent);
     fixture.detectChanges();
@@ -100,9 +101,11 @@ describe('UserMenuComponent', () => {
 
     fixture.componentInstance.onSignOut();
 
+    expect(logoutSpy).toHaveBeenCalledTimes(1);
     expect(authApi.logout).toHaveBeenCalledTimes(1);
     expect(authState.accessToken()).toBeNull();
     expect(authState.currentUser()).toBeNull();
+    expect(fixture.componentInstance.isSigningOut()).toBe(false);
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
@@ -116,6 +119,28 @@ describe('UserMenuComponent', () => {
     fixture.componentInstance.onSignOut();
 
     expect(authApi.logout).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.isSigningOut()).toBe(false);
     expect(router.navigateByUrl).not.toHaveBeenCalled();
+  });
+
+  it('prevents duplicate sign-out requests while a logout is in flight', () => {
+    const logoutSubject = new Subject<{ success: true }>();
+    authApi.logout.mockReturnValue(logoutSubject.asObservable());
+    authState.setAccessToken('active-access-token');
+
+    const fixture = TestBed.createComponent(UserMenuComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.onSignOut();
+    fixture.componentInstance.onSignOut();
+
+    expect(authApi.logout).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.isSigningOut()).toBe(true);
+
+    logoutSubject.next({ success: true });
+    logoutSubject.complete();
+
+    expect(fixture.componentInstance.isSigningOut()).toBe(false);
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 });
