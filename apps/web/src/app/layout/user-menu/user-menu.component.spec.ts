@@ -22,7 +22,7 @@ describe('UserMenuComponent', () => {
   beforeEach(async () => {
     authApi = {
       getMe: vi.fn().mockReturnValue(of(userResponse)),
-      logout: vi.fn(),
+      logout: vi.fn().mockReturnValue(of({ success: true })),
     };
 
     await TestBed.configureTestingModule({
@@ -35,10 +35,6 @@ describe('UserMenuComponent', () => {
 
     authState = TestBed.inject(AuthStateService);
     router = TestBed.inject(Router);
-    authApi.logout.mockImplementation(() => {
-      authState.clear();
-      return of({ success: true });
-    });
     vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
   });
 

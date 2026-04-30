@@ -27,7 +27,9 @@ describe('AuthApiService', () => {
     httpController.verify();
   });
 
-  it('posts login with credentials and stores access token in memory state', () => {
+  it('posts login with credentials and keeps auth state ownership outside AuthApiService', () => {
+    authState.setAccessToken('token-before-login-success');
+
     service
       .login({
         email: 'test@example.com',
@@ -47,7 +49,7 @@ describe('AuthApiService', () => {
       accessToken: '  token-from-login  ',
     });
 
-    expect(authState.accessToken()).toBe('token-from-login');
+    expect(authState.accessToken()).toBe('token-before-login-success');
   });
 
   it('does not mutate auth state when login fails', () => {
@@ -99,7 +101,7 @@ describe('AuthApiService', () => {
     });
   });
 
-  it('posts logout with credentials and clears in-memory token state', () => {
+  it('posts logout with credentials and keeps auth state ownership outside AuthApiService', () => {
     authState.setAccessToken('token-before-logout');
 
     service.logout().subscribe();
@@ -115,7 +117,7 @@ describe('AuthApiService', () => {
       success: true,
     });
 
-    expect(authState.accessToken()).toBeNull();
+    expect(authState.accessToken()).toBe('token-before-logout');
   });
 
   it('keeps auth state unchanged when logout fails', () => {
@@ -241,5 +243,24 @@ describe('AuthApiService', () => {
         sortDir: 'desc',
       },
     });
+  });
+});
+
+describe('AuthApiService dependency boundary', () => {
+  it('can be injected without resolving AuthStateService', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: AuthStateService,
+          useFactory: () => {
+            throw new Error('AuthStateService should not be resolved by AuthApiService');
+          },
+        },
+      ],
+    });
+
+    expect(() => TestBed.inject(AuthApiService)).not.toThrow();
   });
 });

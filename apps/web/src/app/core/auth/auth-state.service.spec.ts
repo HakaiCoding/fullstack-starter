@@ -39,10 +39,6 @@ describe('AuthStateService', () => {
       ],
     });
     service = TestBed.inject(AuthStateService);
-    authApi.logout.mockImplementation(() => {
-      service.clear();
-      return of<LogoutResponse>({ success: true });
-    });
   });
 
   it('starts with no access token, no current user, and unauthenticated state', () => {
@@ -127,7 +123,7 @@ describe('AuthStateService', () => {
     expect(service.currentUser()).toBeNull();
   });
 
-  it('delegates logout to AuthApiService and preserves existing success behavior', () => {
+  it('clears auth state on successful logout response', () => {
     service.setAccessToken('active-access-token');
     service.refreshCurrentUser().subscribe();
     expect(service.currentUser()).toEqual(currentUserResponse);
@@ -144,7 +140,7 @@ describe('AuthStateService', () => {
     expect(service.isAuthenticated()).toBe(false);
   });
 
-  it('delegates login to AuthApiService', () => {
+  it('sets access token on successful login response and preserves response shape', () => {
     let response: AccessTokenResponse | null = null;
 
     service
@@ -162,9 +158,37 @@ describe('AuthStateService', () => {
       password: 'Password123!',
     });
     expect(response).toEqual({ accessToken: 'active-access-token' });
+    expect(service.accessToken()).toBe('active-access-token');
+    expect(service.isAuthenticated()).toBe(true);
   });
 
-  it('does not clear auth state when delegated logout fails', () => {
+  it('keeps auth state unchanged when login fails', () => {
+    service.setAccessToken('active-access-token');
+    service.refreshCurrentUser().subscribe();
+    expect(service.currentUser()).toEqual(currentUserResponse);
+
+    authApi.login.mockReturnValueOnce(throwError(() => new Error('Login failed')));
+    let receivedError: Error | null = null;
+
+    service
+      .login({
+        email: 'user@example.com',
+        password: 'WrongPassword123!',
+      })
+      .subscribe({
+        error: (error) => {
+          receivedError = error as Error;
+        },
+      });
+
+    expect(authApi.login).toHaveBeenCalledTimes(1);
+    expect(receivedError).toBeInstanceOf(Error);
+    expect(service.accessToken()).toBe('active-access-token');
+    expect(service.currentUser()).toEqual(currentUserResponse);
+    expect(service.isAuthenticated()).toBe(true);
+  });
+
+  it('does not clear auth state when logout fails', () => {
     service.setAccessToken('active-access-token');
     authApi.getMe.mockReturnValueOnce(of(currentUserResponse));
     service.refreshCurrentUser().subscribe();

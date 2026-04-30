@@ -1,4 +1,4 @@
-import { Injectable, Injector, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import type {
   AccessTokenResponse,
   AuthMeResponse,
@@ -10,7 +10,7 @@ import { type LoginRequest } from './auth.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthStateService {
-  private readonly injector = inject(Injector);
+  private readonly authApi = inject(AuthApiService);
   private readonly accessTokenState = signal<string | null>(null);
   private readonly currentUserState = signal<AuthMeResponse | null>(null);
 
@@ -34,7 +34,7 @@ export class AuthStateService {
       return of(null);
     }
 
-    return this.getAuthApiService()
+    return this.authApi
       .getMe()
       .pipe(
         tap((currentUser) => {
@@ -48,11 +48,19 @@ export class AuthStateService {
   }
 
   logout(): Observable<LogoutResponse> {
-    return this.getAuthApiService().logout();
+    return this.authApi.logout().pipe(
+      tap(() => {
+        this.clear();
+      }),
+    );
   }
 
   login(credentials: LoginRequest): Observable<AccessTokenResponse> {
-    return this.getAuthApiService().login(credentials);
+    return this.authApi.login(credentials).pipe(
+      tap((response) => {
+        this.setAccessToken(response.accessToken);
+      }),
+    );
   }
 
   clearCurrentUser(): void {
@@ -62,9 +70,5 @@ export class AuthStateService {
   clear(): void {
     this.accessTokenState.set(null);
     this.clearCurrentUser();
-  }
-
-  private getAuthApiService(): AuthApiService {
-    return this.injector.get(AuthApiService);
   }
 }
