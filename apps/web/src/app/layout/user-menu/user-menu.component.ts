@@ -11,9 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import type { AuthMeResponse } from '@fullstack-starter/contracts';
 import { Router, RouterLink } from '@angular/router';
-import { catchError, distinctUntilChanged, finalize, of, switchMap } from 'rxjs';
+import { distinctUntilChanged, finalize, switchMap } from 'rxjs';
 import { AuthApiService } from '../../core/auth/auth-api.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 
@@ -29,7 +28,7 @@ export class UserMenuComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
 
-  readonly currentUser = signal<AuthMeResponse | null>(null);
+  readonly currentUser = this.authState.currentUser;
   readonly isAuthenticated = this.authState.isAuthenticated;
   readonly isSigningOut = signal(false);
   readonly userPrimaryLabel = computed(() => {
@@ -50,20 +49,10 @@ export class UserMenuComponent {
     toObservable(this.isAuthenticated)
       .pipe(
         distinctUntilChanged(),
-        switchMap((isAuthenticated) => {
-          if (!isAuthenticated) {
-            return of<AuthMeResponse | null>(null);
-          }
-
-          return this.authApi.getMe().pipe(
-            catchError(() => of<AuthMeResponse | null>(null)),
-          );
-        }),
+        switchMap(() => this.authState.refreshCurrentUser()),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((user) => {
-        this.currentUser.set(user);
-      });
+      .subscribe();
   }
 
   onSignOut(): void {
@@ -83,7 +72,6 @@ export class UserMenuComponent {
       )
       .subscribe({
         next: () => {
-          this.currentUser.set(null);
           void this.router.navigateByUrl('/login');
         },
         error: () => {

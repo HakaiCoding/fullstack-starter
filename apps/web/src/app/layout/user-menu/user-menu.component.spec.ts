@@ -22,7 +22,7 @@ describe('UserMenuComponent', () => {
   beforeEach(async () => {
     authApi = {
       getMe: vi.fn().mockReturnValue(of(userResponse)),
-      logout: vi.fn().mockReturnValue(of({ success: true })),
+      logout: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -35,6 +35,10 @@ describe('UserMenuComponent', () => {
 
     authState = TestBed.inject(AuthStateService);
     router = TestBed.inject(Router);
+    authApi.logout.mockImplementation(() => {
+      authState.clear();
+      return of({ success: true });
+    });
     vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
   });
 
@@ -59,6 +63,7 @@ describe('UserMenuComponent', () => {
     fixture.detectChanges();
 
     expect(authApi.getMe).toHaveBeenCalledTimes(1);
+    expect(authState.currentUser()).toEqual(userResponse);
 
     const userMenuTrigger = fixture.nativeElement.querySelector(
       '[data-testid="user-menu-trigger"]',
@@ -91,10 +96,13 @@ describe('UserMenuComponent', () => {
 
     const fixture = TestBed.createComponent(UserMenuComponent);
     fixture.detectChanges();
+    expect(authState.currentUser()).toEqual(userResponse);
 
     fixture.componentInstance.onSignOut();
 
     expect(authApi.logout).toHaveBeenCalledTimes(1);
+    expect(authState.accessToken()).toBeNull();
+    expect(authState.currentUser()).toBeNull();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
