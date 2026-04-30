@@ -1,7 +1,12 @@
 import { Injectable, Injector, computed, inject, signal } from '@angular/core';
-import type { AuthMeResponse, LogoutResponse } from '@fullstack-starter/contracts';
+import type {
+  AccessTokenResponse,
+  AuthMeResponse,
+  LogoutResponse,
+} from '@fullstack-starter/contracts';
 import { Observable, catchError, of, tap } from 'rxjs';
 import { AuthApiService } from './auth-api.service';
+import { type LoginRequest } from './auth.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthStateService {
@@ -44,6 +49,10 @@ export class AuthStateService {
 
   logout(): Observable<LogoutResponse> {
     return this.getAuthApiService().logout();
+  }
+
+  login(credentials: LoginRequest): Observable<AccessTokenResponse> {
+    return this.getAuthApiService().login(credentials);
   }
 
   clearCurrentUser(): void {

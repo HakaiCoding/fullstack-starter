@@ -1,4 +1,8 @@
-import type { AuthMeResponse, LogoutResponse } from '@fullstack-starter/contracts';
+import type {
+  AccessTokenResponse,
+  AuthMeResponse,
+  LogoutResponse,
+} from '@fullstack-starter/contracts';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
@@ -14,11 +18,18 @@ describe('AuthStateService', () => {
   };
 
   let service: AuthStateService;
-  let authApi: { getMe: ReturnType<typeof vi.fn>; logout: ReturnType<typeof vi.fn> };
+  let authApi: {
+    getMe: ReturnType<typeof vi.fn>;
+    login: ReturnType<typeof vi.fn>;
+    logout: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     authApi = {
       getMe: vi.fn().mockReturnValue(of(currentUserResponse)),
+      login: vi
+        .fn()
+        .mockReturnValue(of<AccessTokenResponse>({ accessToken: 'active-access-token' })),
       logout: vi.fn().mockReturnValue(of<LogoutResponse>({ success: true })),
     };
 
@@ -131,6 +142,26 @@ describe('AuthStateService', () => {
     expect(service.accessToken()).toBeNull();
     expect(service.currentUser()).toBeNull();
     expect(service.isAuthenticated()).toBe(false);
+  });
+
+  it('delegates login to AuthApiService', () => {
+    let response: AccessTokenResponse | null = null;
+
+    service
+      .login({
+        email: 'user@example.com',
+        password: 'Password123!',
+      })
+      .subscribe((value) => {
+        response = value;
+      });
+
+    expect(authApi.login).toHaveBeenCalledTimes(1);
+    expect(authApi.login).toHaveBeenCalledWith({
+      email: 'user@example.com',
+      password: 'Password123!',
+    });
+    expect(response).toEqual({ accessToken: 'active-access-token' });
   });
 
   it('does not clear auth state when delegated logout fails', () => {

@@ -9,7 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
+import { AuthStateService } from '../../../core/auth/auth-state.service';
 import { type LoginRequest } from '../../../core/auth/auth.types';
 
 const GENERIC_LOGIN_ERROR_MESSAGE =
@@ -31,7 +31,7 @@ const GENERIC_LOGIN_ERROR_MESSAGE =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPage {
-  private readonly authApi = inject(AuthApiService);
+  private readonly authState = inject(AuthStateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly router = inject(Router);
@@ -61,7 +61,7 @@ export class LoginPage {
     this.errorMessage.set(null);
     this.isSubmitting.set(true);
 
-    this.authApi
+    this.authState
       .login(credentials)
       .pipe(
         takeUntilDestroyed(this.destroyRef),

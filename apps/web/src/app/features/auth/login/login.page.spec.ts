@@ -3,17 +3,17 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
+import { AuthStateService } from '../../../core/auth/auth-state.service';
 import { LoginPage } from './login.page';
 
 describe('LoginPage', () => {
-  let authApi: { login: ReturnType<typeof vi.fn> };
+  let authState: { login: ReturnType<typeof vi.fn> };
   let fixture: ReturnType<typeof TestBed.createComponent<LoginPage>>;
   let page: LoginPage;
   let router: { navigateByUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    authApi = {
+    authState = {
       login: vi.fn(),
     };
     router = {
@@ -23,7 +23,7 @@ describe('LoginPage', () => {
     await TestBed.configureTestingModule({
       imports: [LoginPage],
       providers: [
-        { provide: AuthApiService, useValue: authApi as unknown as AuthApiService },
+        { provide: AuthStateService, useValue: authState as unknown as AuthStateService },
         { provide: Router, useValue: router as unknown as Router },
       ],
     }).compileComponents();
@@ -56,13 +56,13 @@ describe('LoginPage', () => {
   it('does not call login when the form is invalid', () => {
     page.onSubmit();
 
-    expect(authApi.login).not.toHaveBeenCalled();
+    expect(authState.login).not.toHaveBeenCalled();
     expect(page.emailControl.touched).toBe(true);
     expect(page.passwordControl.touched).toBe(true);
   });
 
   it('submits credentials and navigates to root on success', () => {
-    authApi.login.mockReturnValue(of({ accessToken: 'token' }));
+    authState.login.mockReturnValue(of({ accessToken: 'token' }));
     page.loginForm.setValue({
       email: 'user@example.com',
       password: 'Password123!',
@@ -70,7 +70,7 @@ describe('LoginPage', () => {
 
     page.onSubmit();
 
-    expect(authApi.login).toHaveBeenCalledWith({
+    expect(authState.login).toHaveBeenCalledWith({
       email: 'user@example.com',
       password: 'Password123!',
     });
@@ -80,7 +80,7 @@ describe('LoginPage', () => {
   });
 
   it('shows a generic error when login fails', () => {
-    authApi.login.mockReturnValue(
+    authState.login.mockReturnValue(
       throwError(() => new Error('Unauthorized')),
     );
     page.loginForm.setValue({
@@ -100,7 +100,7 @@ describe('LoginPage', () => {
 
   it('shows loading state while login request is in flight', () => {
     const loginSubject = new Subject<AccessTokenResponse>();
-    authApi.login.mockReturnValue(loginSubject.asObservable());
+    authState.login.mockReturnValue(loginSubject.asObservable());
     page.loginForm.setValue({
       email: 'user@example.com',
       password: 'Password123!',
