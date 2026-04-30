@@ -19,6 +19,7 @@ describe('appRoutes', () => {
 
     expect(defaultChildRoute?.component).toBe(HomePage);
     expect(defaultChildRoute?.pathMatch).toBe('full');
+    expect(defaultChildRoute?.title).toBe(APP_ROUTE_METADATA.home.title);
   });
 
   it('keeps login route configured', () => {
@@ -27,6 +28,7 @@ describe('appRoutes', () => {
     );
 
     expect(typeof loginRoute?.loadComponent).toBe('function');
+    expect(loginRoute?.title).toBe(APP_ROUTE_METADATA.login.title);
   });
 
   it('defines explicit not-found route', () => {
@@ -35,6 +37,7 @@ describe('appRoutes', () => {
     );
 
     expect(typeof notFoundRoute?.loadComponent).toBe('function');
+    expect(notFoundRoute?.title).toBe(APP_ROUTE_METADATA.notFound.title);
   });
 
   it('keeps child wildcard route last and redirects to /not-found', () => {
@@ -55,7 +58,7 @@ describe('appRoutes', () => {
 
     await harness.navigateByUrl(APP_ROUTE_METADATA.home.path);
     expect(router.url).toBe(APP_ROUTE_METADATA.home.path);
-    expect(harness.routeNativeElement?.textContent).toContain('HomePage');
+    expect(harness.routeNativeElement?.textContent).toContain(APP_ROUTE_METADATA.home.title);
 
     await harness.navigateByUrl(APP_ROUTE_METADATA.login.path);
     expect(router.url).toBe(APP_ROUTE_METADATA.login.path);

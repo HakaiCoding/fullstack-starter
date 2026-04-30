@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { APP_ROUTE_METADATA } from '../../app-route-metadata';
 
 @Component({
   selector: 'app-home-page',
@@ -6,4 +7,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   styleUrl: './home.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomePage {}
+export class HomePage {
+  readonly pageTitle = APP_ROUTE_METADATA.home.title;
+}

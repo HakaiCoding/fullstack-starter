@@ -76,5 +76,6 @@ Local Skill guidance reminders:
 ## Route Metadata Baseline
 - Route-facing metadata lives in `src/app/app-route-metadata.ts`.
 - Keep route `pathSegment`/absolute `path` and route-facing UI values (for example `title`, `label`, `icon`) in that file.
-- `src/app/app.routes.ts` consumes this metadata and attaches it to route `data`.
+- `src/app/app.routes.ts` consumes this metadata and attaches it to route `data` and route `title`.
+- Route `title` metadata is the baseline source for document title updates and shell page heading display.
 - Route-facing UI consumers (for example shell/menu/page link targets) should consume the same metadata instead of duplicating route strings.
