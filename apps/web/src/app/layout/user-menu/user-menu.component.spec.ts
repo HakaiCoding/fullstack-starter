@@ -1,9 +1,9 @@
 import type { AuthMeResponse } from '@fullstack-starter/contracts';
+import { signal, type WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
-import { AuthApiService } from '../../core/auth/auth-api.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { UserMenuComponent } from './user-menu.component';
 
@@ -15,13 +15,23 @@ describe('UserMenuComponent', () => {
     role: 'user',
   };
 
-  let authApi: { getMe: ReturnType<typeof vi.fn>; logout: ReturnType<typeof vi.fn> };
-  let authState: AuthStateService;
+  let currentUserState: WritableSignal<AuthMeResponse | null>;
+  let isAuthenticatedState: WritableSignal<boolean>;
+  let authState: {
+    currentUser: AuthStateService['currentUser'];
+    isAuthenticated: AuthStateService['isAuthenticated'];
+    refreshCurrentUser: ReturnType<typeof vi.fn>;
+    logout: ReturnType<typeof vi.fn>;
+  };
   let router: Router;
 
   beforeEach(async () => {
-    authApi = {
-      getMe: vi.fn().mockReturnValue(of(userResponse)),
+    currentUserState = signal<AuthMeResponse | null>(null);
+    isAuthenticatedState = signal(false);
+    authState = {
+      currentUser: currentUserState.asReadonly(),
+      isAuthenticated: isAuthenticatedState.asReadonly(),
+      refreshCurrentUser: vi.fn(() => of(currentUserState())),
       logout: vi.fn().mockReturnValue(of({ success: true })),
     };
 
@@ -29,11 +39,10 @@ describe('UserMenuComponent', () => {
       imports: [UserMenuComponent],
       providers: [
         provideRouter([]),
-        { provide: AuthApiService, useValue: authApi as unknown as AuthApiService },
+        { provide: AuthStateService, useValue: authState as unknown as AuthStateService },
       ],
     }).compileComponents();
 
-    authState = TestBed.inject(AuthStateService);
     router = TestBed.inject(Router);
     vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
   });
@@ -41,8 +50,6 @@ describe('UserMenuComponent', () => {
   it('renders sign in button while unauthenticated', () => {
     const fixture = TestBed.createComponent(UserMenuComponent);
     fixture.detectChanges();
-
-    expect(authApi.getMe).not.toHaveBeenCalled();
 
     const signInButton = fixture.nativeElement.querySelector(
       '[data-testid="sign-in-button"]',
@@ -53,13 +60,11 @@ describe('UserMenuComponent', () => {
   });
 
   it('renders user menu trigger with display name when authenticated', () => {
-    authState.setAccessToken('active-access-token');
+    isAuthenticatedState.set(true);
+    currentUserState.set(userResponse);
 
     const fixture = TestBed.createComponent(UserMenuComponent);
     fixture.detectChanges();
-
-    expect(authApi.getMe).toHaveBeenCalledTimes(1);
-    expect(authState.currentUser()).toEqual(userResponse);
 
     const userMenuTrigger = fixture.nativeElement.querySelector(
       '[data-testid="user-menu-trigger"]',
@@ -70,13 +75,11 @@ describe('UserMenuComponent', () => {
   });
 
   it('falls back to email when display name is null', () => {
-    authApi.getMe.mockReturnValue(
-      of({
-        ...userResponse,
-        displayName: null,
-      }),
-    );
-    authState.setAccessToken('active-access-token');
+    isAuthenticatedState.set(true);
+    currentUserState.set({
+      ...userResponse,
+      displayName: null,
+    });
 
     const fixture = TestBed.createComponent(UserMenuComponent);
     fixture.detectChanges();
@@ -88,41 +91,39 @@ describe('UserMenuComponent', () => {
   });
 
   it('calls logout and navigates to login on sign out success', () => {
-    authState.setAccessToken('active-access-token');
-    const logoutSpy = vi.spyOn(authState, 'logout');
+    isAuthenticatedState.set(true);
+    currentUserState.set(userResponse);
 
     const fixture = TestBed.createComponent(UserMenuComponent);
     fixture.detectChanges();
-    expect(authState.currentUser()).toEqual(userResponse);
 
     fixture.componentInstance.onSignOut();
 
-    expect(logoutSpy).toHaveBeenCalledTimes(1);
-    expect(authApi.logout).toHaveBeenCalledTimes(1);
-    expect(authState.accessToken()).toBeNull();
-    expect(authState.currentUser()).toBeNull();
+    expect(authState.logout).toHaveBeenCalledTimes(1);
     expect(fixture.componentInstance.isSigningOut()).toBe(false);
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
   it('does not navigate when sign out fails', () => {
-    authApi.logout.mockReturnValue(throwError(() => new Error('Logout failed')));
-    authState.setAccessToken('active-access-token');
+    authState.logout.mockReturnValue(throwError(() => new Error('Logout failed')));
+    isAuthenticatedState.set(true);
+    currentUserState.set(userResponse);
 
     const fixture = TestBed.createComponent(UserMenuComponent);
     fixture.detectChanges();
 
     fixture.componentInstance.onSignOut();
 
-    expect(authApi.logout).toHaveBeenCalledTimes(1);
+    expect(authState.logout).toHaveBeenCalledTimes(1);
     expect(fixture.componentInstance.isSigningOut()).toBe(false);
     expect(router.navigateByUrl).not.toHaveBeenCalled();
   });
 
   it('prevents duplicate sign-out requests while a logout is in flight', () => {
     const logoutSubject = new Subject<{ success: true }>();
-    authApi.logout.mockReturnValue(logoutSubject.asObservable());
-    authState.setAccessToken('active-access-token');
+    authState.logout.mockReturnValue(logoutSubject.asObservable());
+    isAuthenticatedState.set(true);
+    currentUserState.set(userResponse);
 
     const fixture = TestBed.createComponent(UserMenuComponent);
     fixture.detectChanges();
@@ -130,7 +131,7 @@ describe('UserMenuComponent', () => {
     fixture.componentInstance.onSignOut();
     fixture.componentInstance.onSignOut();
 
-    expect(authApi.logout).toHaveBeenCalledTimes(1);
+    expect(authState.logout).toHaveBeenCalledTimes(1);
     expect(fixture.componentInstance.isSigningOut()).toBe(true);
 
     logoutSubject.next({ success: true });
