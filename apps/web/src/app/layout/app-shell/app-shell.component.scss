@@ -14,8 +14,26 @@
   z-index: 10;
 }
 
-.app-toolbar-title {
-  font-weight: 500;
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.app-brand img {
+  display: block;
+  height: 24px;
+  width: auto;
+}
+
+.app-brand:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 
 .app-toolbar-spacer {

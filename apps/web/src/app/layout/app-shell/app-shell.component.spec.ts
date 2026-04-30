@@ -53,20 +53,46 @@ describe('AppShellComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('renders active route metadata title in the toolbar', async () => {
+  it('renders the stack brand logos in nx, angular, nestjs order', () => {
+    const fixture = TestBed.createComponent(AppShellComponent);
+    fixture.detectChanges();
+
+    const brandImages = Array.from(
+      fixture.nativeElement.querySelectorAll('.app-brand img'),
+    ) as HTMLImageElement[];
+
+    expect(brandImages.map((image) => image.getAttribute('src'))).toEqual([
+      '/stack-svgs/nx-icon.svg',
+      '/stack-svgs/angular-icon.svg',
+      '/stack-svgs/nestjs-icon.svg',
+    ]);
+  });
+
+  it('navigates to home when brand is clicked from another route', async () => {
+    const fixture = TestBed.createComponent(AppShellComponent);
+    const router = TestBed.inject(Router);
+
+    await router.navigateByUrl(APP_ROUTE_METADATA.login.path);
+    fixture.detectChanges();
+    const navigateSpy = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+
+    const brandButton = fixture.nativeElement.querySelector('.app-brand') as HTMLButtonElement;
+    brandButton.click();
+
+    expect(navigateSpy).toHaveBeenCalledWith(APP_ROUTE_METADATA.home.path);
+  });
+
+  it('does not navigate when brand is clicked while already on home', async () => {
     const fixture = TestBed.createComponent(AppShellComponent);
     const router = TestBed.inject(Router);
 
     await router.navigateByUrl(APP_ROUTE_METADATA.home.path);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.app-toolbar-title')?.textContent).toContain(
-      APP_ROUTE_METADATA.home.title,
-    );
+    const navigateSpy = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
 
-    await router.navigateByUrl(APP_ROUTE_METADATA.login.path);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.app-toolbar-title')?.textContent).toContain(
-      APP_ROUTE_METADATA.login.title,
-    );
+    const brandButton = fixture.nativeElement.querySelector('.app-brand') as HTMLButtonElement;
+    brandButton.click();
+
+    expect(navigateSpy).not.toHaveBeenCalled();
   });
 });

@@ -18,15 +18,25 @@
   text-align: center;
 }
 
+.page-header {
+  display: grid;
+  justify-items: center;
+}
+
 .not-found-code {
   margin: 0;
   font: var(--mat-sys-display-small);
   color: var(--mat-sys-primary);
 }
 
-h1 {
+.page-header h1 {
   margin: 8px 0 0;
   font: var(--mat-sys-headline-medium);
+}
+
+.page-content {
+  display: grid;
+  justify-items: center;
 }
 
 .not-found-message {

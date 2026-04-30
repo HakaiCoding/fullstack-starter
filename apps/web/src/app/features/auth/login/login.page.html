@@ -1,4 +1,4 @@
-<main class="login-page" aria-labelledby="login-title">
+<section class="login-page" aria-labelledby="login-title">
   <section class="login-surface">
     <mat-card appearance="outlined" class="login-card">
       <form
@@ -7,81 +7,83 @@
         (ngSubmit)="onSubmit()"
         novalidate
       >
-        <header class="login-form-header">
+        <header class="page-header login-form-header">
           <h1 id="login-title" class="login-form-title">{{ pageTitle }}</h1>
           <p class="login-form-subtitle">Use your account credentials to continue.</p>
         </header>
 
-        @if (isSubmitting()) {
-          <mat-progress-bar mode="indeterminate" />
-        }
-
-        <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input
-            matInput
-            type="email"
-            formControlName="email"
-            autocomplete="email"
-            required
-          />
-          @if (emailControl.touched && emailControl.hasError('required')) {
-            <mat-error>Email is required.</mat-error>
+        <section class="page-content">
+          @if (isSubmitting()) {
+            <mat-progress-bar mode="indeterminate" />
           }
-          @if (emailControl.touched && emailControl.hasError('email')) {
-            <mat-error>Enter a valid email address.</mat-error>
-          }
-        </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Password</mat-label>
-          <input
-            matInput
-            [type]="isPasswordHidden() ? 'password' : 'text'"
-            formControlName="password"
-            autocomplete="current-password"
-            required
-          />
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              required
+            />
+            @if (emailControl.touched && emailControl.hasError('required')) {
+              <mat-error>Email is required.</mat-error>
+            }
+            @if (emailControl.touched && emailControl.hasError('email')) {
+              <mat-error>Enter a valid email address.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              [type]="isPasswordHidden() ? 'password' : 'text'"
+              formControlName="password"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              [attr.aria-label]="isPasswordHidden() ? 'Show password' : 'Hide password'"
+              [attr.aria-pressed]="!isPasswordHidden()"
+              (click)="togglePasswordVisibility()"
+            >
+              <mat-icon>{{ isPasswordHidden() ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+            @if (passwordControl.touched && passwordControl.hasError('required')) {
+              <mat-error>Password is required.</mat-error>
+            }
+          </mat-form-field>
+
+          @if (errorMessage(); as loginError) {
+            <p
+              class="login-error"
+              role="alert"
+              aria-live="polite"
+              data-testid="login-error"
+            >
+              {{ loginError }}
+            </p>
+          }
+
           <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            [attr.aria-label]="isPasswordHidden() ? 'Show password' : 'Hide password'"
-            [attr.aria-pressed]="!isPasswordHidden()"
-            (click)="togglePasswordVisibility()"
+            class="login-submit"
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="loginForm.invalid || isSubmitting()"
           >
-            <mat-icon>{{ isPasswordHidden() ? 'visibility' : 'visibility_off' }}</mat-icon>
+            {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
           </button>
-          @if (passwordControl.touched && passwordControl.hasError('required')) {
-            <mat-error>Password is required.</mat-error>
-          }
-        </mat-form-field>
 
-        @if (errorMessage(); as loginError) {
-          <p
-            class="login-error"
-            role="alert"
-            aria-live="polite"
-            data-testid="login-error"
-          >
-            {{ loginError }}
+          <p class="login-help">
+            Need access? Contact an administrator.
           </p>
-        }
-
-        <button
-          class="login-submit"
-          mat-flat-button
-          color="primary"
-          type="submit"
-          [disabled]="loginForm.invalid || isSubmitting()"
-        >
-          {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
-        </button>
-
-        <p class="login-help">
-          Need access? Contact an administrator.
-        </p>
+        </section>
       </form>
     </mat-card>
   </section>
-</main>
+</section>

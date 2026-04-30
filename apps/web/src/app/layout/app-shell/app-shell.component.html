@@ -1,6 +1,10 @@
 <div class="app-shell">
   <mat-toolbar class="app-toolbar">
-    <span class="app-toolbar-title">{{ title() }}</span>
+    <button class="app-brand" type="button" (click)="onBrandClick()" aria-label="Go to home">
+      <img src="/stack-svgs/nx-icon.svg" alt="Nx logo" />
+      <img src="/stack-svgs/angular-icon.svg" alt="Angular logo" />
+      <img src="/stack-svgs/nestjs-icon.svg" alt="NestJS logo" />
+    </button>
     <span class="app-toolbar-spacer"></span>
     <app-user-menu />
   </mat-toolbar>

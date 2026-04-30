@@ -79,3 +79,9 @@ Local Skill guidance reminders:
 - `src/app/app.routes.ts` consumes this metadata and attaches it to route `data` and route `title`.
 - Route `title` metadata is the baseline source for document title updates and shell page heading display.
 - Route-facing UI consumers (for example shell/menu/page link targets) should consume the same metadata instead of duplicating route strings.
+
+## Page Layout Convention Baseline
+- `AppShell` owns the app-level `<main>` and renders routed content through `<router-outlet>`.
+- Routed page templates should not render another `<main>`.
+- Routed pages should use one page-level wrapper (for example `<section class="<feature>-page" aria-labelledby="<feature>-title">`), one visible `<h1>`, and a `page-header` around the page title where practical.
+- Use a `page-content` region when the page has content beyond the header; omit empty wrappers.
