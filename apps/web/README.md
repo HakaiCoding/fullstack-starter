@@ -33,6 +33,35 @@ Placement reminders:
 - Business/domain rules should not be implemented in UI components.
 - Cross-app contracts should live in `libs/shared/contracts`.
 
+## Frontend Service/Component Boundary Convention
+- Policy status: accepted frontend baseline.
+- `*ApiService` responsibilities:
+  - own HTTP/backend endpoint calls and transport mapping.
+  - do not own durable backend-derived UI/application state.
+  - do not mutate `*StateService` state except through explicitly documented exceptions.
+- `*StateService` responsibilities:
+  - own backend-derived state/resources, loading/error state, derived readonly values, and app-facing methods.
+  - may call `*ApiService` internally.
+  - expose readonly state/signals/resources to consumers where practical.
+- Component boundaries:
+  - route/page/shell/feature-boundary components may inject `*StateService` and call public state methods.
+  - presentational/reusable child components should prefer `input()/output()`.
+  - presentational/reusable child components should not inject `*ApiService`.
+  - presentational/reusable child components should not inject `*StateService` unless an explicit documented exception is approved.
+  - purely visual, temporary, non-shared UI state may remain component-local.
+- Adoption/enforcement:
+  - rollout is phased; existing non-compliant source is legacy/current state, not immediate mandatory cleanup.
+  - cleanup/refactor requires separate explicit approval.
+  - enforcement is review-based for this baseline.
+  - static/lint enforcement is optional future work.
+- Exception handling:
+  - auth refresh/interceptor/helper collaborators are valid exception candidates when strict split is materially awkward.
+  - document exception rationale and scope in feature/spec docs.
+  - use `DECISIONS.md` for durable cross-cutting, security-sensitive, or architecture-wide exceptions.
+- Policy references:
+  - [`../../DECISIONS.md`](../../DECISIONS.md) (`2026-04-30 - Accept frontend ApiService/StateService/component boundary convention baseline`)
+  - [`../../specs/frontend-api-state-component-boundary-convention-baseline.md`](../../specs/frontend-api-state-component-boundary-convention-baseline.md)
+
 ## Source Structure Baseline
 - `src/app/core/*`: app-wide infrastructure (for example auth services/interceptors/types)
 - `src/app/layout/*`: shell/layout components

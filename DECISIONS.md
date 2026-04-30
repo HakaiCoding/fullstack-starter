@@ -225,3 +225,21 @@ Also preserve liveness/readiness separation: root and liveness endpoints do not 
 Alternatives considered: Keep legacy root payload (`{ message: "Hello API" }`); keep no dedicated liveness endpoint; keep readiness `503` body non-stable/framework-default; introduce dependency-specific readiness error codes.
 Consequences: Starter baseline now has explicit, test-backed system endpoint contracts with minimal scope and stable `503` error-envelope coverage for readiness failure using existing normalizer/filter architecture.
 Related docs/specs: [`specs/api-root-health-readiness-baseline.md`](./specs/api-root-health-readiness-baseline.md), [`specs/stable-api-error-response-contract-baseline.md`](./specs/stable-api-error-response-contract-baseline.md), [`apps/api/README.md`](./apps/api/README.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+
+## 2026-04-30 - Accept frontend ApiService/StateService/component boundary convention baseline
+Status: Accepted
+Context: High-level UI boundaries were already accepted (no durable business/domain rules in UI), but a detailed frontend convention for HTTP transport ownership, backend-derived state ownership, and component/service boundary usage was still only proposed. Current frontend/auth source includes mixed patterns, and review consistency needed a durable accepted baseline without forcing immediate full-repo cleanup.
+Decision: Accept the frontend boundary convention baseline with phased adoption:
+- `*ApiService` owns HTTP/backend endpoint calls and transport mapping, should not own durable backend-derived UI/application state, and should not mutate `*StateService` state except through explicitly documented exceptions.
+- `*StateService` owns backend-derived state/resources, loading/error state, derived readonly values, and app-facing methods; it may call `*ApiService` internally and should expose readonly state/signals/resources where practical.
+- route/page/shell/feature-boundary components may inject `*StateService` and consume readonly state plus public state methods.
+- presentational/reusable child components should prefer `input()/output()` and should not inject `*ApiService` or `*StateService` unless an explicit documented exception is approved.
+- purely visual, temporary, non-shared UI state may remain component-local.
+- existing non-compliant source is treated as legacy/current-state evidence, not immediate mandatory cleanup.
+- cleanup/refactor is separate follow-up scope requiring explicit approval.
+- auth refresh/interceptor/helper collaborators are explicit exception candidates when strict split is materially awkward.
+- feature/spec-level documentation is sufficient for local exceptions; `DECISIONS.md` is required for durable cross-cutting, security-sensitive, or architecture-wide exceptions.
+- baseline enforcement is review-based; static/lint enforcement is optional future work only.
+Alternatives considered: Keep convention as proposed-only guidance; require immediate full-repo cleanup; enforce static/lint rules immediately in this baseline.
+Consequences: Frontend layering expectations are now durable and reviewable across docs while preserving accepted auth/session and authorization constraints. Existing mixed legacy code can remain until explicitly approved cleanup slices are planned.
+Related docs/specs: [`specs/frontend-api-state-component-boundary-convention-baseline.md`](./specs/frontend-api-state-component-boundary-convention-baseline.md), [`apps/web/README.md`](./apps/web/README.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`AI_CONTRACT.md`](./AI_CONTRACT.md)

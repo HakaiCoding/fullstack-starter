@@ -97,6 +97,12 @@ Belongs here:
 - Angular Material component composition and theming usage for web presentation
 - request orchestration from UI to API
 - auth token attachment/refresh flow wiring on the client
+- accepted frontend boundary convention baseline:
+  - `*ApiService` owns HTTP/backend endpoint calls and transport mapping, not durable backend-derived state ownership.
+  - `*StateService` owns backend-derived state/resources and app-facing state methods; boundary components should consume state services.
+  - presentational/reusable child components should prefer `input()/output()` and avoid `*ApiService`/`*StateService` injection unless a documented exception is approved.
+  - auth refresh/interceptor/helper collaborators may be documented exception candidates when strict split is materially awkward.
+  - adoption is phased; legacy non-compliant source is not immediate mandatory cleanup.
 
 Does not belong here:
 - server business/domain rules
