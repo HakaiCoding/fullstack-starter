@@ -75,10 +75,13 @@ Local Skill guidance reminders:
 
 ## Route Metadata Baseline
 - Route-facing metadata lives in `src/app/app-route-metadata.ts`.
-- Keep route `pathSegment`/absolute `path` and route-facing UI values (for example `title`, `label`, `icon`) in that file.
+- Keep route `pathSegment`/absolute `path` and route-facing UI values (for example `title`, `label`, `icon`, breadcrumb-facing labels) in that file.
 - `src/app/app.routes.ts` consumes this metadata and attaches it to route `data` and route `title`.
 - Route `title` metadata is the baseline source for document title updates and shell page heading display.
-- Route-facing UI consumers (for example shell/menu/page link targets) should consume the same metadata instead of duplicating route strings.
+- Route-facing UI consumers (for example shell/menu/page link targets and breadcrumb consumers) should consume the same metadata instead of duplicating route strings.
+- Breadcrumb-facing metadata in this baseline is metadata/plumbing only; it may exist in centralized route metadata but does not define or require breadcrumb UI rendering.
+- This baseline does not decide breadcrumb behavior details such as hierarchy, visibility, placement, accessibility behavior, dynamic route handling, clickability, separators, or whether home/current page appears.
+- Future breadcrumb UI work should inspect this route metadata baseline and define behavior in an accepted doc/spec before implementation when behavior is not already documented.
 
 ## Page Layout Convention Baseline
 - `AppShell` owns the app-level `<main>` and renders routed content through `<router-outlet>`.

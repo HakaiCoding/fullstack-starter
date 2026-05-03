@@ -20,6 +20,10 @@ describe('appRoutes', () => {
     expect(defaultChildRoute?.component).toBe(HomePage);
     expect(defaultChildRoute?.pathMatch).toBe('full');
     expect(defaultChildRoute?.title).toBe(APP_ROUTE_METADATA.home.title);
+    expect(defaultChildRoute?.data).toEqual({
+      routeMetadata: APP_ROUTE_METADATA.home,
+    });
+    expect(APP_ROUTE_METADATA.home.breadcrumbLabel).toBeDefined();
   });
 
   it('keeps login route configured', () => {
@@ -29,6 +33,10 @@ describe('appRoutes', () => {
 
     expect(typeof loginRoute?.loadComponent).toBe('function');
     expect(loginRoute?.title).toBe(APP_ROUTE_METADATA.login.title);
+    expect(loginRoute?.data).toEqual({
+      routeMetadata: APP_ROUTE_METADATA.login,
+    });
+    expect(APP_ROUTE_METADATA.login.breadcrumbLabel).toBeDefined();
   });
 
   it('defines explicit not-found route', () => {
@@ -38,6 +46,10 @@ describe('appRoutes', () => {
 
     expect(typeof notFoundRoute?.loadComponent).toBe('function');
     expect(notFoundRoute?.title).toBe(APP_ROUTE_METADATA.notFound.title);
+    expect(notFoundRoute?.data).toEqual({
+      routeMetadata: APP_ROUTE_METADATA.notFound,
+    });
+    expect(APP_ROUTE_METADATA.notFound.breadcrumbLabel).toBeDefined();
   });
 
   it('keeps child wildcard route last and redirects to /not-found', () => {

@@ -4,6 +4,7 @@ export interface AppRouteMetadata {
   readonly title: string;
   readonly label: string;
   readonly icon?: string;
+  readonly breadcrumbLabel?: string;
 }
 
 export interface AppRouteData {
@@ -19,6 +20,7 @@ export const APP_ROUTE_METADATA: Readonly<Record<AppRouteKey, AppRouteMetadata>>
     title: 'Home',
     label: 'Home',
     icon: 'home',
+    breadcrumbLabel: 'Home',
   },
   login: {
     pathSegment: 'login',
@@ -26,11 +28,13 @@ export const APP_ROUTE_METADATA: Readonly<Record<AppRouteKey, AppRouteMetadata>>
     title: 'Login',
     label: 'Sign in',
     icon: 'login',
+    breadcrumbLabel: 'Login',
   },
   notFound: {
     pathSegment: 'not-found',
     path: '/not-found',
     title: 'Page not found',
     label: 'Not found',
+    breadcrumbLabel: 'Not found',
   },
 } as const;
