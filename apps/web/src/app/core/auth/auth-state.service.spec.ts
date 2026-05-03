@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import type {
   AccessTokenResponse,
   AuthMeResponse,
@@ -44,6 +45,8 @@ describe('AuthStateService', () => {
   it('starts with no access token, no current user, and unauthenticated state', () => {
     expect(service.accessToken()).toBeNull();
     expect(service.currentUser()).toBeNull();
+    expect(service.loginApiError()).toBeNull();
+    expect(service.loginErrorMessage()).toBeNull();
     expect(service.isAuthenticated()).toBe(false);
   });
 
@@ -79,6 +82,8 @@ describe('AuthStateService', () => {
 
     expect(service.accessToken()).toBeNull();
     expect(service.currentUser()).toBeNull();
+    expect(service.loginApiError()).toBeNull();
+    expect(service.loginErrorMessage()).toBeNull();
     expect(service.isAuthenticated()).toBe(false);
   });
 
@@ -141,6 +146,8 @@ describe('AuthStateService', () => {
   });
 
   it('sets access token on successful login response and preserves response shape', () => {
+    authApi.login.mockReturnValueOnce(of({ accessToken: 'active-access-token' }));
+
     let response: AccessTokenResponse | null = null;
 
     service
@@ -159,16 +166,33 @@ describe('AuthStateService', () => {
     });
     expect(response).toEqual({ accessToken: 'active-access-token' });
     expect(service.accessToken()).toBe('active-access-token');
+    expect(service.loginApiError()).toBeNull();
+    expect(service.loginErrorMessage()).toBeNull();
     expect(service.isAuthenticated()).toBe(true);
   });
 
-  it('keeps auth state unchanged when login fails', () => {
+  it('keeps auth state unchanged and stores mapped API error when login fails', () => {
     service.setAccessToken('active-access-token');
     service.refreshCurrentUser().subscribe();
     expect(service.currentUser()).toEqual(currentUserResponse);
 
-    authApi.login.mockReturnValueOnce(throwError(() => new Error('Login failed')));
-    let receivedError: Error | null = null;
+    authApi.login.mockReturnValueOnce(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 401,
+            statusText: 'Unauthorized',
+            error: {
+              statusCode: 401,
+              error: {
+                code: 'AUTH_INVALID_CREDENTIALS',
+                message: 'Invalid credentials.',
+              },
+            },
+          }),
+      ),
+    );
+    let receivedError: HttpErrorResponse | null = null;
 
     service
       .login({
@@ -177,15 +201,57 @@ describe('AuthStateService', () => {
       })
       .subscribe({
         error: (error) => {
-          receivedError = error as Error;
+          receivedError = error as HttpErrorResponse;
         },
       });
 
     expect(authApi.login).toHaveBeenCalledTimes(1);
-    expect(receivedError).toBeInstanceOf(Error);
+    expect(receivedError).toBeInstanceOf(HttpErrorResponse);
     expect(service.accessToken()).toBe('active-access-token');
     expect(service.currentUser()).toEqual(currentUserResponse);
+    expect(service.loginApiError()).toEqual({
+      kind: 'api',
+      userMessage: 'Login failed. Please check your credentials and try again.',
+      statusCode: 401,
+      apiErrorCode: 'AUTH_INVALID_CREDENTIALS',
+    });
+    expect(service.loginErrorMessage()).toBe(
+      'Login failed. Please check your credentials and try again.',
+    );
     expect(service.isAuthenticated()).toBe(true);
+  });
+
+  it('uses a network-safe fallback for login network errors', () => {
+    authApi.login.mockReturnValueOnce(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 0,
+            statusText: 'Unknown Error',
+          }),
+      ),
+    );
+
+    service
+      .login({
+        email: 'user@example.com',
+        password: 'Password123!',
+      })
+      .subscribe({
+        error: () => {
+          // Error forwarding is intentional. State assertions are below.
+        },
+      });
+
+    expect(service.loginApiError()).toEqual({
+      kind: 'network',
+      userMessage: 'Network error. Please check your connection and try again.',
+      statusCode: null,
+      apiErrorCode: null,
+    });
+    expect(service.loginErrorMessage()).toBe(
+      'Network error. Please check your connection and try again.',
+    );
   });
 
   it('does not clear auth state when logout fails', () => {

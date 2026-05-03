@@ -1,6 +1,6 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, finalize, forkJoin, tap, throwError } from 'rxjs';
+import { extractApiErrorResponse } from '../api-error/api-error.utils';
 import { SystemApiService } from './system-api.service';
 import type {
   ApiDatabaseReadinessResponse,
@@ -85,51 +85,6 @@ export class SystemStateService {
   }
 
   private tryExtractApiError(error: unknown): SystemStatusApiError | null {
-    if (!(error instanceof HttpErrorResponse)) {
-      return null;
-    }
-
-    if (!isSystemStatusApiError(error.error)) {
-      return null;
-    }
-
-    return error.error;
+    return extractApiErrorResponse(error);
   }
-}
-
-function isSystemStatusApiError(value: unknown): value is SystemStatusApiError {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const candidate = value as {
-    statusCode?: unknown;
-    error?: {
-      code?: unknown;
-      message?: unknown;
-      details?: unknown;
-    };
-  };
-
-  if (typeof candidate.statusCode !== 'number') {
-    return false;
-  }
-
-  if (typeof candidate.error?.code !== 'string') {
-    return false;
-  }
-
-  if (typeof candidate.error?.message !== 'string') {
-    return false;
-  }
-
-  if (
-    candidate.error.details !== undefined &&
-    (!Array.isArray(candidate.error.details) ||
-      candidate.error.details.some((detail) => typeof detail !== 'string'))
-  ) {
-    return false;
-  }
-
-  return true;
 }

@@ -13,9 +13,6 @@ import { APP_ROUTE_METADATA } from '../../../app-route-metadata';
 import { AuthStateService } from '../../../core/auth/auth-state.service';
 import { type LoginRequest } from '../../../core/auth/auth.types';
 
-const GENERIC_LOGIN_ERROR_MESSAGE =
-  'Login failed. Please check your credentials and try again.';
-
 @Component({
   selector: 'app-login-page',
   imports: [
@@ -39,7 +36,7 @@ export class LoginPage {
 
   readonly isSubmitting = signal(false);
   readonly isPasswordHidden = signal(true);
-  readonly errorMessage = signal<string | null>(null);
+  readonly errorMessage = this.authState.loginErrorMessage;
   readonly pageTitle = APP_ROUTE_METADATA.login.title;
   readonly loginForm = this.formBuilder.group({
     email: this.formBuilder.control('', [Validators.required, Validators.email]),
@@ -48,6 +45,10 @@ export class LoginPage {
 
   readonly emailControl = this.loginForm.controls.email;
   readonly passwordControl = this.loginForm.controls.password;
+
+  constructor() {
+    this.authState.clearLoginError();
+  }
 
   togglePasswordVisibility(): void {
     this.isPasswordHidden.update((value) => !value);
@@ -60,7 +61,7 @@ export class LoginPage {
     }
 
     const credentials: LoginRequest = this.loginForm.getRawValue();
-    this.errorMessage.set(null);
+    this.authState.clearLoginError();
     this.isSubmitting.set(true);
 
     this.authState
@@ -76,7 +77,7 @@ export class LoginPage {
           void this.router.navigateByUrl(APP_ROUTE_METADATA.home.path);
         },
         error: () => {
-          this.errorMessage.set(GENERIC_LOGIN_ERROR_MESSAGE);
+          // Login API error presentation state is owned by AuthStateService.
         },
       });
   }

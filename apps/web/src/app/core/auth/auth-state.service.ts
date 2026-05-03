@@ -4,7 +4,9 @@ import type {
   AuthMeResponse,
   LogoutResponse,
 } from '@fullstack-starter/contracts';
-import { Observable, catchError, of, tap } from 'rxjs';
+import { Observable, catchError, of, tap, throwError } from 'rxjs';
+import type { FrontendApiError } from '../api-error/api-error.types';
+import { toFrontendApiError } from '../api-error/api-error.utils';
 import { AuthApiService } from './auth-api.service';
 import { type LoginRequest } from './auth.types';
 
@@ -13,9 +15,14 @@ export class AuthStateService {
   private readonly authApi = inject(AuthApiService);
   private readonly accessTokenState = signal<string | null>(null);
   private readonly currentUserState = signal<AuthMeResponse | null>(null);
+  private readonly loginApiErrorState = signal<FrontendApiError | null>(null);
 
   readonly accessToken = this.accessTokenState.asReadonly();
   readonly currentUser = this.currentUserState.asReadonly();
+  readonly loginApiError = this.loginApiErrorState.asReadonly();
+  readonly loginErrorMessage = computed(
+    () => this.loginApiErrorState()?.userMessage ?? null,
+  );
   readonly isAuthenticated = computed(() => this.accessTokenState() !== null);
 
   setAccessToken(accessToken: string): void {
@@ -56,11 +63,21 @@ export class AuthStateService {
   }
 
   login(credentials: LoginRequest): Observable<AccessTokenResponse> {
+    this.clearLoginError();
+
     return this.authApi.login(credentials).pipe(
       tap((response) => {
         this.setAccessToken(response.accessToken);
       }),
+      catchError((error: unknown) => {
+        this.loginApiErrorState.set(toFrontendApiError(error));
+        return throwError(() => error);
+      }),
     );
+  }
+
+  clearLoginError(): void {
+    this.loginApiErrorState.set(null);
   }
 
   clearCurrentUser(): void {
@@ -70,5 +87,6 @@ export class AuthStateService {
   clear(): void {
     this.accessTokenState.set(null);
     this.clearCurrentUser();
+    this.clearLoginError();
   }
 }

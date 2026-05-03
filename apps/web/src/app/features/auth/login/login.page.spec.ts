@@ -1,4 +1,5 @@
 import type { AccessTokenResponse } from '@fullstack-starter/contracts';
+import { signal, type WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
@@ -8,14 +9,24 @@ import { AuthStateService } from '../../../core/auth/auth-state.service';
 import { LoginPage } from './login.page';
 
 describe('LoginPage', () => {
-  let authState: { login: ReturnType<typeof vi.fn> };
+  let loginErrorMessageState: WritableSignal<string | null>;
+  let authState: {
+    login: ReturnType<typeof vi.fn>;
+    loginErrorMessage: AuthStateService['loginErrorMessage'];
+    clearLoginError: ReturnType<typeof vi.fn>;
+  };
   let fixture: ReturnType<typeof TestBed.createComponent<LoginPage>>;
   let page: LoginPage;
   let router: { navigateByUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
+    loginErrorMessageState = signal<string | null>(null);
     authState = {
       login: vi.fn(),
+      loginErrorMessage: loginErrorMessageState.asReadonly(),
+      clearLoginError: vi.fn(() => {
+        loginErrorMessageState.set(null);
+      }),
     };
     router = {
       navigateByUrl: vi.fn().mockResolvedValue(true),
@@ -63,6 +74,7 @@ describe('LoginPage', () => {
   });
 
   it('submits credentials and navigates to root on success', () => {
+    loginErrorMessageState.set('Stale error');
     authState.login.mockReturnValue(of({ accessToken: 'token' }));
     page.loginForm.setValue({
       email: 'user@example.com',
@@ -75,15 +87,17 @@ describe('LoginPage', () => {
       email: 'user@example.com',
       password: 'Password123!',
     });
+    expect(authState.clearLoginError).toHaveBeenCalled();
     expect(router.navigateByUrl).toHaveBeenCalledWith(APP_ROUTE_METADATA.home.path);
     expect(page.errorMessage()).toBeNull();
     expect(page.isSubmitting()).toBe(false);
   });
 
   it('shows a generic error when login fails', () => {
-    authState.login.mockReturnValue(
-      throwError(() => new Error('Unauthorized')),
-    );
+    authState.login.mockImplementation(() => {
+      loginErrorMessageState.set('Login failed. Please check your credentials and try again.');
+      return throwError(() => new Error('Unauthorized'));
+    });
     page.loginForm.setValue({
       email: 'user@example.com',
       password: 'WrongPassword123!',
