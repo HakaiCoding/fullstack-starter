@@ -35,7 +35,7 @@ Placement reminders:
 - Cross-app contracts should live in `libs/shared/contracts`.
 
 Local Skill guidance reminders:
-- For Angular async HTTP/state orchestration work, inspect relevant local Skills such as `angular-http`, `angular-signals`, and `angular-rxjs-patterns`.
+- For Angular async HTTP/state orchestration work, inspect relevant local Skills such as `angular-developer` and `angular-rxjs-patterns`.
 - Local Skills are guidance and do not override accepted project docs/specs/decisions.
 
 ## Frontend Service/Component Boundary Convention

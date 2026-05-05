@@ -96,12 +96,11 @@ apps/api/src/
 ## Relevant Local Skills
 - skills inspected:
   - `nx-workspace-patterns`
-  - `angular-best-practices`
-  - `angular-routing`
+  - `angular-developer`
   - `nestjs-best-practices`
 - skills used:
   - `nx-workspace-patterns` for monorepo boundary consistency principles
-  - `angular-best-practices` and `angular-routing` for feature-oriented Angular app organization
+  - `angular-developer` for feature-oriented Angular app organization
   - `nestjs-best-practices` for feature-module-first Nest organization
 - why each skill is relevant:
   - this change is a framework + Nx placement convention change, not feature behavior work

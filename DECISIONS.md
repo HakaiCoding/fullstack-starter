@@ -69,9 +69,9 @@ Related docs/specs: [`specs/_template.md`](./specs/_template.md), [`AI_CONTRACT.
 ## 2026-04-24 - Use local skills as preferred technology-practice reference for AI-assisted work
 Status: Accepted
 Context: AI-assisted sessions need current technology/tooling/workflow guidance and can drift when relying on generic model assumptions alone.
-Decision: For technology-specific, framework-specific, library-specific, tooling-specific, security-sensitive, and workflow-specific tasks, AI sessions are expected to inspect and use relevant local skills in `C:\Users\Development\.agents\skills\` by default. Canonical project artifacts/specs/decisions remain authoritative for repository-specific architecture, boundaries, and accepted policy.
+Decision: For technology-specific, framework-specific, library-specific, tooling-specific, security-sensitive, and workflow-specific tasks, AI sessions are expected to inspect and use relevant local skills from the documented project local Skills root path by default. Canonical project artifacts/specs/decisions remain authoritative for repository-specific architecture, boundaries, and accepted policy.
 Alternatives considered: Treat local skills as optional references; rely on generic model memory for best-practice guidance.
-Consequences: Guidance quality should stay current with local skill updates; conflicts with repository artifacts/specs/decisions must be surfaced explicitly and resolved using the safest project-compatible option; non-trivial implementation/planning outputs should report relevant skills inspected/used and any conflicts or tensions.
+Consequences: Guidance quality should stay current with local skill updates; conflicts with repository artifacts/specs/decisions must be surfaced explicitly and resolved using the safest project-compatible option; non-trivial implementation/planning outputs should report relevant skills inspected/used and any conflicts or tensions. Lifecycle note: skills-root location details are maintained by `2026-05-05 - Move local Skills inventory source of truth to project-local .agents directory`.
 Related docs/specs: [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`docs/README.md`](./docs/README.md), [`specs/_template.md`](./specs/_template.md), [`docs/commands-reference.md`](./docs/commands-reference.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
 ## 2026-04-25 - Use `GET /api/v1/users` as first live RBAC route
@@ -243,3 +243,11 @@ Decision: Accept the frontend boundary convention baseline with phased adoption:
 Alternatives considered: Keep convention as proposed-only guidance; require immediate full-repo cleanup; enforce static/lint rules immediately in this baseline.
 Consequences: Frontend layering expectations are now durable and reviewable across docs while preserving accepted auth/session and authorization constraints. Existing mixed legacy code can remain until explicitly approved cleanup slices are planned.
 Related docs/specs: [`specs/frontend-api-state-component-boundary-convention-baseline.md`](./specs/frontend-api-state-component-boundary-convention-baseline.md), [`apps/web/README.md`](./apps/web/README.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`AI_CONTRACT.md`](./AI_CONTRACT.md)
+
+## 2026-05-05 - Move local Skills inventory source of truth to project-local `.agents` directory
+Status: Accepted
+Context: The prior user-global Skills directory was deleted, and this repository now installs and uses project-local Skills under the repo root `.agents` directory.
+Decision: Use project-local Skills under `./.agents/skills/` as the source of truth for local Skills inventory and discovery in this repository. Do not recreate or reference the deleted user-global Skills directory in current guidance. Do not present removed Skills as currently available unless they are present under the project-local `.agents/skills/` tree.
+Alternatives considered: Keep pointing docs to a user-global Skills location; keep deleted Skills listed as currently available inventory.
+Consequences: Skills inventory and references must be verified from the repository-local `.agents/skills/` layout; stale references to deleted Skills must be reconciled in project docs/specs; accepted project docs/specs/decisions remain authoritative over Skills guidance.
+Related docs/specs: [`AI_SKILLS.md`](./AI_SKILLS.md), [`AI_CONTRACT.md`](./AI_CONTRACT.md), [`docs/README.md`](./docs/README.md), [`projectmap.md`](./projectmap.md), [`specs/_template.md`](./specs/_template.md)

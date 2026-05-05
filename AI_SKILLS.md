@@ -55,8 +55,8 @@ Available Local Skills Inventory
 
 This inventory helps AI sessions discover relevant local Skills quickly. It is a discovery aid, not a substitute for inspecting the current Skills directory. Before relying on a Skill, Codex must verify that the Skill still exists and read the current Skill content.
 
-- Documented local Skills root path in current project workflow docs: `C:\Users\Development\.agents\skills\`
-- Verification date: `2026-05-01`
+- Documented local Skills root path in current project workflow docs: `./.agents/skills/` (project root).
+- Verification date: `2026-05-05`
 - Inventory authority note: this inventory is a discovery aid, not permanent technical authority, and does not make any Skill guidance automatically accepted project policy.
 - Environment-specific system/runtime Skills (for example under `.codex` runtime/system directories) are excluded from this project local/user Skills inventory.
 - If a Skills directory is inaccessible, do not invent Skills, paths, or scopes.
@@ -66,23 +66,16 @@ This inventory helps AI sessions discover relevant local Skills quickly. It is a
 
 | Skill name | Path | Apparent scope/purpose | Verification note |
 | --- | --- | --- | --- |
-| angular-best-practices | `C:\Users\Development\.agents\skills\angular-best-practices` | Modern Angular best practices for Angular apps. | Live directory and `SKILL.md` verified in session. |
-| angular-best-practices-material | `C:\Users\Development\.agents\skills\angular-best-practices-material` | Angular Material and CDK best practices. | Live directory and `SKILL.md` verified in session. |
-| angular-best-practices-transloco | `C:\Users\Development\.agents\skills\angular-best-practices-transloco` | Transloco i18n best practices for Angular. | Live directory and `SKILL.md` verified in session. |
-| angular-component | `C:\Users\Development\.agents\skills\angular-component` | Angular standalone component implementation guidance. | Live directory and `SKILL.md` verified in session. |
-| angular-di | `C:\Users\Development\.agents\skills\angular-di` | Angular DI patterns with `inject()` and tokens. | Live directory and `SKILL.md` verified in session. |
-| angular-directives | `C:\Users\Development\.agents\skills\angular-directives` | Angular custom directive patterns. | Live directory and `SKILL.md` verified in session. |
-| angular-forms | `C:\Users\Development\.agents\skills\angular-forms` | Angular signal-based forms guidance. | Live directory and `SKILL.md` verified in session. |
-| angular-http | `C:\Users\Development\.agents\skills\angular-http` | Angular HTTP and resource/httpResource usage. | Live directory and `SKILL.md` verified in session. |
-| angular-routing | `C:\Users\Development\.agents\skills\angular-routing` | Angular routing with lazy loading, guards, and resolvers. | Live directory and `SKILL.md` verified in session. |
-| angular-rxjs-patterns | `C:\Users\Development\.agents\skills\angular-rxjs-patterns` | Angular RxJS async-stream/operator/error-handling/subscription patterns for service/component flows. | Live directory, global inventory entry, and `SKILL.md` verified in session. |
-| angular-signals | `C:\Users\Development\.agents\skills\angular-signals` | Angular signal-based state patterns. | Live directory and `SKILL.md` verified in session. |
-| caveman-commit | `C:\Users\Development\.agents\skills\caveman-commit` | Ultra-compressed Conventional Commits message generation. | Live directory and `SKILL.md` verified in session. |
-| docker-expert | `C:\Users\Development\.agents\skills\docker-expert` | Advanced Docker/containerization guidance. | Live directory and `SKILL.md` verified in session. |
-| jwt-security | `C:\Users\Development\.agents\skills\jwt-security` | JWT authentication security best practices. | Live directory and `SKILL.md` verified in session. |
-| nestjs-best-practices | `C:\Users\Development\.agents\skills\nestjs-best-practices` | NestJS architecture and implementation best practices. | Live directory and `SKILL.md` verified in session. |
-| nx-workspace-patterns | `C:\Users\Development\.agents\skills\nx-workspace-patterns` | Nx workspace configuration and monorepo patterns. | Live directory and `SKILL.md` verified in session. |
-| postgresql-best-practices | `C:\Users\Development\.agents\skills\postgresql-best-practices` | PostgreSQL schema/query/database development practices. | Live directory and `SKILL.md` verified in session. |
-| postgresql-table-design | `C:\Users\Development\.agents\skills\postgresql-table-design` | PostgreSQL table/schema design guidance. | Live directory and `SKILL.md` verified in session. |
-| typeorm | `C:\Users\Development\.agents\skills\typeorm` | TypeORM development guidance. | Live directory and `SKILL.md` verified in session. |
-| typescript-advanced-types | `C:\Users\Development\.agents\skills\typescript-advanced-types` | Advanced TypeScript type-system patterns. | Live directory and `SKILL.md` verified in session. |
+| angular-best-practices-material | `./.agents/skills/angular-best-practices-material` | Angular Material and CDK best practices. | Project-local directory and `SKILL.md` verified in session. |
+| angular-best-practices-transloco | `./.agents/skills/angular-best-practices-transloco` | Transloco i18n best practices for Angular. | Project-local directory and `SKILL.md` verified in session. |
+| angular-developer | `./.agents/skills/angular-developer` | General Angular implementation guidance (signals/resource/forms/DI/routing/testing/tooling). | Project-local directory and `SKILL.md` verified in session. |
+| angular-rxjs-patterns | `./.agents/skills/angular-rxjs-patterns` | Angular RxJS async-stream/operator/error-handling/subscription patterns for service/component flows. | Project-local directory and `SKILL.md` verified in session. |
+| caveman-commit | `./.agents/skills/caveman-commit` | Ultra-compressed Conventional Commits message generation. | Project-local directory and `SKILL.md` verified in session. |
+| docker-expert | `./.agents/skills/docker-expert` | Advanced Docker/containerization guidance. | Project-local directory and `SKILL.md` verified in session. |
+| jwt-security | `./.agents/skills/jwt-security` | JWT authentication security best practices. | Project-local directory and `SKILL.md` verified in session. |
+| nestjs-best-practices | `./.agents/skills/nestjs-best-practices` | NestJS architecture and implementation best practices. | Project-local directory and `SKILL.md` verified in session. |
+| nx-workspace-patterns | `./.agents/skills/nx-workspace-patterns` | Nx workspace configuration and monorepo patterns. | Project-local directory and `SKILL.md` verified in session. |
+| postgresql-best-practices | `./.agents/skills/postgresql-best-practices` | PostgreSQL schema/query/database development practices. | Project-local directory and `SKILL.md` verified in session. |
+| postgresql-table-design | `./.agents/skills/postgresql-table-design` | PostgreSQL table/schema design guidance. | Project-local directory and `SKILL.md` verified in session. |
+| typeorm | `./.agents/skills/typeorm` | TypeORM development guidance. | Project-local directory and `SKILL.md` verified in session. |
+| typescript-advanced-types | `./.agents/skills/typescript-advanced-types` | Advanced TypeScript type-system patterns. | Project-local directory and `SKILL.md` verified in session. |

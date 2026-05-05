@@ -92,12 +92,12 @@
 - skills inspected:
   - `nx-workspace-patterns`
   - `nestjs-best-practices`
-  - `angular-best-practices`
+  - `angular-developer`
   - `typescript-advanced-types`
 - skills used:
   - `nx-workspace-patterns`
   - `nestjs-best-practices`
-  - `angular-best-practices`
+  - `angular-developer`
   - `typescript-advanced-types`
 - why each skill is relevant:
   - reinforced workspace boundary discipline and API/web contract-vs-internal separation.

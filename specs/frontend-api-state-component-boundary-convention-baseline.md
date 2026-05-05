@@ -115,25 +115,20 @@
 
 ## Relevant Local Skills
 - policy authority: [`../AI_SKILLS.md`](../AI_SKILLS.md)
+- inventory reconciliation note:
+  - historical references to removed Angular Skills are reconciled here to current project-local `.agents/skills` equivalents without changing this spec's accepted status.
 - skills inspected:
-  - `angular-http`
-  - `angular-signals`
+  - `angular-developer`
   - `angular-rxjs-patterns`
-  - `angular-di`
-  - `angular-routing`
-  - `angular-best-practices`
   - `jwt-security`
   - `nx-workspace-patterns`
 - skills used:
-  - `angular-http` (HTTP call placement and interceptor patterns)
-  - `angular-signals` (private writable + readonly public state patterns)
+  - `angular-developer` (HTTP/state patterns, signals/resource guidance, DI patterns, and routing guidance)
   - `angular-rxjs-patterns` (operator selection, cancellation/retry patterns, and subscription lifecycle guidance for async frontend state flows)
-  - `angular-di` (service DI/facade composition)
-  - `angular-best-practices` (`input()/output()` and boundary guidance)
   - `jwt-security` (token storage/auth safety posture compatibility check)
   - `nx-workspace-patterns` (boundary/governance discipline context)
 - conflicts/tensions with project docs/spec:
-  - `angular-routing` can suggest frontend role-guard patterns; accepted project policy keeps durable authorization policy in API/domain scope.
+  - `angular-developer` routing guidance can suggest frontend role-guard patterns; accepted project policy keeps durable authorization policy in API/domain scope.
   - `nx-workspace-patterns` can model API+state together; accepted project convention here is a stricter split with explicit exceptions.
   - `jwt-security` prefers asymmetric signing generally; accepted project auth baseline remains authoritative and unchanged.
 - project-compatible decision:

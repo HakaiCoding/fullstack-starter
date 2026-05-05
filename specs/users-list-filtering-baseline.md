@@ -80,18 +80,19 @@
   - `typeorm`
   - `postgresql-table-design`
   - `nx-workspace-patterns`
-  - `angular-http`
+  - `angular-developer`
+  - `angular-rxjs-patterns`
   - `typescript-advanced-types`
 - skills used:
   - `nestjs-best-practices`
   - `typeorm`
   - `nx-workspace-patterns`
-  - `angular-http`
+  - `angular-developer`
 - why each skill is relevant:
   - DTO/service boundary and transport validation placement.
   - TypeORM filtering composition (`ILike`) while preserving existing paging/sorting.
   - cross-project gate discipline for Nx workspace.
-  - Angular API client query wiring patterns.
+  - Angular API client query wiring and async-stream patterns.
 - conflicts/tensions with project docs/spec:
   - none unresolved; project-approved scope takes priority.
 - project-compatible decision:
